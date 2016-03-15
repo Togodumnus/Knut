@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int pwd(int argc, char const *argv[]) {
+int knut_pwd(int argc, char const *argv[]) {
 	char * pwd;
 	pwd = (char *) get_current_dir_name();
 	fprintf(stdout,"%s\n", pwd);
@@ -13,5 +13,5 @@ int pwd(int argc, char const *argv[]) {
 
 int main(int argc, char const *argv[])
 {
-	return pwd(argc, argv);
+	return knut_pwd(argc, argv);
 }
