@@ -1,0 +1,7 @@
+image: gcc:latest
+
+job_compile:
+    stage: build
+    script:
+        - make
+
