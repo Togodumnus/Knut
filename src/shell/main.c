@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
 
     char *line = NULL;
     while (42) {
-        printf("Knut > ");
+        printPrompt();
         if (readLine(&line) == -1) { //End of file
             printf("\nBye !\n");
             free(line);

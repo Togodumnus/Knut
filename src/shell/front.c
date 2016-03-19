@@ -15,3 +15,13 @@ int readLine(char **line) {
     size_t size;
     return getline(line, &size, stdin);
 }
+
+/**
+ * printPrompt
+ *
+ * Affiche le prompt avant une commande
+ */
+void printPrompt() {
+    printf("Toto @ KnutShell\n"); //TODO
+    printf("> ");
+}
