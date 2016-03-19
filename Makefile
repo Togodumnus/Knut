@@ -18,10 +18,14 @@ EXEC=knutShell#le shell à compiler
 LIBS=yes #librairies à compiler
 
 #Colors
-NO_C=\033[0m
-OK_C=\033[32;01m
-ERROR_C=\033[31;01m
-WARN_C=\033[33;01m
+NO_C		=\033[0m
+OK_C		=\033[32;01m
+ERROR_C		=\033[31;01m
+WARN_C		=\033[33;01m
+BOLD_C      =\033[1m
+UNDERLINE_C =\033[4m
+BLINK_C     =\033[5m
+INVERSE_C   =\033[7m
 
 DONE = "$(OK_C)✓ Done$(NO_C)"
 
@@ -31,16 +35,16 @@ DONE = "$(OK_C)✓ Done$(NO_C)"
 
 all: libs shell clean
 	@echo "KnutShell is ready ! \n\
-- run $(WARN_C)$(binDir)/$(EXEC)Static$(NO_C) for knutShell using static \
+- run $(WARN_C)$(binDir)/$(EXEC)Static$(NO_C) for knutShell with static \
 libraries \n\
-- run $(WARN_C)$(binDir)/$(EXEC)$(NO_C) for knutShell using dynamic \
+- run $(WARN_C)$(binDir)/$(EXEC)$(NO_C) for knutShell with dynamic \
 libraries \n\
   (don't forget $(WARN_C)export LD_LIBRARY_PATH="'$$'"LD_LIBRARY_PATH:\
 $(shell pwd)/bin/libs$(NO_C))"
 
 .PHONY: clean
 clean:
-	@echo "☞ Cleaning"
+	@echo "$(BOLD_C)☞ Cleaning$(NO_C)"
 	@rm -rf $(objDir)
 	@echo $(DONE)
 
@@ -51,7 +55,7 @@ libs: libsIntro libsBuild
 	@echo "$(OK_C)✓ Libs Done$(NO_C)"
 
 libsIntro:
-	@echo "☞ Libs"
+	@echo "$(BOLD_C)☞ Libs$(NO_C)"
 	@mkdir -p $(binDir)/$(libsDir)
 
 libsBuild: $(LIBS)
@@ -68,7 +72,7 @@ yesIntro:
 #exécutable
 $(binDir)/$(libsDir)/yes: $(objDir)/$(libsDir)/yes/yes.o \
 						  $(objDir)/$(libsDir)/yes/main.o
-	@echo "		● Executable"
+	@echo "		$(BOLD_C)- Executable$(NO_C)"
 	@$(CC) -o $(binDir)/$(libsDir)/yes $^ $(LDFLAGS)
 	@echo "		$(CC) -o $(binDir)/$(libsDir)/yes $^ $(LDFLAGS)"
 	@echo "		"$(DONE)
@@ -89,25 +93,46 @@ $(objDir)/$(libsDir)/yes/%.o: $(srcDir)/$(libsDir)/yes/%.c
 ################################################################################
 #							Compilation du shell							   #
 ################################################################################
-shell: shellIntro shellBuild
+shell: shellIntro shellBuildDynamic shellBuildStatic
 
 shellIntro:
-	@echo "☞ Compiling Shell"
+	@echo "$(BOLD_C)☞ Compiling Shell$(NO_C)"
 
-shellBuild: $(objDir)/$(shellDir)/main.o
+shellBuildDynamic: $(objDir)/$(shellDir)/main.o \
+				   $(objDir)/$(shellDir)/dynamicLib.o
+	@echo "$(BOLD_C)- using dynamic librairies$(NO_C)"
 	$(CC) -o $(binDir)/$(EXEC) $^ $(LDFLAGS)
-	@echo "✓ Compiling Shell Done"
 
-$(objDir)/$(shellDir)/main.o: $(srcDir)/$(shellDir)/main.c
-	@echo "	⇾ Compiling $@"
+shellBuildStatic: $(objDir)/$(shellDir)/main-Static.o \
+				  $(objDir)/$(shellDir)/dynamicLib.o
+	@echo "$(BOLD_C)- using static librairies$(NO_C)"
+	$(CC) \
+		-o $(binDir)/$(EXEC)Static $^ \
+		-L$(binDir)/$(libsDir)/ $(addsuffix S, $(addprefix -l, $(LIBS))) $(LDFLAGS)
+	@echo "$(OK_C)✓ Shell Done$(NO_C)"
+
+$(objDir)/$(shellDir)/%.o: $(srcDir)/$(shellDir)/%.c
+	$(call compile-shell-dep, $@, $^)
+
+$(objDir)/$(shellDir)/%-Static.o: $(srcDir)/$(shellDir)/%.c
+	$(call compile-shell-dep, $@, $^, -DLIB_STATIC)
+
+
+################################################################################
+#									Fonctions								   #
+################################################################################
+
+define compile-shell-dep
+	@echo "	⇾ Compiling $1"
 	@mkdir -p $(objDir)/$(shellDir)
-	@$(CC) $(CFLAGS) $(debug) -o $@ $^
-	@echo "	$(CC) $(CFLAGS) $(debug) -o $@ $^"
+	@$(CC) $(CFLAGS) $3 $(debug) -o $1 $2
+	@echo "	$(CC) $(CFLAGS) $(debug) -o $1 $2"
 	@echo "	"$(DONE)
+endef
 
 # $(call make-static-lib, /path/to/maLib.a, <.o files>)
 define make-static-lib
-	@echo "		● Static"
+	@echo "		$(BOLD_C)- Static$(NO_C)"
 	@ar -cr $1 $2
 	@echo "		ar -cr $1 $2"
 	@ranlib $1
@@ -117,7 +142,7 @@ endef
 
 # $(call make-dynamic-lib,$@,$^)
 define make-dynamic-lib
-	@echo "		● Dynamic"
+	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
 	@$(CC) -shared -o $1 $2
 	@echo "		$(CC) -shared -o $@ $^"
 	@echo "		"$(DONE)
