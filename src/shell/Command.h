@@ -30,4 +30,4 @@ struct Command {
     char *argv[];
 };
 
-typedef Command Command;
+typedef struct Command Command;

@@ -28,7 +28,14 @@ struct Action {
      */
     bool orBefore;
 
-}
+    /**
+     * pipe
+     *
+     * Vaut true si il faut piper le stdout précédent en entré de l'action
+     */
+    bool pipe;
 
-typedef Action Action;
+};
+
+typedef struct Action Action;
 
