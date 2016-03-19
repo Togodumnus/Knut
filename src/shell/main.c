@@ -8,6 +8,7 @@
 #endif
 
 #include "front.h"
+#include "process.h"
 
 /**
  * commandes
