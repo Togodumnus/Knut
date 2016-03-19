@@ -1,6 +1,6 @@
 
 CC = gcc
-CFLAGS = -c -Wall -std=c99
+CFLAGS = -c -Wall -std=c99 -Werror
 LDFLAGS= -ldl
 
 libCFLAGS = -fPIC
