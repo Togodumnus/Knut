@@ -33,7 +33,7 @@ DONE = "$(OK_C)✓ Done$(NO_C)"
 # Règles
 #
 
-all: libs shell clean
+all: libs shell
 	@echo "KnutShell is ready ! \n\
 - run $(WARN_C)$(binDir)/$(EXEC)Static$(NO_C) for knutShell with static \
 libraries \n\
@@ -42,10 +42,16 @@ libraries \n\
   (don't forget $(WARN_C)export LD_LIBRARY_PATH="'$$'"LD_LIBRARY_PATH:\
 $(shell pwd)/bin/libs$(NO_C))"
 
-.PHONY: clean
+.PHONY: clean distclean
+
 clean:
 	@echo "$(BOLD_C)☞ Cleaning$(NO_C)"
 	@rm -rf $(objDir)
+	@echo $(DONE)
+
+distclean:
+	@echo "$(BOLD_C)☞ rm ./bin/$(NO_C)"
+	@rm -rf $(binDir)
 	@echo $(DONE)
 
 ################################################################################
