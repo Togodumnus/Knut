@@ -1,7 +1,7 @@
 
 CC = gcc
 CFLAGS = -c -Wall -std=c99
-LDFLAGS=
+LDFLAGS= -ldl
 
 libCFLAGS = -fPIC
 
@@ -35,8 +35,8 @@ all: libs shell clean
 libraries \n\
 - run $(WARN_C)$(binDir)/$(EXEC)$(NO_C) for knutShell using dynamic \
 libraries \n\
-  (don't forget $(WARN_C)export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:\
-$(shell pwd)$(NO_C))"
+  (don't forget $(WARN_C)export LD_LIBRARY_PATH="'$$'"LD_LIBRARY_PATH:\
+$(shell pwd)/bin/libs$(NO_C))"
 
 .PHONY: clean
 clean:
@@ -58,8 +58,8 @@ libsBuild: $(LIBS)
 
 # Commande yes
 
-yes: yesIntro $(binDir)/$(libsDir)/yes $(binDir)/$(libsDir)/libyes.a \
-		$(binDir)/$(libsDir)/libyes.so
+yes: yesIntro $(binDir)/$(libsDir)/yes $(binDir)/$(libsDir)/libyesS.a \
+			  $(binDir)/$(libsDir)/libyesD.so
 	@echo "	"$(DONE)
 
 yesIntro:
@@ -74,11 +74,11 @@ $(binDir)/$(libsDir)/yes: $(objDir)/$(libsDir)/yes/yes.o \
 	@echo "		"$(DONE)
 
 #librairie statique
-$(binDir)/$(libsDir)/libyes.a: $(objDir)/$(libsDir)/yes/yes.o
+$(binDir)/$(libsDir)/libyesS.a: $(objDir)/$(libsDir)/yes/yes.o
 	$(call make-static-lib,$@,$^)
 
 #librairie dynamique
-$(binDir)/$(libsDir)/libyes.so: $(objDir)/$(libsDir)/yes/yes.o
+$(binDir)/$(libsDir)/libyesD.so: $(objDir)/$(libsDir)/yes/yes.o
 	$(call make-dynamic-lib,$@,$^)
 
 $(objDir)/$(libsDir)/yes/%.o: $(srcDir)/$(libsDir)/yes/%.c
