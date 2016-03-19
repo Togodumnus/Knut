@@ -56,6 +56,7 @@ int main(int argc, char* argv[]) {
             exit(1);
         } else {
             printf("User: %s", line);
+            process(line);
         }
     }
 
