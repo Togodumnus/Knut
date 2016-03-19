@@ -1,3 +1,3 @@
 #pragma once
 
-void process(char *str);
+int process(char *str);
