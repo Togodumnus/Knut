@@ -105,12 +105,14 @@ shellIntro:
 	@echo "$(BOLD_C)☞ Compiling Shell$(NO_C)"
 
 shellBuildDynamic: $(objDir)/$(shellDir)/main.o \
-				   $(objDir)/$(shellDir)/dynamicLib.o
+				   $(objDir)/$(shellDir)/dynamicLib.o \
+				   $(objDir)/$(shellDir)/front.o
 	@echo "$(BOLD_C)- using dynamic librairies$(NO_C)"
 	$(CC) -o $(binDir)/$(EXEC) $^ $(LDFLAGS)
 
 shellBuildStatic: $(objDir)/$(shellDir)/main-Static.o \
-				  $(objDir)/$(shellDir)/dynamicLib.o
+				  $(objDir)/$(shellDir)/dynamicLib.o\
+				  $(objDir)/$(shellDir)/front.o
 	@echo "$(BOLD_C)- using static librairies$(NO_C)"
 	$(CC) \
 		-o $(binDir)/$(EXEC)Static $^ \

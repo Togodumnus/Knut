@@ -7,6 +7,8 @@
     #include "dynamicLib.h"
 #endif
 
+#include "front.h"
+
 /**
  * commandes
  *
@@ -35,15 +37,26 @@ int (*commandesFonctions[sizeof(commandes) / sizeof(char) - 1])(int, char *[]) =
 
 int main(int argc, char* argv[]) {
 
+    printf("KnutShell");
+
     #ifndef LIB_STATIC
     //si pas de LIB_STATIC, on charge les librairies dynamiquement
     loadLibs(commandes, commandesFonctions);
-    printf("Dynamic\n");
+    printf(" (librairies dynamiques)\n");
     #else
-    printf("Static\n");
+    printf(" (librairies statiques)\n");
     #endif
 
-    printf("Hello world\n");
-    commandesFonctions[0](argc, argv);
+    char *line = NULL;
+    while (42) {
+        printf("Knut > ");
+        if (readLine(&line) == -1) { //End of file
+            printf("\nBye !\n");
+            free(line);
+            exit(1);
+        } else {
+            printf("User: %s", line);
+        }
+    }
 
 }
