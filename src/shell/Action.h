@@ -13,10 +13,10 @@
  * @example ls; echo hello          COMMA
  */
 enum ChainingType {
-    COMMA,  //aucun lien entre deux process (séparation par ;)
-    AND,    //ET logique (séparation par &&)
-    OR,     //OU logique (séparation par ||)
-    PIPE    //pipe des entrées / sorties (séparation par |)
+    CHAINING_COMMA,  //aucun lien entre deux process (séparation par ;)
+    CHAINING_AND,    //ET logique (séparation par &&)
+    CHAINING_OR,     //OU logique (séparation par ||)
+    CHAINING_PIPE    //pipe des entrées / sorties (séparation par |)
 };
 
 typedef enum ChainingType ChainingType;
