@@ -13,13 +13,10 @@
 #include "Action.h"
 #include "Command.h"
 
+#include "test.h" //TODO remove
+
 const int PIPE_READ  = 0;
 const int PIPE_WRITE = 1;
-
-//TODO remove
-char *argvTest1[] = {"rm", "/bin", NULL};
-char *argvTest2[] = {"yes", NULL};
-
 
 /**
  * extractionActions
@@ -43,39 +40,32 @@ void extractionActions(char *str, Action ***actions, int *actc) {
     //séparées par |, ||, && ou ;
     //pour l'instant on crée une action fake
 
-    Action *action = (Action *) malloc(sizeof(Action));
-    action->cmd = "/bin/ls /bin";
-    action->chainingType = CHAINING_PIPE;
+    *actc = 3;
 
-    Action *action2 = (Action *) malloc(sizeof(Action));
-    action2->cmd = "yes";
-    action2->chainingType = CHAINING_AND;
+    *actions = (Action **) malloc(*actc * sizeof(Action*));
+    (*actions)[0] = &actionLsPipe;
+    (*actions)[1] = &actionCatPipe;
+    (*actions)[2] = &actionYesAnd;
 
-    *actions = (Action **) malloc(2 * sizeof(Action*));
-    (*actions)[0] = action;
-    (*actions)[1] = action2;
-
-    *actc = 2;
 }
 
-Command lectureAction(Action *action) {
+Command *lectureAction(Action *action) {
     //TODO : faire un automate qui lit action->cmd
     //pour l'instant on crée une commande fake
 
-    Command command;
-    if (action->chainingType == CHAINING_PIPE) {
-        command.type = EXECUTABLE;
-        command.cmd = "rm";
-        command.argc = 2;
-        command.argv = argvTest1;
-    } else {
-        command.type = LIBRARY;
-        command.cmd = "yes";
-        command.argc = 1;
-        command.argv = argvTest2;
+    if (action == &actionLsPipe) {
+        return &commandLsPipe;
+    } else if (action == &actionEchoOr) {
+        return &commandEchoOr;
+    } else if (action == &actionYesAnd) {
+        return &commandYesAnd;
+    } else if (action == &actionCatPipe) {
+        return &commandCatPipe;
+    } else if (action == &actionEchoAndBkg) {
+        return &commandEchoAndBkg;
     }
 
-    return command;
+    return NULL;
 }
 
 int process(char *str) {
@@ -107,7 +97,7 @@ int process(char *str) {
 
         Action *action = actions[i];
         printf("[parent]\taction %d (%p): %s\n", i, action, action->cmd);
-        Command cmd = lectureAction(action);
+        Command *cmd = lectureAction(action);
 
         printf("[parent]\tchaining type = %d\n", action->chainingType);
 
@@ -176,7 +166,7 @@ int process(char *str) {
                 }
             }
 
-            switch (cmd.type) {
+            switch (cmd->type) {
                 case EXECUTABLE:
                     printf("[child %d] EXECUTABLE %s\n", i, action->cmd);
                     dprintf(fileno(tmp), "[child %d] EXECUTABLE %s\n", i, action->cmd);
@@ -216,7 +206,7 @@ int process(char *str) {
             }
         }
 
-        free(action);
+        /*free(action);*/
     }
 
     free(pstdin);
