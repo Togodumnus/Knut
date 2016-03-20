@@ -11,8 +11,6 @@ enum CommandType {
 
 typedef enum CommandType CommandType;
 
-//TODO before type
-
 struct Command {
 
     CommandType type;
