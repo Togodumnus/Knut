@@ -47,6 +47,8 @@ void extractionActions(char *str, Action ***actions, int *actc) {
     (*actions)[1] = &actionCatPipe;
     (*actions)[2] = &actionYesAnd;
 
+    //ls / | cat && yes
+
 }
 
 Command *lectureAction(Action *action) {
@@ -107,8 +109,9 @@ int process(char *str) {
                     close(pstdin[0]);
                     close(pstdin[1]);
                 }
-                pstdin[0] = pstdout[0];
-                pstdin[1] = pstdout[1];
+                pstdin[PIPE_READ] = pstdout[PIPE_READ];
+                pstdin[PIPE_WRITE] = pstdout[PIPE_WRITE];
+                close(pstdin[PIPE_WRITE]);
             } else {
                 //la première action est branchée sur stdin
                 pstdin[PIPE_READ] = STDIN_FILENO;
@@ -156,11 +159,13 @@ int process(char *str) {
 
                 //replace stdin
                 if (pstdin[PIPE_READ] != fileno(stdin)) {
+                    close(fileno(stdin));
                     dup2(pstdin[PIPE_READ], fileno(stdin));
                     close(pstdin[PIPE_READ]);
                 }
                 //replace stdout
                 if (pstdout[PIPE_WRITE] != fileno(stdout)) {
+                    close(fileno(stdout));
                     dup2(pstdout[PIPE_WRITE], fileno(stdout));
                     close(pstdout[PIPE_WRITE]);
                 }
@@ -168,19 +173,19 @@ int process(char *str) {
 
             switch (cmd->type) {
                 case EXECUTABLE:
-                    printf("[child %d] EXECUTABLE %s\n", i, action->cmd);
+                    /*printf("[child %d] EXECUTABLE %s\n", i, action->cmd);*/
                     dprintf(fileno(tmp), "[child %d] EXECUTABLE %s\n", i, action->cmd);
-                    exit(0);
-                    //exit(1);
+                    execvp(cmd->cmd, cmd->argv);
+                    exit(1); //erreur de exec si ici
                     break;
                 case LIBRARY:
-                    printf("[child %d] LIBRARY %s\n", i, action->cmd);
+                    /*printf("[child %d] LIBRARY %s\n", i, action->cmd);*/
                     dprintf(fileno(tmp), "[child %d] LIBRARY %s\n", i, action->cmd);
                     exit(0);
                     //exit(...);
                     break;
                 case ACTION:
-                    printf("[child %d] ACTION %s\n", i, action->cmd);
+                    /*printf("[child %d] ACTION %s\n", i, action->cmd);*/
                     dprintf(fileno(tmp), "[child %d] ACTION %s\n", i, action->cmd);
                     exit(process(action->cmd));
                     break;
@@ -208,6 +213,8 @@ int process(char *str) {
 
         /*free(action);*/
     }
+
+    printf("[parent] end\n");
 
     free(pstdin);
     free(pstdout);
