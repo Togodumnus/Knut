@@ -9,8 +9,9 @@ enum CommandType {
     ACTION      //la commande est une action, ex: "echo hello && ls -l"
 };
 
-typedef CommandType CommandType;
+typedef enum CommandType CommandType;
 
+//TODO before type
 
 struct Command {
 
@@ -26,8 +27,8 @@ struct Command {
      */
     char *cmd;
 
-    int argc,
-    char *argv[];
+    int argc;
+    char **argv;
 };
 
 typedef struct Command Command;
