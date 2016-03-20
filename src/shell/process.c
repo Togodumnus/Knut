@@ -73,8 +73,8 @@ Command *lectureAction(Action *action) {
 int process(char *str) {
 
     //TODO remove
-    FILE *tmp = fopen("test.txt", "w+");
-    //dprintf(fileno(tmp), "[child %d] \tok\n", i);
+    FILE *debugFile = fopen("debug.txt", "w+");
+    //dprintf(fileno(debugFile), "[child %d] \tok\n", i);
 
     //Extraction des actions à effectuer de l'input
     Action **actions = NULL;
@@ -174,19 +174,19 @@ int process(char *str) {
             switch (cmd->type) {
                 case EXECUTABLE:
                     /*printf("[child %d] EXECUTABLE %s\n", i, action->cmd);*/
-                    dprintf(fileno(tmp), "[child %d] EXECUTABLE %s\n", i, action->cmd);
+                    dprintf(fileno(debugFile), "[child %d] EXECUTABLE %s\n", i, action->cmd);
                     execvp(cmd->cmd, cmd->argv);
                     exit(1); //erreur de exec si ici
                     break;
                 case LIBRARY:
                     /*printf("[child %d] LIBRARY %s\n", i, action->cmd);*/
-                    dprintf(fileno(tmp), "[child %d] LIBRARY %s\n", i, action->cmd);
+                    dprintf(fileno(debugFile), "[child %d] LIBRARY %s\n", i, action->cmd);
                     exit(0);
                     //exit(...);
                     break;
                 case ACTION:
                     /*printf("[child %d] ACTION %s\n", i, action->cmd);*/
-                    dprintf(fileno(tmp), "[child %d] ACTION %s\n", i, action->cmd);
+                    dprintf(fileno(debugFile), "[child %d] ACTION %s\n", i, action->cmd);
                     exit(process(action->cmd));
                     break;
                 default:
