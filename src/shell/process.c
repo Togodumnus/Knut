@@ -10,11 +10,12 @@
 #include <sys/wait.h>
 
 #include "process.h"
+
+#include "../DEBUG.h"
 #include "Action.h"
 #include "Command.h"
 #include "extractionActions.h"
 #include "lectureAction.h"
-
 
 
 const int PIPE_READ  = 0;
@@ -22,15 +23,13 @@ const int PIPE_WRITE = 1;
 
 int process(char *str) {
 
-    //TODO remove
-    FILE *debugFile = fopen("debug.txt", "w+");
-    //dprintf(fileno(debugFile), "[child %d] \tok\n", i);
+    DEBUG("%d, %s", 120, "hello");
 
     //Extraction des actions à effectuer de l'input
     Action **actions = NULL;
     int actc = 0; //nombre d'actions
     extractionActions(str, &actions, &actc);
-    printf("[parent]\t%d actions to do\n", actc);
+    DEBUG("[parent]\t%d actions to do", actc);
 
     int status = 0; //status code of execution
 
@@ -48,10 +47,10 @@ int process(char *str) {
     for (int i = 0; i < actc; i++) {
 
         Action *action = actions[i];
-        printf("[parent]\taction %d (%p): %s\n", i, action, action->cmd);
+        DEBUG("[parent]\taction %d (%p): %s", i, action, action->cmd);
         Command *cmd = lectureAction(action);
 
-        printf("[parent]\tchaining type = %d\n", action->chainingType);
+        DEBUG("[parent]\tchaining type = %d", action->chainingType);
 
         if (action->chainingType == CHAINING_PIPE) {
             if (i > 0) {
@@ -99,12 +98,12 @@ int process(char *str) {
 
         if (pid_child == 0) { //child
 
-            printf("[child %d] \t%d start\n",i, getpid());
+            DEBUG("[child %d] \t%d start",i, getpid());
 
             if (action->chainingType == CHAINING_PIPE) {
-                printf("[child %d] \tReplacing stdin (%d) with %d\n",
+                DEBUG("[child %d] \tReplacing stdin (%d) with %d",
                         i, fileno(stdin), pstdin[PIPE_READ]);
-                printf("[child %d] \tReplacing stdout (%d) with %d\n",
+                DEBUG("[child %d] \tReplacing stdout (%d) with %d",
                         i, fileno(stdout), pstdout[PIPE_WRITE]);
 
                 //replace stdin
@@ -123,20 +122,17 @@ int process(char *str) {
 
             switch (cmd->type) {
                 case EXECUTABLE:
-                    /*printf("[child %d] EXECUTABLE %s\n", i, action->cmd);*/
-                    dprintf(fileno(debugFile), "[child %d] EXECUTABLE %s\n", i, action->cmd);
+                    DEBUG("[child %d] EXECUTABLE %s", i, action->cmd);
                     execvp(cmd->cmd, cmd->argv);
                     exit(1); //erreur de exec si ici
                     break;
                 case LIBRARY:
-                    /*printf("[child %d] LIBRARY %s\n", i, action->cmd);*/
-                    dprintf(fileno(debugFile), "[child %d] LIBRARY %s\n", i, action->cmd);
+                    DEBUG("[child %d] LIBRARY %s", i, action->cmd);
                     exit(0);
                     //exit(...);
                     break;
                 case ACTION:
-                    /*printf("[child %d] ACTION %s\n", i, action->cmd);*/
-                    dprintf(fileno(debugFile), "[child %d] ACTION %s\n", i, action->cmd);
+                    DEBUG("[child %d] ACTION %s", i, action->cmd);
                     exit(process(action->cmd));
                     break;
                 default:
@@ -156,7 +152,7 @@ int process(char *str) {
             } else {
                 //Attente de la terminaison du fils
                 waitpid(pid_child, &status, 0);
-                printf("[parent]\tChild %s %d exited with code %d\n",
+                DEBUG("[parent]\tChild %s %d exited with code %d",
                         action->cmd, pid_child, status);
             }
         }
@@ -164,7 +160,7 @@ int process(char *str) {
         /*free(action);*/
     }
 
-    printf("[parent] end\n");
+    DEBUG("[parent] end");
 
     free(pstdin);
     free(pstdout);

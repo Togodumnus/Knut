@@ -110,6 +110,7 @@ shellBuildDynamic: $(objDir)/$(shellDir)/main.o \
 				   $(objDir)/$(shellDir)/process.o \
 				   $(objDir)/$(shellDir)/extractionActions.o \
 				   $(objDir)/$(shellDir)/lectureAction.o \
+				   $(objDir)/$(shellDir)/lectureAction.o \
 				   $(objDir)/$(shellDir)/test.o
 	@echo "$(BOLD_C)- using dynamic librairies$(NO_C)"
 	$(CC) -o $(binDir)/$(EXEC) $^ $(LDFLAGS)
@@ -127,11 +128,11 @@ shellBuildStatic: $(objDir)/$(shellDir)/main-Static.o \
 		-L$(binDir)/$(libsDir)/ $(addsuffix S, $(addprefix -l, $(LIBS))) $(LDFLAGS)
 	@echo "$(OK_C)✓ Shell Done$(NO_C)"
 
-$(objDir)/$(shellDir)/%.o: $(srcDir)/$(shellDir)/%.c
-	$(call compile-shell-dep, $@, $^)
+$(objDir)/$(shellDir)/%.o: $(srcDir)/$(shellDir)/%.c $(srcDir)/DEBUG.h
+	$(call compile-shell-dep, $@, $<)
 
-$(objDir)/$(shellDir)/%-Static.o: $(srcDir)/$(shellDir)/%.c
-	$(call compile-shell-dep, $@, $^, -DLIB_STATIC)
+$(objDir)/$(shellDir)/%-Static.o: $(srcDir)/$(shellDir)/%.c $(srcDir)/DEBUG.h
+	$(call compile-shell-dep, $@, $<, -DLIB_STATIC)
 
 
 ################################################################################
