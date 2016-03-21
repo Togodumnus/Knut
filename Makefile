@@ -108,6 +108,8 @@ shellBuildDynamic: $(objDir)/$(shellDir)/main.o \
 				   $(objDir)/$(shellDir)/dynamicLib.o \
 				   $(objDir)/$(shellDir)/front.o \
 				   $(objDir)/$(shellDir)/process.o \
+				   $(objDir)/$(shellDir)/extractionActions.o \
+				   $(objDir)/$(shellDir)/lectureAction.o \
 				   $(objDir)/$(shellDir)/test.o
 	@echo "$(BOLD_C)- using dynamic librairies$(NO_C)"
 	$(CC) -o $(binDir)/$(EXEC) $^ $(LDFLAGS)
@@ -116,6 +118,8 @@ shellBuildStatic: $(objDir)/$(shellDir)/main-Static.o \
 				  $(objDir)/$(shellDir)/dynamicLib.o\
 				  $(objDir)/$(shellDir)/front.o \
 				  $(objDir)/$(shellDir)/process.o \
+				  $(objDir)/$(shellDir)/extractionActions.o \
+				  $(objDir)/$(shellDir)/lectureAction.o \
 				  $(objDir)/$(shellDir)/test.o
 	@echo "$(BOLD_C)- using static librairies$(NO_C)"
 	$(CC) \

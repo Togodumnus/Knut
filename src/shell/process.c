@@ -12,63 +12,13 @@
 #include "process.h"
 #include "Action.h"
 #include "Command.h"
+#include "extractionActions.h"
+#include "lectureAction.h"
 
-#include "test.h" //TODO remove
+
 
 const int PIPE_READ  = 0;
 const int PIPE_WRITE = 1;
-
-/**
- * extractionActions
- *
- * Extractions des actions à effectuer d'une chaîne de caractère entrée par
- * l'utilisateur
- *
- * @example : rm /bin || (echo error && ls -l /)
- *            |------|   |---------------------|
- *             action           action
- *
- * @param   {char *}        str     Un pointeur sur la chaîne d'entrée
- * @param   {Action ***}    actions Un pointeur un futur tableau de pointeurs
- *                                  sur les actions.
- * @param   {int *}         actc    Un pointeur sur un int qui va stocker le
- *                                  nombre d'actions
- */
-void extractionActions(char *str, Action ***actions, int *actc) {
-
-    //TODO : faire un automate à état fini pour lire les actions
-    //séparées par |, ||, && ou ;
-    //pour l'instant on crée une action fake
-
-    *actc = 3;
-
-    *actions = (Action **) malloc(*actc * sizeof(Action*));
-    (*actions)[0] = &actionLsPipe;
-    (*actions)[1] = &actionCatPipe;
-    (*actions)[2] = &actionYesAnd;
-
-    //ls / | cat && yes
-
-}
-
-Command *lectureAction(Action *action) {
-    //TODO : faire un automate qui lit action->cmd
-    //pour l'instant on crée une commande fake
-
-    if (action == &actionLsPipe) {
-        return &commandLsPipe;
-    } else if (action == &actionEchoOr) {
-        return &commandEchoOr;
-    } else if (action == &actionYesAnd) {
-        return &commandYesAnd;
-    } else if (action == &actionCatPipe) {
-        return &commandCatPipe;
-    } else if (action == &actionEchoAndBkg) {
-        return &commandEchoAndBkg;
-    }
-
-    return NULL;
-}
 
 int process(char *str) {
 
