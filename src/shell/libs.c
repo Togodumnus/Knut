@@ -30,20 +30,21 @@ char *commandes[] = {"yes", NULL};
  * @see dynamicLib.c#loadLibs()
  */
 #ifndef LIB_STATIC
-libFunc commandesFonctions[sizeof(commandes) / sizeof(char) - 1];
+CommandeFonction commandesFonctions[sizeof(commandes) / sizeof(char) - 1];
 #else
-libFunc commandesFonctions[sizeof(commandes) / sizeof(char) - 1] =
+CommandeFonction commandesFonctions[sizeof(commandes) / sizeof(char) - 1] =
     {yesLib};
 #endif
 
  /**
  *
- * Charge la librairie `lib` et attache sa fonction <lib>Lib() sur pFunc
+ * Charge la librairie `lib` et attache sa fonction <lib>Lib() sur
+ * pCommandeFonction
  *
- * @param   {char *}                            lib
- * @param   {int (**)(int argc, char *argv[])}   pFunc
+ * @param   {char *}                lib
+ * @param   {CommandeFonction *}    pCommandeFonction
  */
-void loadLib(char *lib, int (**pFunc)(int argc, char *argv[])) {
+void loadLib(char *lib, CommandeFonction *pCommandeFonction) {
 
     void *libFile;
 
@@ -58,7 +59,7 @@ void loadLib(char *lib, int (**pFunc)(int argc, char *argv[])) {
         exit(1);
     }
 
-    if ((*pFunc = (libFunc) dlsym(libFile, funcName)) == NULL) {
+    if ((*pCommandeFonction = (CommandeFonction) dlsym(libFile, funcName)) == NULL) {
         perror("fonction introuvable dans la lib");
         exit(1);
     }
@@ -66,7 +67,7 @@ void loadLib(char *lib, int (**pFunc)(int argc, char *argv[])) {
     free(path);
     free(funcName);
 
-};
+}
 
 /**
  * loadLibs
@@ -77,10 +78,34 @@ void loadLib(char *lib, int (**pFunc)(int argc, char *argv[])) {
 void loadLibs() {
 
     int i = 0;
-    do {
+    while (commandes[i] != NULL) { //la dernière libs doit être le pointeur NULL
         loadLib(commandes[i], &commandesFonctions[i]);
         i++;
-    } while (commandes[i] != NULL); //la dernière libs doit être le pointeur NULL
+    }
 
-};
+}
+
+/**
+ * findCommande
+ *
+ * Recherche si la commande cmd fait partie des librairies qui sont disponible
+ * et retourne le pointeur vers <cmd>Lib si possible
+ *
+ * @param   {char *}    cmd     La commande qu'il faut trouver
+ *
+ * @return  {CommandeFonction}  Le pointeur vers <cmd>Lib ou NULL si la lib
+ *                              n'est pas trouvée
+ */
+CommandeFonction findCommande(char *cmd) {
+
+    int i = 0;
+    while (commandes[i] != NULL) { //la dernière libs doit être le pointeur NULL
+        if (strcmp(commandes[i], cmd) == 0) {
+            return commandesFonctions[i];
+        }
+        i++;
+    }
+
+    return NULL;
+}
 

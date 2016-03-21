@@ -1,5 +1,6 @@
 #pragma once
 
-typedef int (*libFunc)(int argc, char *argv[]);
-void loadLib(char *lib, int (**pFunc)(int argc, char *argv[]));
+typedef int (*CommandeFonction)(int argc, char *argv[]);
+void loadLib(char *lib, CommandeFonction *commandeFonction);
 void loadLibs();
+CommandeFonction findCommande(char *cmd);

@@ -16,6 +16,7 @@
 #include "Command.h"
 #include "extractionActions.h"
 #include "lectureAction.h"
+#include "libs.h"
 
 
 const int PIPE_READ  = 0;
@@ -128,8 +129,15 @@ int process(char *str) {
                     break;
                 case LIBRARY:
                     DEBUG("[child %d] LIBRARY %s", i, action->cmd);
-                    exit(0);
-                    //exit(...);
+                    CommandeFonction libFunc = findCommande(cmd->cmd);
+                    if (libFunc == NULL) { //cmd n'existe pas
+                        char msg[256];
+                        sprintf(msg, "%s : commande introuvable\n", cmd->cmd);
+                        perror(msg);
+                        exit(1);
+                    } else {
+                        exit(libFunc(cmd->argc, cmd->argv));
+                    }
                     break;
                 case ACTION:
                     DEBUG("[child %d] ACTION %s", i, action->cmd);
