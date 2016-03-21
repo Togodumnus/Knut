@@ -8,10 +8,35 @@
     #include <linux/limits.h>
 #endif
 
-#include "dynamicLib.h"
+#include "libs.h"
 
 /**
- * loadLib
+ * commandes
+ *
+ * Liste des commandes disponibles par libraries statiques ou dynamiques
+ * Ne pas oublier NULL à la fin du tableau.
+ *
+ * @see dynamicLib.c#loadLibs()
+ */
+char *commandes[] = {"yes", NULL};
+
+/**
+ * commandesFonctions
+ *
+ * Liste des fonctions XXXLib() d'entrée sur les librairies statiques ou
+ * dynamiques disponnibles.
+ * Doit être dans le même ordre que `char *commandes`.
+ *
+ * @see dynamicLib.c#loadLibs()
+ */
+#ifndef LIB_STATIC
+libFunc commandesFonctions[sizeof(commandes) / sizeof(char) - 1];
+#else
+libFunc commandesFonctions[sizeof(commandes) / sizeof(char) - 1] =
+    {yesLib};
+#endif
+
+ /**
  *
  * Charge la librairie `lib` et attache sa fonction <lib>Lib() sur pFunc
  *
@@ -48,20 +73,14 @@ void loadLib(char *lib, int (**pFunc)(int argc, char *argv[])) {
  *
  * Charge les librairies de `libs` et attache les fonctions <lib>Lib() sur
  * commandesFonctions.
- *
- * @param   {char *[]}                  libs                Liste des commandes
- *                                                          à charger.
- * @param   {int (*[])(int, char *[])}  commandesFonctions  Liste des pointeurs
- *                                                          sur les fonctions
- *                                                          <lib>Lib()
  */
-void loadLibs(char *libs[], int (*commandesFonctions[])(int, char *[])) {
+void loadLibs() {
 
     int i = 0;
     do {
-        loadLib(libs[i], &commandesFonctions[i]);
+        loadLib(commandes[i], &commandesFonctions[i]);
         i++;
-    } while (libs[i] != NULL); //la dernière libs doit être le pointeur NULL
+    } while (commandes[i] != NULL); //la dernière libs doit être le pointeur NULL
 
 };
 

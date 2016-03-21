@@ -105,7 +105,7 @@ shellIntro:
 	@echo "$(BOLD_C)☞ Compiling Shell$(NO_C)"
 
 shellBuildDynamic: $(objDir)/$(shellDir)/main.o \
-				   $(objDir)/$(shellDir)/dynamicLib.o \
+				   $(objDir)/$(shellDir)/libs.o \
 				   $(objDir)/$(shellDir)/front.o \
 				   $(objDir)/$(shellDir)/process.o \
 				   $(objDir)/$(shellDir)/extractionActions.o \
@@ -116,7 +116,7 @@ shellBuildDynamic: $(objDir)/$(shellDir)/main.o \
 	$(CC) -o $(binDir)/$(EXEC) $^ $(LDFLAGS)
 
 shellBuildStatic: $(objDir)/$(shellDir)/main-Static.o \
-				  $(objDir)/$(shellDir)/dynamicLib.o\
+				  $(objDir)/$(shellDir)/libs.o\
 				  $(objDir)/$(shellDir)/front.o \
 				  $(objDir)/$(shellDir)/process.o \
 				  $(objDir)/$(shellDir)/extractionActions.o \
