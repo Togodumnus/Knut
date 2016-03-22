@@ -13,8 +13,7 @@ int kecho(int argc, char * const argv[]) {
 	while((c = getopt(argc, argv, "ne")) != -1) {
 		opt++;
 		switch(c) {
-			case 'e':
-				printf("e\n");
+			case 'e': // Fait de base 
 				break;
 			case 'n': 
 				opt_n = 1;
