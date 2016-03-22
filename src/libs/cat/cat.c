@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <string.h>
 
 int catLib(int argc, char *argv[]) {
     char buffer[1024];
