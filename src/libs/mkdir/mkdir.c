@@ -1,18 +1,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <stdio.h>
-
-/**
-* Fonction principale
-*/
-int kmkdir(int argc, char const *argv[]) {
-	if (argc<2) {
-		perror("Pas assez d'arguments\n");
-		return -1;
-	}
-	mkdir(argv[1], 775);
-	return 0;
-}
+#include <unistd.h>
+#include <stdlib.h>
+#include <math.h>
 
 /**
 * Mode verbeux
@@ -20,33 +11,69 @@ int kmkdir(int argc, char const *argv[]) {
 */
 int kmkdir_v(char * dirname) {
 	printf("mkdir: created directory %s\n", dirname);
+	return 0;
 }
 
-/**
-* Fonction appelé par la librairie
+/*
+* Convertir octal en décimal
 */
-int kmkdir_lib(int argc, char const *argv[]) {
-	int ret = kmkdir(argc, argv);
-	while((c = getopt(argc, argv, "mpvZ")) != -1) {
+int octal_decimal(int n)
+{
+    int decimal=0, i=0, rem;
+    while (n!=0)
+    {
+        rem = n%10;
+        n/=10;
+        decimal += rem*pow(8,i);
+        ++i;
+    }
+    return decimal;
+}
+
+
+/**
+* Ajout des permissions
+* Exemple : mkdir -m 777 dir
+* Créé un répértoire dir avec toutes les permissions pour tout le monde
+*/
+int kmkdir_m(int argc, char * const argv[]) {
+	if (argc<4) {
+		printf("kmkdir : missing operand\n");
+		return -1;
+	}
+	return octal_decimal(atoi(argv[argc-2]));	
+}
+
+/*
+* Pour traiter les options
+*/
+int kmkdir(int argc, char * const argv[]) {
+	if (argc<2) {
+		printf("kmkdir : missing operand\n");
+		return -1;
+	}
+	int c;
+	int permissions = 0775; // permissions de base
+	while((c = getopt(argc, argv, "mv")) != -1) {
 		switch(c) {
 			case 'm':
-				printf("m\n");
-				break;
-			case 'p':
-				printf("p\n");
+				permissions = kmkdir_m(argc, argv);
 				break;
 			case 'v': 
-				printf("i\n");
-				break;	
-			case 'Z': 
-				printf("i\n");
-				break;	
+				kmkdir_v(argv[argc-1]);
+				break;
+			case '?': // option pas reconnu
+				exit(-1);	
 		}
 	}
+	printf("%d\n",permissions);
+	mkdir(argv[argc-1], permissions);
 	return 0;
 }
 
 
-int main(int argc, char const *argv[]) {
-	kmkdir_lib(argc, argv);
+
+
+int main(int argc, char * const argv[]) {
+	return kmkdir(argc, argv);
 }
