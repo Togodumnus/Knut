@@ -16,7 +16,7 @@ int catLib(int argc, char *argv[]) {
     			fclose(file);
             }
             else{
-                printf("ERROR\n");
+                printf("Problème avec le ou les fichiers\n");
             }
     	}
     }
