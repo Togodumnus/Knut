@@ -2,7 +2,7 @@
 #include <getopt.h>
 
 int catLib(int argc, char *argv[]){
-    char buffer[1024];
+    char buffer[4096];
     FILE *file;
     size_t nread;
     if (argc > 1) {
@@ -25,7 +25,28 @@ int catLib(int argc, char *argv[]){
 }
 
 int catLib_n(int argc, char *argv[]){
-    //TODO
+    char ligne[4096];
+    int nbligne=1;
+    FILE *file;
+    for (int i = 2; i < argc; i++){
+        file = fopen(argv[i],"r");
+        if(file){
+            while (fgets(ligne,4096,file))
+            {
+                printf("%d  ",nbligne);
+                if (fputs(ligne, stdout)==EOF)
+                {
+                    printf("L'écriture sur stdout à échoué");
+                    return -1;
+                }
+                nbligne++;
+            }
+        }
+        else{
+            printf("Erreur avec les fichiers\n");
+            return -1;
+        }
+    }  
     return 0;
 }
 
