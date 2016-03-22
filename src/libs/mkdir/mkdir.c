@@ -5,14 +5,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-/**
-* Mode verbeux
-* Affiche un message avec le nom du repertoire créé
-*/
-int kmkdir_v(char * dirname) {
-	printf("mkdir: created directory %s\n", dirname);
-	return 0;
-}
 
 /*
 * Convertir octal en décimal
@@ -30,6 +22,14 @@ int octal_decimal(int n)
     return decimal;
 }
 
+/**
+* Mode verbeux
+* Affiche un message avec le nom du repertoire créé
+*/
+int kmkdir_v(char * dirname) {
+	printf("mkdir: created directory %s\n", dirname);
+	return 0;
+}
 
 /**
 * Ajout des permissions
@@ -66,14 +66,6 @@ int kmkdir(int argc, char * const argv[]) {
 				exit(-1);	
 		}
 	}
-	printf("%d\n",permissions);
 	mkdir(argv[argc-1], permissions);
 	return 0;
-}
-
-
-
-
-int main(int argc, char * const argv[]) {
-	return kmkdir(argc, argv);
 }
