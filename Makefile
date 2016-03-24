@@ -42,7 +42,7 @@ libraries \n\
 - run $(WARN_C)$(binDir)/$(EXEC)$(NO_C) for knutShell with dynamic \
 libraries \n\
   (don't forget $(WARN_C)export LD_LIBRARY_PATH="'$$'"LD_LIBRARY_PATH:\
-$(shell pwd)/bin/libs$(NO_C))"
+$(shell pwd)/$(binDir)/$(libsDir)/$(dynamicDir)$(NO_C))"
 
 .PHONY: clean distclean
 
@@ -110,16 +110,18 @@ shellIntro:
 	@echo "$(BOLD_C)☞ Compiling Shell$(NO_C)"
 
 shellBuildDynamic: $(objDir)/$(shellDir)/main.o \
-				   $(objDir)/$(shellDir)/dynamicLib.o
+				   $(objDir)/$(shellDir)/libs.o \
+				   $(objDir)/$(shellDir)/utils.o
 	@echo "$(BOLD_C)- using dynamic librairies$(NO_C)"
 	$(CC) -o $(binDir)/$(EXEC) $^ $(LDFLAGS)
 
 shellBuildStatic: $(objDir)/$(shellDir)/main-Static.o \
-				  $(objDir)/$(shellDir)/dynamicLib.o
+				   $(objDir)/$(shellDir)/libs.o \
+				   $(objDir)/$(shellDir)/utils.o
 	@echo "$(BOLD_C)- using static librairies$(NO_C)"
 	$(CC) \
 		-o $(binDir)/$(EXEC)Static $^ \
-		-L$(binDir)/$(libsDir)/ $(addsuffix S, $(addprefix -l, $(LIBS))) $(LDFLAGS)
+		-L$(binDir)/$(libsDir)/$(staticDir) $(addprefix -l, $(LIBS)) $(LDFLAGS)
 	@echo "$(OK_C)✓ Shell Done$(NO_C)"
 
 $(objDir)/$(shellDir)/%.o: $(srcDir)/$(shellDir)/%.c
