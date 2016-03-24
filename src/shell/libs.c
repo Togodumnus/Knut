@@ -78,14 +78,13 @@ void enregisterCommande(char *name, CommandeFonction commandeFonction) {
  * Print les commandes disponibles
  */
 void showCommandes() {
-    printf("[");
+    printf("Commands : [");
     for (int i = 0; i < commandes.size; i++) {
         printf("%s", commandes.liste[i]->name);
-        printf(" ");
         if (i < commandes.size-1) {
             printf(", ");
         } else {
-            printf("]");
+            printf("]\n");
         }
     }
 }

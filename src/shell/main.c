@@ -24,8 +24,10 @@ int main(int argc, char* argv[]) {
         printf("Static\n");
     #endif
 
+    showCommandes();
+
     printf("Hello world\n");
 
-    (*findCommande("yes"))(argc, argv);
+    /*(*findCommande("yes"))(argc, argv);*/
 
 }
