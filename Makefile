@@ -7,11 +7,13 @@ libCFLAGS = -fPIC
 
 debug = -c
 
-objDir   = obj
-binDir   = bin
-srcDir   = src
-libsDir  = libs
-shellDir = shell
+objDir     = obj
+binDir     = bin
+srcDir     = src
+libsDir    = libs
+dynamicDir = dynamic
+staticDir  = static
+shellDir   = shell
 
 EXEC=knutShell#le shell à compiler
 
@@ -40,7 +42,7 @@ libraries \n\
 - run $(WARN_C)$(binDir)/$(EXEC)$(NO_C) for knutShell with dynamic \
 libraries \n\
   (don't forget $(WARN_C)export LD_LIBRARY_PATH="'$$'"LD_LIBRARY_PATH:\
-$(shell pwd)/bin/libs$(NO_C))"
+$(shell pwd)/$(binDir)/$(libsDir)/$(dynamicDir)$(NO_C))"
 
 .PHONY: clean distclean
 
@@ -63,13 +65,16 @@ libs: libsIntro libsBuild
 libsIntro:
 	@echo "$(BOLD_C)☞ Libs$(NO_C)"
 	@mkdir -p $(binDir)/$(libsDir)
+	@mkdir -p $(binDir)/$(libsDir)/$(staticDir)
+	@mkdir -p $(binDir)/$(libsDir)/$(dynamicDir)
 
 libsBuild: $(LIBS)
 
 # Commande yes
 
-yes: yesIntro $(binDir)/$(libsDir)/yes $(binDir)/$(libsDir)/libyesS.a \
-			  $(binDir)/$(libsDir)/libyesD.so
+yes: yesIntro $(binDir)/$(libsDir)/yes \
+			  $(binDir)/$(libsDir)/$(staticDir)/libyes.a \
+			  $(binDir)/$(libsDir)/$(dynamicDir)/libyes.so
 	@echo "	"$(DONE)
 
 yesIntro:
@@ -84,11 +89,11 @@ $(binDir)/$(libsDir)/yes: $(objDir)/$(libsDir)/yes/yes.o \
 	@echo "		"$(DONE)
 
 #librairie statique
-$(binDir)/$(libsDir)/libyesS.a: $(objDir)/$(libsDir)/yes/yes.o
+$(binDir)/$(libsDir)/$(staticDir)/libyes.a: $(objDir)/$(libsDir)/yes/yes.o
 	$(call make-static-lib,$@,$^)
 
 #librairie dynamique
-$(binDir)/$(libsDir)/libyesD.so: $(objDir)/$(libsDir)/yes/yes.o
+$(binDir)/$(libsDir)/$(dynamicDir)/libyes.so: $(objDir)/$(libsDir)/yes/yes.o
 	$(call make-dynamic-lib,$@,$^)
 
 $(objDir)/$(libsDir)/yes/%.o: $(srcDir)/$(libsDir)/yes/%.c
@@ -111,6 +116,7 @@ shellBuildDynamic: $(objDir)/$(shellDir)/main.o \
 				   $(objDir)/$(shellDir)/extractionActions.o \
 				   $(objDir)/$(shellDir)/lectureAction.o \
 				   $(objDir)/$(shellDir)/lectureAction.o \
+				   $(objDir)/$(shellDir)/utils.o \
 				   $(objDir)/$(shellDir)/test.o
 	@echo "$(BOLD_C)- using dynamic librairies$(NO_C)"
 	$(CC) -o $(binDir)/$(EXEC) $^ $(LDFLAGS)
@@ -121,11 +127,12 @@ shellBuildStatic: $(objDir)/$(shellDir)/main-Static.o \
 				  $(objDir)/$(shellDir)/process.o \
 				  $(objDir)/$(shellDir)/extractionActions.o \
 				  $(objDir)/$(shellDir)/lectureAction.o \
+				  $(objDir)/$(shellDir)/utils.o \
 				  $(objDir)/$(shellDir)/test.o
 	@echo "$(BOLD_C)- using static librairies$(NO_C)"
 	$(CC) \
 		-o $(binDir)/$(EXEC)Static $^ \
-		-L$(binDir)/$(libsDir)/ $(addsuffix S, $(addprefix -l, $(LIBS))) $(LDFLAGS)
+		-L$(binDir)/$(libsDir)/$(staticDir) $(addprefix -l, $(LIBS)) $(LDFLAGS)
 	@echo "$(OK_C)✓ Shell Done$(NO_C)"
 
 $(objDir)/$(shellDir)/%.o: $(srcDir)/$(shellDir)/%.c $(srcDir)/DEBUG.h

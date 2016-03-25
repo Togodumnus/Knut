@@ -2,110 +2,180 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dlfcn.h>
+#include <dirent.h>
+#include <sys/types.h>
 #ifdef __APPLE__
     #include <limits.h>
 #else
     #include <linux/limits.h>
 #endif
 
+#include "../DEBUG.h"
+#include "utils.h"
+
 #include "libs.h"
+
+/**
+ * Commande
+ *
+ * Représente une commande enregistrée par une librairie
+ */
+struct Commande {
+    char *name;                        //par exemple, "ls"
+    CommandeFonction commandeFonction; //par exemple, le main de la lib ls
+};
+typedef struct Commande Commande;
 
 /**
  * commandes
  *
- * Liste des commandes disponibles par libraries statiques ou dynamiques
- * Ne pas oublier NULL à la fin du tableau.
- *
- * @see dynamicLib.c#loadLibs()
+ * Stocke l'ensemble des commande disponibles (enregistrées)
  */
-char *commandes[] = {"yes", NULL};
+struct Commandes {
+    int size;           //le nombre de commandes dispo
+    Commande **liste;    //le tableau des commandes
+
+} commandes;
 
 /**
- * commandesFonctions
+ * enregisterCommande
  *
- * Liste des fonctions XXXLib() d'entrée sur les librairies statiques ou
- * dynamiques disponnibles.
- * Doit être dans le même ordre que `char *commandes`.
- *
- * @see dynamicLib.c#loadLibs()
+ * @param   {char *}            name                Nom de la commande
+ * @param   {CommandeFonction}  commandeFonction    Le pointeur vers la fonction
+ *                                                  d'entrée sur la commande
  */
-#ifndef LIB_STATIC
-CommandeFonction commandesFonctions[sizeof(commandes) / sizeof(char) - 1];
-#else
-CommandeFonction commandesFonctions[sizeof(commandes) / sizeof(char) - 1] =
-    {yesLib};
-#endif
+void enregisterCommande(char *name, CommandeFonction commandeFonction) {
 
- /**
+    DEBUG("Enregistrement commande : %s", name);
+
+    Commande *newCommande = (Commande *) malloc(sizeof(Commande));
+
+    if (newCommande == NULL) {
+        perror("Malloc error");
+        exit(1);
+    }
+    newCommande->name = name;
+    newCommande->commandeFonction = commandeFonction;
+
+    Commande **newList = (Commande **) realloc(
+            commandes.liste,
+            (commandes.size + 1) * sizeof(Commande *)
+    );
+
+    if (newList == NULL) {
+        perror("Malloc error");
+        exit(1);
+    }
+    commandes.liste = newList;
+    commandes.liste[commandes.size] = newCommande;
+    commandes.size++;
+}
+
+/**
+ * showCommandes
  *
- * Charge la librairie `lib` et attache sa fonction <lib>Lib() sur
- * pCommandeFonction
- *
- * @param   {char *}                lib
- * @param   {CommandeFonction *}    pCommandeFonction
+ * Print les commandes disponibles
  */
-void loadLib(char *lib, CommandeFonction *pCommandeFonction) {
+void showCommandes() {
+    printf("Commands : [");
+    for (int i = 0; i < commandes.size; i++) {
+        printf("%s", commandes.liste[i]->name);
+        if (i < commandes.size-1) {
+            printf(", ");
+        } else {
+            printf("]\n");
+        }
+    }
+}
+
+/**
+ * loadLib
+ *
+ * Charge la librairie et lance sa fonction init
+ *
+ * @param  {char *} dir     Le dossier où chercher la lib
+ * @param  {char *} file    La lib
+ */
+void loadLib(const char *dir, const char *file) {
 
     void *libFile;
+    InitFonction pInit;
 
-    char *path     = (char *) malloc(PATH_MAX * sizeof(char));
-    char *funcName = (char *) malloc(PATH_MAX * sizeof(char));
+    DEBUG("loadLib %s%s", dir, file);
 
-    sprintf(path, "./bin/libs/lib%sD.so", lib);
-    sprintf(funcName, "%sLib", lib);
+    char *path = (char *) malloc(PATH_MAX * sizeof(char));
+    sprintf(path, "%s%s", dir, file);
 
     if ((libFile = dlopen(path, RTLD_LAZY)) == NULL) {
         perror("lib introuvable");
         exit(1);
     }
 
-    if ((*pCommandeFonction = (CommandeFonction) dlsym(libFile, funcName)) == NULL) {
+    if ((pInit = (InitFonction) dlsym(libFile, "Init")) == NULL) {
         perror("fonction introuvable dans la lib");
         exit(1);
     }
 
-    free(path);
-    free(funcName);
+    (pInit)(enregisterCommande); //on lance l'init de la lib
 
+    free(path);
 }
 
+
 /**
- * loadLibs
+ * loadDynamicLibs
  *
- * Charge les librairies de `libs` et attache les fonctions <lib>Lib() sur
- * commandesFonctions.
+ * Charge les librairies de `libs` et appelle leur fonctions Init
+ *
+ * @param {char *}  libdir      Le dossier où il faut chercher les libs
  */
-void loadLibs() {
+void loadDynamicLibs(char *libdir) {
 
-    int i = 0;
-    while (commandes[i] != NULL) { //la dernière libs doit être le pointeur NULL
-        loadLib(commandes[i], &commandesFonctions[i]);
-        i++;
+    DEBUG("loading dynamic libs");
+
+    DIR *directory;
+    struct dirent *file;
+
+    const char *EXTENSION = "so";
+
+    directory = opendir(libdir); //on ouvre le dossier
+    if (directory != NULL) {
+        while ((file = readdir(directory))) { //on parcours tous les fichiers
+
+            //on charge les fichiers .so uniquement
+            char *file_extension = fileExtension(file->d_name);
+            if (file_extension != NULL
+                    && strcmp(file_extension, EXTENSION) == 0) {
+                DEBUG("loadLib %s", file->d_name);
+                loadLib(libdir, file->d_name);
+            }
+        }
+        closedir(directory);
     }
-
+    else {
+        perror("Impossible de charger les librairies à partir de $libdir");
+    }
 }
 
 /**
  * findCommande
  *
- * Recherche si la commande cmd fait partie des librairies qui sont disponible
- * et retourne le pointeur vers <cmd>Lib si possible
+ * Recherche si la commande cmd fait partie des librairies qui sont disponibles
+ * et retourne le pointeur sa fonction d'entrée si possible
  *
  * @param   {char *}    cmd     La commande qu'il faut trouver
  *
- * @return  {CommandeFonction}  Le pointeur vers <cmd>Lib ou NULL si la lib
+ * @return  {CommandeFonction}  Le pointeur vers la fonction ou NULL si la lib
  *                              n'est pas trouvée
  */
 CommandeFonction findCommande(char *cmd) {
 
-    int i = 0;
-    while (commandes[i] != NULL) { //la dernière libs doit être le pointeur NULL
-        if (strcmp(commandes[i], cmd) == 0) {
-            return commandesFonctions[i];
+    for (int i = 0; i < commandes.size; i++) {
+        printf("%s\n", commandes.liste[i]->name);
+        if (strcmp(commandes.liste[i]->name, cmd) == 0) {
+            return commandes.liste[i]->commandeFonction;
         }
-        i++;
     }
 
     return NULL;
 }
-

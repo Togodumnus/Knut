@@ -1,10 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../DEBUG.h"
 #include "libs.h"
 #include "front.h"
 #include "process.h"
+
+#include "../DEBUG.h"
+#include "../libs/yes/yes.h"
+
+/**
+ * LIBS_DIR
+ *
+ * Répertoire des librairies dynamiques
+ */
+char *LIBS_DIR = "./bin/libs/dynamic/";
 
 int main(int argc, char* argv[]) {
 
@@ -12,11 +21,13 @@ int main(int argc, char* argv[]) {
 
     #ifndef LIB_STATIC
         //si pas de LIB_STATIC, on charge les librairies dynamiquement
-        loadLibs();
         printf(" (librairies dynamiques)\n");
+        loadDynamicLibs(LIBS_DIR);
     #else
+        enregisterCommande("yes", yesLib);
         printf(" (librairies statiques)\n");
     #endif
+        showCommandes();
 
     char *line = NULL;
     while (42) {
@@ -30,5 +41,7 @@ int main(int argc, char* argv[]) {
             process(line);
         }
     }
+
+    printf("Hello world\n");
 
 }
