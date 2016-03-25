@@ -1,7 +1,7 @@
 
 CC = gcc
 CFLAGS = -c -Wall -std=c99 -Werror
-LDFLAGS= -ldl
+LDFLAGS= -ldl -rdynamic
 
 libCFLAGS = -fPIC
 
