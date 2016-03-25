@@ -111,13 +111,15 @@ shellIntro:
 
 shellBuildDynamic: $(objDir)/$(shellDir)/main.o \
 				   $(objDir)/$(shellDir)/libs.o \
-				   $(objDir)/$(shellDir)/utils.o
+				   $(objDir)/$(shellDir)/utils.o \
+				   $(objDir)/$(shellDir)/shellCommands.o
 	@echo "$(BOLD_C)- using dynamic librairies$(NO_C)"
 	$(CC) -o $(binDir)/$(EXEC) $^ $(LDFLAGS)
 
 shellBuildStatic: $(objDir)/$(shellDir)/main-Static.o \
 				   $(objDir)/$(shellDir)/libs.o \
-				   $(objDir)/$(shellDir)/utils.o
+				   $(objDir)/$(shellDir)/utils.o \
+				  $(objDir)/$(shellDir)/shellCommands.o
 	@echo "$(BOLD_C)- using static librairies$(NO_C)"
 	$(CC) \
 		-o $(binDir)/$(EXEC)Static $^ \

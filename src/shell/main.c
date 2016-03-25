@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "libs.h"
+#include "shellCommands.h"
 
 #include "../DEBUG.h"
 #include "../libs/yes/yes.h"
@@ -28,6 +29,7 @@ int main(int argc, char* argv[]) {
 
     printf("Hello world\n");
 
+    /*shellCommand("cd", "~/Documents");*/
     /*(*findCommande("yes"))(argc, argv);*/
 
 }
