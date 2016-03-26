@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "utils.h"
 #include "libs.h"
 #include "front.h"
 #include "process.h"
@@ -15,19 +16,45 @@
  */
 const char *LIBS_DIR = "./bin/libs/dynamic/";
 
+/**
+ * EXEC_DIR
+ *
+ * Répertoire de nos commandes exécutable
+ */
+const char *EXEC_DIR = "./bin/libs/";
+
+/**
+ * EXEC_MODE
+ *
+ * Le mode d'éxécution
+ * @see utils.h
+ *
+ * Utiliser `extern` si besoin de le récupérer dans d'autre fichiers
+ *
+ */
+enum execution_mode EXEC_MODE = EXECUTABLE_MODE;
+
 int main(int argc, char* argv[]) {
 
     printf("KnutShell");
 
-    #ifndef LIB_STATIC
-        //si pas de LIB_STATIC, on charge les librairies dynamiquement
+    if (argc > 1) {
+        EXEC_MODE = readArgs(argc, argv);
+    }
+
+    if (EXEC_MODE == EXECUTABLE_MODE) {
+        printf(" (exécutables)\n");
+        updatePATH(EXEC_DIR);
+    } else if (EXEC_MODE == LIB_DYNAMIC_MODE) { //chargement des librairies
+                                                //dynamiquement
         printf(" (librairies dynamiques)\n");
         loadDynamicLibs(LIBS_DIR);
-    #else
+    } else {                                    //enregistrement des librairies
+                                                //statiques
         enregisterCommande("yes", yesLib);
         printf(" (librairies statiques)\n");
-    #endif
         showCommandes();
+    }
 
     char *line = NULL;
     while (42) {

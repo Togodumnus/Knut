@@ -107,57 +107,39 @@ $(objDir)/$(libsDir)/%.o: $(srcDir)/$(libsDir)/%.c
 ################################################################################
 #							Compilation du shell							   #
 ################################################################################
-shell: shellIntro shellBuildDynamic shellBuildStatic
+shell: shellIntro shellBuild
 
 shellIntro:
 	@echo "$(BOLD_C)☞ Compiling Shell$(NO_C)"
 
-shellBuildDynamic: $(objDir)/$(shellDir)/main.o \
-				   $(objDir)/$(shellDir)/libs.o \
-				   $(objDir)/$(shellDir)/front.o \
-				   $(objDir)/$(shellDir)/process.o \
-				   $(objDir)/$(shellDir)/extractionActions.o \
-				   $(objDir)/$(shellDir)/lectureAction.o \
-				   $(objDir)/$(shellDir)/lectureAction.o \
-				   $(objDir)/$(shellDir)/utils.o \
-				   $(objDir)/$(shellDir)/shellCommands.o \
-				   $(objDir)/$(shellDir)/test.o
-	@echo "$(BOLD_C)- using dynamic librairies$(NO_C)"
-	$(CC) -o $(binDir)/$(EXEC) $^ $(LDFLAGS)
+shellBuild: $(objDir)/$(shellDir)/main.o \
+		    $(objDir)/$(shellDir)/front.o \
+			$(objDir)/$(shellDir)/libs.o \
+			$(objDir)/$(shellDir)/process.o \
+			$(objDir)/$(shellDir)/extractionActions.o \
+			$(objDir)/$(shellDir)/lectureAction.o \
+			$(objDir)/$(shellDir)/lectureAction.o \
+			$(objDir)/$(shellDir)/utils.o \
+			$(objDir)/$(shellDir)/shellCommands.o \
+			$(objDir)/$(shellDir)/test.o
+	@#TODO : ici on inclue tout le temps les libs statics parce qu'on
+	@# a choisi d'utiliser une option au lancement pour décider entre
+	@# les exécutables, les libs statiques et les libs dynamiques
+	@#Autre solution : compiler 3 binaires différents
+	$(CC) -o $(binDir)/$(EXEC) $^ \
+		-L$(binDir)/$(libsDir)/$(staticDir) $(addprefix -l, $(LIBS)) \
+		$(LDFLAGS)
 
-shellBuildStatic: $(objDir)/$(shellDir)/main-Static.o \
-				  $(objDir)/$(shellDir)/libs.o\
-				  $(objDir)/$(shellDir)/front.o \
-				  $(objDir)/$(shellDir)/process.o \
-				  $(objDir)/$(shellDir)/extractionActions.o \
-				  $(objDir)/$(shellDir)/lectureAction.o \
-				  $(objDir)/$(shellDir)/utils.o \
-				  $(objDir)/$(shellDir)/shellCommands.o \
-				  $(objDir)/$(shellDir)/test.o
-	@echo "$(BOLD_C)- using static librairies$(NO_C)"
-	$(CC) \
-		-o $(binDir)/$(EXEC)Static $^ \
-		-L$(binDir)/$(libsDir)/$(staticDir) $(addprefix -l, $(LIBS)) $(LDFLAGS)
-	@echo "$(OK_C)✓ Shell Done$(NO_C)"
-
-$(objDir)/$(shellDir)/%.o: $(srcDir)/$(shellDir)/%.c $(srcDir)/DEBUG.h
-	$(call compile-shell-dep, $@, $<)
-
-$(objDir)/$(shellDir)/%-Static.o: $(srcDir)/$(shellDir)/%.c $(srcDir)/DEBUG.h
-	$(call compile-shell-dep, $@, $<, -DLIB_STATIC)
-
+$(objDir)/$(shellDir)/%.o: $(srcDir)/$(shellDir)/%.c
+	@echo "	⇾ Compiling $@"
+	@mkdir -p $(objDir)/$(shellDir)
+	@$(CC) $(CFLAGS) $3 $(debug) -o $@ $^
+	@echo "	$(CC) $(CFLAGS) $(debug) -o $@ $^"
+	@echo "	"$(DONE)
 
 ################################################################################
 #									Fonctions								   #
 ################################################################################
-
-define compile-shell-dep
-	@echo "	⇾ Compiling $1"
-	@mkdir -p $(objDir)/$(shellDir)
-	@$(CC) $(CFLAGS) $3 $(debug) -o $1 $2
-	@echo "	$(CC) $(CFLAGS) $(debug) -o $1 $2"
-	@echo "	"$(DONE)
-endef
 
 # $(call make-static-lib, /path/to/maLib.a, <.o files>)
 define make-static-lib
