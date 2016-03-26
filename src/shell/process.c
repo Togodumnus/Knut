@@ -14,13 +14,49 @@
 #include "../DEBUG.h"
 #include "Action.h"
 #include "Command.h"
+#include "utils.h"
+#include "libs.h"
 #include "extractionActions.h"
 #include "lectureAction.h"
-#include "libs.h"
 
+extern enum execution_mode EXEC_MODE;
 
 const int PIPE_READ  = 0;
 const int PIPE_WRITE = 1;
+
+void exec(Action *action, Command *cmd) {
+
+    DEBUG("[child] EXEC_MODE %d", EXEC_MODE);
+
+    if (cmd->type == SIMPLE) {
+
+        if (EXEC_MODE == EXECUTABLE_MODE) {
+            DEBUG("[child] EXECUTABLE %s", action->cmd);
+            execvp(cmd->cmd, cmd->argv);
+            exit(1); //erreur de exec si ici
+        } else { //LIB_DYNAMIC_MODE ou LIB_STATIC_MODE
+
+            DEBUG("[child] LIB %s", action->cmd);
+            CommandeFonction libFunc = findCommande(cmd->cmd);
+
+            if (libFunc == NULL) { //cmd n'existe pas, on tente un execvp
+                DEBUG("[child] NO LIB %s", action->cmd);
+                DEBUG("[child] EXECUTABLE %s", action->cmd);
+                execvp(cmd->cmd, cmd->argv);
+                exit(1); //erreur de exec si ici
+            } else {
+                exit(libFunc(cmd->argc, cmd->argv));
+            }
+        }
+
+    } else if (cmd->type == COMPLEX) {
+        DEBUG("[child] COMPLEX CMD %s", action->cmd);
+        exit(process(action->cmd));
+    } else {
+        perror("Unknown action type");
+        exit(1);
+    }
+}
 
 int process(char *str) {
 
@@ -121,33 +157,9 @@ int process(char *str) {
                 }
             }
 
-            switch (cmd->type) {
-                case EXECUTABLE:
-                    DEBUG("[child %d] EXECUTABLE %s", i, action->cmd);
-                    execvp(cmd->cmd, cmd->argv);
-                    exit(1); //erreur de exec si ici
-                    break;
-                case LIBRARY:
-                    DEBUG("[child %d] LIBRARY %s", i, action->cmd);
-                    CommandeFonction libFunc = findCommande(cmd->cmd);
-                    if (libFunc == NULL) { //cmd n'existe pas
-                        char msg[256];
-                        sprintf(msg, "%s : commande introuvable\n", cmd->cmd);
-                        perror(msg);
-                        exit(1);
-                    } else {
-                        exit(libFunc(cmd->argc, cmd->argv));
-                    }
-                    break;
-                case ACTION:
-                    DEBUG("[child %d] ACTION %s", i, action->cmd);
-                    exit(process(action->cmd));
-                    break;
-                default:
-                    perror("Unknown action type");
-                    exit(1);
-                    break;
-            }
+            //Exécution de la commande
+            //@see process.c#exec()
+            exec(action, cmd);
 
         } else {
 

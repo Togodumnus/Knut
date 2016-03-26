@@ -171,7 +171,6 @@ void loadDynamicLibs(const char *libdir) {
 CommandeFonction findCommande(char *cmd) {
 
     for (int i = 0; i < commandes.size; i++) {
-        printf("%s\n", commandes.liste[i]->name);
         if (strcmp(commandes.liste[i]->name, cmd) == 0) {
             return commandes.liste[i]->commandeFonction;
         }

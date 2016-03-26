@@ -41,7 +41,7 @@ Action actionEchoAndBkg = {
 
 char *argvLsPipe[] = {"/bin/ls", "/", NULL};
 Command commandLsPipe = {
-    EXECUTABLE,
+    SIMPLE,
     "/bin/ls",
     2,
     argvLsPipe,
@@ -49,7 +49,7 @@ Command commandLsPipe = {
 
 char *argvEchoOr[] = {"echo", "error", NULL};
 Command commandEchoOr = {
-    LIBRARY,
+    SIMPLE,
     "echo",
     2,
     argvEchoOr,
@@ -57,7 +57,7 @@ Command commandEchoOr = {
 
 char *argvYesAnd[] = {"yes", NULL};
 Command commandYesAnd = {
-    LIBRARY,
+    SIMPLE,
     "yes",
     1,
     argvYesAnd,
@@ -65,15 +65,15 @@ Command commandYesAnd = {
 
 char *argvCatPipe[] = {"/bin/cat", NULL};
 Command commandCatPipe = {
-EXECUTABLE,
-"/bin/cat",
-1,
-argvCatPipe,
+    SIMPLE,
+    "/bin/cat",
+    1,
+    argvCatPipe,
 };
 
 char *argvEchoAndBkg[] = {"/bin/echo", "salut", NULL};
 Command commandEchoAndBkg = {
-    EXECUTABLE,
+    SIMPLE,
     "/bin/echo",
     2,
     argvEchoAndBkg,
