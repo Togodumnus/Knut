@@ -1,7 +1,7 @@
 
 CC = gcc
 CFLAGS = -c -Wall -std=c99 -Werror
-LDFLAGS= -ldl
+LDFLAGS= -ldl -rdynamic
 
 libCFLAGS = -fPIC
 
@@ -96,7 +96,10 @@ $(binDir)/$(libsDir)/$(staticDir)/libyes.a: $(objDir)/$(libsDir)/yes/yes.o
 $(binDir)/$(libsDir)/$(dynamicDir)/libyes.so: $(objDir)/$(libsDir)/yes/yes.o
 	$(call make-dynamic-lib,$@,$^)
 
-$(objDir)/$(libsDir)/yes/%.o: $(srcDir)/$(libsDir)/yes/%.c
+
+# Compilation des fichiers des libs
+
+$(objDir)/$(libsDir)/%.o: $(srcDir)/$(libsDir)/%.c
 	@mkdir -p $(objDir)/$(libsDir)/yes
 	@$(CC) $(CFLAGS) $(libCFLAGS) $(debug) -o $@ $^
 	@echo "		$(OK_C)"`basename $@`"$(NO_C)"
@@ -117,6 +120,7 @@ shellBuildDynamic: $(objDir)/$(shellDir)/main.o \
 				   $(objDir)/$(shellDir)/lectureAction.o \
 				   $(objDir)/$(shellDir)/lectureAction.o \
 				   $(objDir)/$(shellDir)/utils.o \
+				   $(objDir)/$(shellDir)/shellCommands.o \
 				   $(objDir)/$(shellDir)/test.o
 	@echo "$(BOLD_C)- using dynamic librairies$(NO_C)"
 	$(CC) -o $(binDir)/$(EXEC) $^ $(LDFLAGS)
@@ -128,6 +132,7 @@ shellBuildStatic: $(objDir)/$(shellDir)/main-Static.o \
 				  $(objDir)/$(shellDir)/extractionActions.o \
 				  $(objDir)/$(shellDir)/lectureAction.o \
 				  $(objDir)/$(shellDir)/utils.o \
+				  $(objDir)/$(shellDir)/shellCommands.o \
 				  $(objDir)/$(shellDir)/test.o
 	@echo "$(BOLD_C)- using static librairies$(NO_C)"
 	$(CC) \
