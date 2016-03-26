@@ -13,7 +13,7 @@
  *
  * Répertoire des librairies dynamiques
  */
-char *LIBS_DIR = "./bin/libs/dynamic/";
+const char *LIBS_DIR = "./bin/libs/dynamic/";
 
 int main(int argc, char* argv[]) {
 

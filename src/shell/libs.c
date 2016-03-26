@@ -129,7 +129,7 @@ void loadLib(const char *dir, const char *file) {
  *
  * @param {char *}  libdir      Le dossier où il faut chercher les libs
  */
-void loadDynamicLibs(char *libdir) {
+void loadDynamicLibs(const char *libdir) {
 
     DEBUG("loading dynamic libs");
 
