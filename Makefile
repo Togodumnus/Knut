@@ -96,7 +96,10 @@ $(binDir)/$(libsDir)/$(staticDir)/libyes.a: $(objDir)/$(libsDir)/yes/yes.o
 $(binDir)/$(libsDir)/$(dynamicDir)/libyes.so: $(objDir)/$(libsDir)/yes/yes.o
 	$(call make-dynamic-lib,$@,$^)
 
-$(objDir)/$(libsDir)/yes/%.o: $(srcDir)/$(libsDir)/yes/%.c
+
+# Compilation des fichiers des libs
+
+$(objDir)/$(libsDir)/%.o: $(srcDir)/$(libsDir)/%.c
 	@mkdir -p $(objDir)/$(libsDir)/yes
 	@$(CC) $(CFLAGS) $(libCFLAGS) $(debug) -o $@ $^
 	@echo "		$(OK_C)"`basename $@`"$(NO_C)"
