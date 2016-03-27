@@ -32,6 +32,13 @@ Action actionCatPipe = {
     false,
 };
 
+// | /bin/cat > toto.txt
+Action actionCatToFile = {
+    "/bin/cat",
+    CHAINING_PIPE,
+    false,
+};
+
 // && echo salut &
 Action actionEchoAndBkg = {
     "echo salut",
@@ -53,6 +60,9 @@ Command commandEchoOr = {
     "echo",
     2,
     argvEchoOr,
+    NULL,
+    NULL,
+    false
 };
 
 char *argvYesAnd[] = {"yes", NULL};
@@ -61,6 +71,9 @@ Command commandYesAnd = {
     "yes",
     1,
     argvYesAnd,
+    NULL,
+    NULL,
+    false
 };
 
 char *argvCatPipe[] = {"/bin/cat", NULL};
@@ -69,6 +82,20 @@ Command commandCatPipe = {
     "/bin/cat",
     1,
     argvCatPipe,
+    NULL,
+    NULL,
+    false
+};
+
+char *argvCatToFile[] = {"/bin/cat", NULL};
+Command commandCatToFile = {
+    SIMPLE,
+    "/bin/cat",
+    1,
+    argvCatPipe,
+    NULL,
+    "toto.txt",
+    true
 };
 
 char *argvEchoAndBkg[] = {"/bin/echo", "salut", NULL};
@@ -77,5 +104,8 @@ Command commandEchoAndBkg = {
     "/bin/echo",
     2,
     argvEchoAndBkg,
+    NULL,
+    NULL,
+    false
 };
 

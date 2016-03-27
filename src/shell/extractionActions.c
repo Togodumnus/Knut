@@ -27,12 +27,12 @@ void extractionActions(char *str, Action ***actions, int *actc) {
     //séparées par |, ||, && ou ;
     //pour l'instant on crée une action fake
 
-    *actc = 3;
+    *actc = 2;
 
     *actions = (Action **) malloc(*actc * sizeof(Action*));
     (*actions)[0] = &actionLsPipe;
-    (*actions)[1] = &actionCatPipe;
-    (*actions)[2] = &actionYesAnd;
+    (*actions)[1] = &actionCatToFile;
+    /*(*actions)[2] = &actionYesAnd;*/
 
     //ls / | cat && yes
 

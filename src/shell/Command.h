@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 /**
  * CommandType
  */
@@ -24,6 +26,10 @@ struct Command {
 
     int argc;
     char **argv;
+
+    char *fromFile;     //par exemple cat > toto.txt
+    char *toFile;       //par exemple cat < toto.txt
+    bool appendFile;    //true si >>, false si > <
 };
 
 typedef struct Command Command;
