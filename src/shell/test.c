@@ -32,6 +32,13 @@ Action actionCatPipe = {
     false,
 };
 
+// ; cat < toto.txt
+Action actionCatFromFile = {
+    "cat",
+    CHAINING_COMMA,
+    false,
+};
+
 // | /bin/cat > toto.txt
 Action actionCatToFile = {
     "/bin/cat",
@@ -83,6 +90,17 @@ Command commandCatPipe = {
     1,
     argvCatPipe,
     NULL,
+    NULL,
+    false
+};
+
+char *argvCatFromFile[] = {"cat", NULL};
+Command commandCatFromFile = {
+    SIMPLE,
+    "cat",
+    1,
+    argvCatFromFile,
+    "toto.txt",
     NULL,
     false
 };

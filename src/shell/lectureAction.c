@@ -18,6 +18,8 @@ Command *lectureAction(Action *action) {
         return &commandYesAnd;
     } else if (action == &actionCatPipe) {
         return &commandCatPipe;
+    } else if (action == &actionCatFromFile) {
+        return &commandCatFromFile;
     } else if (action == &actionCatToFile) {
         return &commandCatToFile;
     } else if (action == &actionEchoAndBkg) {

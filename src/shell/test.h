@@ -16,6 +16,9 @@ Action actionYesAnd;
 // | /bin/cat
 Action actionCatPipe;
 
+// ; cat < toto.txt
+Action actionCatFromFile;
+
 // | /bin/cat > toto.txt
 Action actionCatToFile;
 
@@ -29,6 +32,8 @@ Command commandEchoOr;
 Command commandYesAnd;
 
 Command commandCatPipe;
+
+Command commandCatFromFile;
 
 Command commandCatToFile;
 

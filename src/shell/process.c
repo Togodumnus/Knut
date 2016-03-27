@@ -86,6 +86,11 @@ int process(char *str) {
         exit(1);
     }
 
+    pstdin[PIPE_READ]   = fileno(stdin);
+    pstdin[PIPE_WRITE]  = -1;
+    pstdout[PIPE_READ]  = -1;
+    pstdout[PIPE_WRITE] = fileno(stdout);
+
     //On exécute et chaîne chaque action
 
     for (int i = 0; i < actc; i++) {
@@ -94,6 +99,7 @@ int process(char *str) {
         DEBUG("[parent]\taction %d (%p): %s", i, action, action->cmd);
         Command *cmd = lectureAction(action);
 
+        // Gestion du chaînage d'entrée/sortie
         DEBUG("[parent]\tchaining type = %d", action->chainingType);
 
         if (action->chainingType == CHAINING_PIPE) {
@@ -133,6 +139,48 @@ int process(char *str) {
         }
         //else action->chainingType == COMMA, on ne fait rien de spécial
 
+
+        //Gestion des redirections d'entrées
+
+        DEBUG(
+            "[parent]\tredirect input from file = %s",
+            cmd->fromFile != NULL ? "true" : "false"
+        );
+        if (cmd->fromFile != NULL) {
+            char *mode = "r";
+            FILE *file = fopen(cmd->fromFile, mode);
+            if (file == NULL) {
+                perror("Redirection output : Not such file");
+                exit(1);
+            }
+            pstdin[PIPE_READ] = fileno(file);
+        }
+
+        DEBUG(
+            "[parent]\tredirect output to file = %s (apppend = %s)",
+            cmd->toFile != NULL ? "true" : "false",
+            cmd->appendFile ? "true" : "false"
+        );
+        if (cmd->toFile != NULL) {
+            //mode d'ouverture : append ou non
+            char *mode = "w+";
+            if (cmd->appendFile) {
+                mode = "a+";
+            }
+
+            FILE *file = fopen(cmd->toFile, mode);
+            if (file == NULL) {
+                perror("Redirection output : Not such file");
+                exit(1);
+            }
+            DEBUG("here %d", fileno(file));
+            pstdout[PIPE_WRITE] = fileno(file);
+            DEBUG("here");
+        }
+
+
+        //Création et éxécution du sous-processus
+
         int pid_child = fork();
 
         if (pid_child == -1) {
@@ -144,7 +192,7 @@ int process(char *str) {
 
             DEBUG("[child %d] \t%d start",i, getpid());
 
-            if (action->chainingType == CHAINING_PIPE) {
+            /*if (action->chainingType == CHAINING_PIPE) {*/
                 DEBUG("[child %d] \tReplacing stdin (%d) with %d",
                         i, fileno(stdin), pstdin[PIPE_READ]);
                 DEBUG("[child %d] \tReplacing stdout (%d) with %d",
@@ -162,13 +210,21 @@ int process(char *str) {
                     dup2(pstdout[PIPE_WRITE], fileno(stdout));
                     close(pstdout[PIPE_WRITE]);
                 }
-            }
+            /*}*/
 
             //Exécution de la commande
             //@see process.c#exec()
             exec(action, cmd);
 
         } else {
+
+            //Fermeture des fichiers utilisés pour la redirection
+            if (cmd->fromFile != NULL) {
+                close(pstdin[PIPE_READ]);
+            }
+            if (cmd->toFile != NULL) {
+                close(pstdout[PIPE_WRITE]);
+            }
 
             //Si l'action doit s'effectuer en background
             //on n'attend pas et on met le status à 0
