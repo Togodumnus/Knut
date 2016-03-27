@@ -52,7 +52,7 @@ void exec(Action *action, Command *cmd) {
                 execvp(cmd->cmd, cmd->argv);
                 exit(1); //erreur de exec si ici
             } else {
-                exit(libFunc(cmd->argc, cmd->argv));
+                exit((*libFunc)(cmd->argc, cmd->argv));
             }
         }
 
