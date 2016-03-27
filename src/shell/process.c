@@ -24,6 +24,12 @@ extern enum execution_mode EXEC_MODE;
 const int PIPE_READ  = 0;
 const int PIPE_WRITE = 1;
 
+/**
+ * exec
+ *
+ * @param   {Action *}  action      L'action a exécuter
+ * @param   {Command *} cmd         La commande qui va avec
+ */
 void exec(Action *action, Command *cmd) {
 
     DEBUG("[child] EXEC_MODE %d", EXEC_MODE);
@@ -39,7 +45,8 @@ void exec(Action *action, Command *cmd) {
             DEBUG("[child] LIB %s", action->cmd);
             CommandeFonction libFunc = findCommande(cmd->cmd);
 
-            if (libFunc == NULL) { //cmd n'existe pas, on tente un execvp
+            if (libFunc == NULL) { //cmd n'existe pas dans nos libs,
+                                   //on tente un execvp
                 DEBUG("[child] NO LIB %s", action->cmd);
                 DEBUG("[child] EXECUTABLE %s", action->cmd);
                 execvp(cmd->cmd, cmd->argv);
