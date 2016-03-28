@@ -1,12 +1,16 @@
+#ifndef __APPLE__
+    #define _GNU_SOURCE
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "utils.h"
 #include "libs.h"
-#include "front.h"
 #include "process.h"
+#include "server.h"
 
 #include "../DEBUG.h"
+
 #include "../libs/yes/yes.h"
 
 /**
@@ -34,6 +38,52 @@ const char *EXEC_DIR = "./bin/libs/";
  */
 enum execution_mode EXEC_MODE = EXECUTABLE_MODE;
 
+/**
+ * printPrompt
+ *
+ * Affiche le prompt avant une commande
+ */
+void printPrompt() {
+    printf("Toto @ KnutShell\n"); //TODO
+    printf("> ");
+    fflush(stdout);
+}
+
+void callbackInit(int port) {
+    printf("Listening on port %d\n", port);
+    printPrompt();
+}
+
+int readInput(int fd) {
+
+    size_t n;
+    char *line = NULL;
+
+    if (isSocket(fd)) {
+        n = getLineSocket(&line, &n, fd);
+    } else { //c'est stdin
+        n = getline(&line, &n, stdin);
+    }
+
+    DEBUG("[server] Received : %s", line);
+
+    if (n == 0) { //End of file
+        printf("\nBye !\n"); //TODO print to fd
+        if (fd == fileno(stdin)) {
+            exit(1);
+        }
+    } else {
+        DEBUG("User: %s", line);
+        process(line); //TODO, pass fd input and fd ouput in case of socket
+
+        printPrompt(); //TODO print to fd
+    }
+
+    free(line);
+
+    return n;
+}
+
 int main(int argc, char* argv[]) {
 
     printf("KnutShell");
@@ -56,18 +106,5 @@ int main(int argc, char* argv[]) {
         showCommandes();
     }
 
-    char *line = NULL;
-    while (42) {
-        printPrompt();
-        if (readLine(&line) == -1) { //End of file
-            printf("\nBye !\n");
-            free(line);
-            exit(1);
-        } else {
-            DEBUG("User: %s", line);
-            process(line);
-        }
-    }
-
-    printf("Hello world\n");
+    loop(callbackInit, readInput);
 }

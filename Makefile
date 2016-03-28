@@ -113,7 +113,6 @@ shellIntro:
 	@echo "$(BOLD_C)☞ Compiling Shell$(NO_C)"
 
 shellBuild: $(objDir)/$(shellDir)/main.o \
-		    $(objDir)/$(shellDir)/front.o \
 			$(objDir)/$(shellDir)/libs.o \
 			$(objDir)/$(shellDir)/process.o \
 			$(objDir)/$(shellDir)/extractionActions.o \
@@ -121,6 +120,8 @@ shellBuild: $(objDir)/$(shellDir)/main.o \
 			$(objDir)/$(shellDir)/lectureAction.o \
 			$(objDir)/$(shellDir)/utils.o \
 			$(objDir)/$(shellDir)/shellCommands.o \
+			$(objDir)/$(shellDir)/server.o \
+			$(objDir)/$(shellDir)/sendall.o \
 			$(objDir)/$(shellDir)/test.o
 	@#TODO : ici on inclue tout le temps les libs statics parce qu'on
 	@# a choisi d'utiliser une option au lancement pour décider entre
