@@ -121,7 +121,7 @@ shellBuild: $(objDir)/$(shellDir)/main.o \
 			$(objDir)/$(shellDir)/utils.o \
 			$(objDir)/$(shellDir)/shellCommands.o \
 			$(objDir)/$(shellDir)/server.o \
-			$(objDir)/$(shellDir)/sendall.o \
+			$(objDir)/$(shellDir)/client.o \
 			$(objDir)/$(shellDir)/test.o
 	@#TODO : ici on inclue tout le temps les libs statics parce qu'on
 	@# a choisi d'utiliser une option au lancement pour décider entre

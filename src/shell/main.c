@@ -8,6 +8,7 @@
 #include "libs.h"
 #include "process.h"
 #include "server.h"
+#include "client.h"
 
 #include "../DEBUG.h"
 
@@ -54,7 +55,7 @@ void callbackInit(int port) {
     printPrompt();
 }
 
-int readInput(int fd) {
+int readInputServer(int fd) {
 
     size_t n;
     char *line = NULL;
@@ -84,11 +85,22 @@ int readInput(int fd) {
     return n;
 }
 
+int readInputClient(char **msg) {
+
+    size_t n;
+    n = getline(msg, &n, stdin);
+
+    DEBUG("[client] Read : %s", *msg);
+    printPrompt();
+
+    return n;
+}
+
 int main(int argc, char* argv[]) {
 
     printf("KnutShell");
 
-    char *addr  = NULL;
+    char *addr  = "localhost";
     int port    = -1;
 
     if (argc > 1) {
@@ -96,8 +108,8 @@ int main(int argc, char* argv[]) {
     }
 
     if (port > -1) { //on veut se connecter à un autre shell
-        printf("addr:%s\n", addr);
-        printf("PORT:%d\n", port);
+        loopClient(addr, port);
+        printf("Bye !\n");
     } else { //utilisation classique du shell
 
         if (EXEC_MODE == EXECUTABLE_MODE) {
@@ -115,6 +127,6 @@ int main(int argc, char* argv[]) {
             showCommandes();
         }
 
-        loop(callbackInit, readInput);
+        loopServer(callbackInit, readInputServer);
     }
 }

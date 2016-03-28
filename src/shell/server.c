@@ -71,7 +71,7 @@ void configServeur(char *port) {
 }
 
 /**
- * createSocket
+ * createServerSocket
  *
  * Création d'un socket sur le port `port`
  * Si on atteint une erreur autre que EADDRINUSE, on exit
@@ -80,7 +80,7 @@ void configServeur(char *port) {
  *
  * @return {int}    -1 si le port est occupé, le socket sinon
  */
-SOCKET createSocket(int port) {
+SOCKET createServerSocket(int port) {
 
     char port_buf[6];
     sprintf((char *)port_buf, "%d", port);
@@ -132,7 +132,7 @@ SOCKET createSocket(int port) {
 SOCKET initSocket(int *port) {
     int p = 1025;
     int listener;
-    while ((listener = createSocket(p)) == -1) {
+    while ((listener = createServerSocket(p)) == -1) {
         p++;
         close(listener);
         if (p > 65535) {
@@ -248,7 +248,7 @@ void acceptConnection(SOCKET fd, fd_set *master, int *max) {
 }
 
 /**
- * loop
+ * loopServer
  *
  * Boucle principale de l'entrée.
  * Création d'un serveur et écoute les connexions entrantes et stdin.
@@ -258,7 +258,7 @@ void acceptConnection(SOCKET fd, fd_set *master, int *max) {
  *                                                  l'init avec le port choisi
  * @param   {int (*)(ind fd)}       readFd          Une fonction pour lire un fd
  */
-void loop(void (*callbackInit)(int fd), int (*readFd)(int fd)) {
+void loopServer(void (*callbackInit)(int fd), int (*readFd)(int fd)) {
 
     int port = -1;
     int socketServeur = -1; //le socket d'écoute de connexions
