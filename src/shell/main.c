@@ -88,23 +88,33 @@ int main(int argc, char* argv[]) {
 
     printf("KnutShell");
 
+    char *addr  = NULL;
+    int port    = -1;
+
     if (argc > 1) {
-        EXEC_MODE = readArgs(argc, argv);
+        readArgs(argc, argv, &EXEC_MODE, &addr, &port);
     }
 
-    if (EXEC_MODE == EXECUTABLE_MODE) {
-        printf(" (exécutables)\n");
-        updatePATH(EXEC_DIR);
-    } else if (EXEC_MODE == LIB_DYNAMIC_MODE) { //chargement des librairies
-                                                //dynamiquement
-        printf(" (librairies dynamiques)\n");
-        loadDynamicLibs(LIBS_DIR);
-    } else {                                    //enregistrement des librairies
-                                                //statiques
-        enregisterCommande("yes", yesLib);
-        printf(" (librairies statiques)\n");
-        showCommandes();
-    }
+    if (port > -1) { //on veut se connecter à un autre shell
+        printf("addr:%s\n", addr);
+        printf("PORT:%d\n", port);
+    } else { //utilisation classique du shell
 
-    loop(callbackInit, readInput);
+        if (EXEC_MODE == EXECUTABLE_MODE) {
+            printf(" (exécutables)\n");
+            updatePATH(EXEC_DIR);
+        } else if (EXEC_MODE == LIB_DYNAMIC_MODE) { //chargement des librairies
+                                                    //dynamiquement
+            printf(" (librairies dynamiques)\n");
+            loadDynamicLibs(LIBS_DIR);
+            showCommandes();
+        } else {                                    //enregistrement des librairies
+                                                    //statiques
+            enregisterCommande("yes", yesLib);
+            printf(" (librairies statiques)\n");
+            showCommandes();
+        }
+
+        loop(callbackInit, readInput);
+    }
 }
