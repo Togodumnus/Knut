@@ -44,6 +44,9 @@ libraries \n\
   (don't forget $(WARN_C)export LD_LIBRARY_PATH="'$$'"LD_LIBRARY_PATH:\
 $(shell pwd)/$(binDir)/$(libsDir)/$(dynamicDir)$(NO_C))"
 
+dev: CFLAGS += -DDEBUG_FLAG
+dev:all
+
 .PHONY: clean distclean
 
 clean:
