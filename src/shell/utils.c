@@ -57,20 +57,46 @@ void updatePATH(const char* prefix) {
     putenv(newPATH);
 }
 
-int readArgs(int argc, char *argv[]) {
+/***
+ * readArgs
+ *
+ * Un petit helper pour lire les arguments passé aux script
+ *
+ * Deux modes d'exécutions :
+ * - normal (./bin/knutShell [-m <mode>]
+ * - distant (./bin/knutShell connect [<addr>] <port>
+ *
+ * @param  {int}                    argc
+ * @param  {char *}                 argv
+ * @param  {enum execution_mode *}  mode    Le mode à lire après -m
+ * @param  {char **}                addr    L'adresse de la machine distante
+ *                                          à remplir si connect
+ * @param  {int *}                  port    Le port de la machine distante à
+ *                                          remplir si connect
+ */
+void readArgs(int argc, char *argv[],
+        enum execution_mode *mode, char **addr, int *port) {
     char option = 0;
 
-    while ((option = getopt(argc, argv,"m:")) != -1) {
-        if (option == 'm') {
-            if (strcmp("exec", optarg) == 0) {
-                return EXECUTABLE_MODE;
-            } else if (strcmp("static", optarg) == 0) {
-                return LIB_STATIC_MODE;
-            } else if (strcmp("dynamic", optarg) == 0) {
-                return LIB_DYNAMIC_MODE;
+    // ./bin/KnutShell connect [addr] <port>
+    if (argc == 3 && strcmp(argv[1], "connect") == 0) {
+        *port = atoi(argv[2]);
+    } else if (argc == 4 && strcmp(argv[1], "connect") == 0) {
+        *addr = argv[2];
+        *port = atoi(argv[3]);
+    } else { // ./bin/KnutShell [-m <mode>]
+
+        while ((option = getopt(argc, argv,"m:")) != -1) {
+            if (option == 'm') {
+                if (strcmp("exec", optarg) == 0) {
+                    *mode = EXECUTABLE_MODE;
+                } else if (strcmp("static", optarg) == 0) {
+                    *mode = LIB_STATIC_MODE;
+                } else if (strcmp("dynamic", optarg) == 0) {
+                    *mode = LIB_DYNAMIC_MODE;
+                }
             }
         }
     }
 
-    return EXECUTABLE_MODE;
 }

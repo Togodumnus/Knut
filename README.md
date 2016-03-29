@@ -15,10 +15,15 @@ make clean
 #Using KnutShell
 
 ```
-./bin/KnutShell [-m <mode>]
+./bin/knutShell connect [<addr>] <port>
+./bin/knutShell [-m <mode>]
 ```
 
 **Options :**
+
+- `connect` : connection à un KnutShell distant
+    - `addr` : (optionel) l'adresse ip
+    - `port` : le port
 
 - `-m <mode>` : Sous quelle forme utiliser nos commandes.
     - `exec` : utilsation des versions exécutables

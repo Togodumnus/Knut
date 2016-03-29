@@ -10,5 +10,6 @@ char *fileExtension(char *file);
 
 void updatePATH(const char* prefix);
 
-int readArgs(int argc, char *argv[]);
+void readArgs(int argc, char *argv[],
+        enum execution_mode *mode, char **addr, int *connect);
 
