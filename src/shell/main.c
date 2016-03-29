@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (port > -1) { //on veut se connecter à un autre shell
-        loopClient(addr, port);
+        loopClient(addr, port, readInputClient);
         printf("Bye !\n");
     } else { //utilisation classique du shell
 
