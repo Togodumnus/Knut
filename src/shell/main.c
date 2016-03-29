@@ -3,6 +3,7 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "utils.h"
 #include "libs.h"
@@ -44,40 +45,56 @@ enum execution_mode EXEC_MODE = EXECUTABLE_MODE;
  *
  * Affiche le prompt avant une commande
  */
-void printPrompt() {
-    printf("Toto @ KnutShell\n"); //TODO
-    printf("> ");
-    fflush(stdout);
+void printPrompt(int fd) {
+    dprintf(fd, "Toto @ KnutShell\n"); //TODO
+    dprintf(fd, "> "); //TODO flush with fsync here ?
+
+    char eot = 4; //EOT : end of transmission
+    if (write(fd, &eot, sizeof(char)) == -1) {
+        perror("Can't end transmission with file descriptor");
+        exit(1);
+    }
 }
 
+//TODO write doc
 void callbackInit(int port) {
     printf("Listening on port %d\n", port);
-    printPrompt();
+    printPrompt(fileno(stdin));
 }
 
+//TODO write doc
 int readInputServer(int fd) {
 
     size_t n;
     char *line = NULL;
 
-    if (isSocket(fd)) {
+    int fdInput, fdOutput;
+
+    if (isSocket(fd)) { //c'est un socket
         n = getLineSocket(&line, &n, fd);
+
+        fdInput  = fd;
+        fdOutput = fd;
     } else { //c'est stdin
         n = getline(&line, &n, stdin);
+
+        fdInput  = fileno(stdin);
+        fdOutput = fileno(stdout);
     }
 
     DEBUG("[server] Received : %s", line);
 
     if (n == 0) { //End of file
-        printf("\nBye !\n"); //TODO print to fd
+        dprintf(fd, "\nBye !\n");
         if (fd == fileno(stdin)) {
             exit(1);
         }
     } else {
         DEBUG("User: %s", line);
-        process(line); //TODO, pass fd input and fd ouput in case of socket
+        process(line, fdInput, fdOutput);
+        DEBUG("[server] end of process");
+        printPrompt(fd);
 
-        printPrompt(); //TODO print to fd
     }
 
     free(line);
@@ -85,22 +102,21 @@ int readInputServer(int fd) {
     return n;
 }
 
+//TODO write doc
 int readInputClient(char **msg) {
 
     size_t n;
     n = getline(msg, &n, stdin);
 
-    DEBUG("[client] Read : %s", *msg);
-    printPrompt();
+    /*DEBUG("here");*/
 
     return n;
 }
 
 int main(int argc, char* argv[]) {
 
-    printf("KnutShell");
 
-    char *addr  = "localhost";
+    char *addr  = "127.0.0.1";
     int port    = -1;
 
     if (argc > 1) {
@@ -108,9 +124,12 @@ int main(int argc, char* argv[]) {
     }
 
     if (port > -1) { //on veut se connecter à un autre shell
+        printf("KnutShell to %s:%d\n", addr, port);
         loopClient(addr, port, readInputClient);
         printf("Bye !\n");
     } else { //utilisation classique du shell
+
+        printf("KnutShell");
 
         if (EXEC_MODE == EXECUTABLE_MODE) {
             printf(" (exécutables)\n");
@@ -127,6 +146,6 @@ int main(int argc, char* argv[]) {
             showCommandes();
         }
 
-        loopServer(callbackInit, readInputServer);
+        loopServer(callbackInit, printPrompt, readInputServer);
     }
 }

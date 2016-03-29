@@ -58,16 +58,17 @@ void exec(Action *action, Command *cmd) {
 
     } else if (cmd->type == COMPLEX) {
         DEBUG("[child] COMPLEX CMD %s", action->cmd);
-        exit(process(action->cmd));
+        exit(process(action->cmd, fileno(stdin), fileno(stdout)));
     } else {
         perror("Unknown action type");
         exit(1);
     }
 }
 
-int process(char *str) {
+//TODO write doc
+int process(char *str, int fdInput, int fdOutput) {
 
-    DEBUG("%d, %s", 120, "hello");
+    DEBUG("process command (in:%d, out:%d): %s", fdInput, fdOutput, str);
 
     //Extraction des actions à effectuer de l'input
     Action **actions = NULL;
@@ -86,10 +87,10 @@ int process(char *str) {
         exit(1);
     }
 
-    pstdin[PIPE_READ]   = fileno(stdin);
+    pstdin[PIPE_READ]   = fdInput;
     pstdin[PIPE_WRITE]  = -1;
     pstdout[PIPE_READ]  = -1;
-    pstdout[PIPE_WRITE] = fileno(stdout);
+    pstdout[PIPE_WRITE] = fdOutput;
 
     //On exécute et chaîne chaque action
 
@@ -113,7 +114,7 @@ int process(char *str) {
                 close(pstdin[PIPE_WRITE]);
             } else {
                 //la première action est branchée sur stdin
-                pstdin[PIPE_READ] = STDIN_FILENO;
+                pstdin[PIPE_READ] = fdInput;
                 pstdin[PIPE_WRITE] = -1;
             }
 
@@ -121,7 +122,7 @@ int process(char *str) {
             //si prochaine action n'est pas pipée, idem
             if (i == actc - 1 || actions[i+1]->chainingType != CHAINING_PIPE) {
                 //on attache just pstdout sur stdout
-                pstdout[PIPE_WRITE] = STDOUT_FILENO;
+                pstdout[PIPE_WRITE] = fdOutput;
                 pstdout[PIPE_READ] = -1;
             } else {
                 //on crée un pipe pour le nouveau stdout

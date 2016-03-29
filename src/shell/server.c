@@ -207,8 +207,12 @@ void selectSocket(fd_set *master, fd_set *result, int max) {
  * @param  {SOCKET}     fd      Le socket à accepter
  * @param  {fd_set *}   master  La liste de sockets à lire
  * @param  {int *}      max     Le fd max parmis master
+ *
+ * @return {int}        Le socket du client ou -1
  */
-void acceptConnection(SOCKET fd, fd_set *master, int *max) {
+int acceptConnection(SOCKET fd, fd_set *master, int *max) {
+
+    int client_sock = -1;
 
     //info du client
     char   remoteIP[INET6_ADDRSTRLEN];
@@ -216,7 +220,7 @@ void acceptConnection(SOCKET fd, fd_set *master, int *max) {
     socklen_t client_addr_len = sizeof(client_addr);
 
     //on accepte la connextion
-    int client_sock = accept(
+    client_sock = accept(
         fd,
         (struct sockaddr *) &client_addr,
         &client_addr_len
@@ -245,6 +249,8 @@ void acceptConnection(SOCKET fd, fd_set *master, int *max) {
         client_sock
     );
 
+    return client_sock;
+
 }
 
 /**
@@ -254,11 +260,14 @@ void acceptConnection(SOCKET fd, fd_set *master, int *max) {
  * Création d'un serveur et écoute les connexions entrantes et stdin.
  * Si une connexion socket ou stdin est prêt à lire, appel de readFd
  *
- * @param   {void (*)(ind port)}    callbackInit    Une fonction appellée après
- *                                                  l'init avec le port choisi
- * @param   {int (*)(ind fd)}       readFd          Une fonction pour lire un fd
+ * @param   {void (*)(ind port)}  callbackInit     Une fonction appellée après
+ *                                                 l'init avec le port choisi
+ * @param   {void (*)(ind port)}  callbackSockInit Une fonction appellée après
+ *                                                 une nouvelle connexion
+ * @param   {int (*)(ind fd)}     readFd           Une fonction pour lire un fd
  */
-void loopServer(void (*callbackInit)(int fd), int (*readFd)(int fd)) {
+void loopServer(void (*callbackInit)(int fd), void (*callbackSockInit)(int fd),
+        int (*readFd)(int fd)) {
 
     int port = -1;
     int socketServeur = -1; //le socket d'écoute de connexions
@@ -288,7 +297,8 @@ void loopServer(void (*callbackInit)(int fd), int (*readFd)(int fd)) {
 
                 //une nouvelle connection sur le serveur
                 if (fd == socketServeur) {
-                    acceptConnection(fd, &socketsToRead, &maxSocket);
+                    int sock = acceptConnection(fd, &socketsToRead, &maxSocket);
+                    callbackSockInit(sock);
                 } else { //Une entrée
 
                     DEBUG("[server] Reading input %d", fd);

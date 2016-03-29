@@ -9,8 +9,11 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <errno.h>
 
 #include "../DEBUG.h"
+
+#include "client.h"
 
 typedef int SOCKET;
 
@@ -98,6 +101,8 @@ int createClientSocket(char *addr, int port) {
         exit(1);
     }
 
+    //On met le socket en état non bloquant pour que recv ne soit pas bloquant
+
     freeaddrinfo(servinfo); // free the linked-list
 
     return sock;
@@ -116,35 +121,40 @@ int createClientSocket(char *addr, int port) {
  */
 void loopClient(char *addr, int port, int (*readInput)(char **msg)) {
 
+    const char eot = 4;
     int socketClient = createClientSocket(addr, port);
 
     while (42) {
 
-        char *msg;
+        DEBUG("[client] Waiting for message");
+
+        //On lit un message jusqu'à un EOT
+        char ch; //caractère par caractère
+        int result = -1;
+        while ((result = read(socketClient, &ch, sizeof(char))) > 0) {
+            printf("%c", ch);
+            if (ch == eot) {
+                break;
+            }
+        }
+
+        if (result == -1) { //si erreur autre que pas de data
+            perror("reception error");
+        }
+
+        DEBUG("[client] end of response %d", errno);
+
+        //On envoi un message
+        char *msg = NULL;
         int n = (*readInput)(&msg); //entrée utilisateur
+
+        DEBUG("[client] Sending %s", msg);
 
         if (n > 0) {
             //envoi de la commande
             if (sendall(socketClient, msg, strlen(msg), 0) == -1) {
                 perror("sendall() error");
             }
-
-            DEBUG("[client] Waiting for response");
-
-            //on lit la réponse jusqu'à un EOF
-            char buffer[BUFFER_SIZE];
-            int n = 0;
-            while((n = recv(socketClient, buffer, sizeof(buffer) - 1, 0)) > 0) {
-                buffer[BUFFER_SIZE] = '\0';
-                printf("%s", buffer);
-            }
-
-            if (n == -1) {
-                perror("reception error");
-            }
-
-            //n == 0, ie. EOF détecté par recv
-
         } else {
             break;
         }
