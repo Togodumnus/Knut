@@ -13,7 +13,11 @@
 
 #define END      "\033[m"
 
-#define debug 1
+#ifdef DEBUG_FLAG
+    #define debug 1
+#else
+    #define debug 0
+#endif
 
 /**
  * DEBUG
