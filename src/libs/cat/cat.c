@@ -52,26 +52,7 @@ int catLib_n(int argc, char *argv[]){
 }
 
 int catLib_e(int argc, char *argv[]){
-    char ligne[4096];
-    FILE *file;
-    for (int i = 2; i < argc; i++){
-        file = fopen(argv[i],"r");
-        if(file){
-            while (fgets(ligne,4096,file))
-            {
-                if (fputs(ligne,stdout)==EOF)
-                {
-                    printf("L'écriture sur stdout à échoué");
-                    return -1;
-                }
-            }
-        }
-        else{
-            printf("Erreur avec les fichiers\n");
-            return -1;
-        }
-    }  
-    return 0;
+    //TODO
     return 0;
 }
 
