@@ -76,6 +76,8 @@ int process(char *str, int fdInput, int fdOutput) {
     extractionActions(str, &actions, &actc);
     DEBUG("[parent]\t%d actions to do", actc);
 
+    exit(1);
+
     int status = 0; //status code of execution
 
     //let's create pipes to chain stdin and stdout

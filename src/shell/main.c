@@ -70,6 +70,8 @@ int readInputServer(int fd) {
 
     int fdInput, fdOutput;
 
+    DEBUG("ici"); //TODO
+
     if (isSocket(fd)) { //c'est un socket
         n = getLineSocket(&line, &n, fd);
 
@@ -97,7 +99,7 @@ int readInputServer(int fd) {
 
     }
 
-    free(line);
+    //free(line); //TODO
 
     return n;
 }

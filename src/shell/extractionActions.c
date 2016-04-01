@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "../DEBUG.h"
 #include "extractionActions.h"
 #include "Action.h"
 #include "test.h" //TODO remove
@@ -23,6 +24,8 @@
  *                          par la suite
  */
 Action* createAction(char *start, int length, int type, bool background) {
+
+    DEBUG("createAction length %d", length);
 
     Action *action = (Action *) malloc(sizeof(Action));
     //on copie la commande
@@ -46,10 +49,14 @@ Action* createAction(char *start, int length, int type, bool background) {
  * @param  {int *}      actc    Le nombre d'action sans action
  */
 void pushAction(Action *action, Action ***actions, int *actc) {
-    *actions = (Action **) realloc(actions, (*actc) * sizeof(Action*));
 
-    *actions[*actc] = action; //on lie action
+    DEBUG("pushAction (*actc=%d)", *actc);
+
     (*actc)++;
+    *actions = (Action **) realloc(*actions, (*actc) * sizeof(Action*));
+
+    DEBUG("Push action to %d",  (*actc) - 1);
+    (*actions)[(*actc) - 1] = action; //on lie action
 }
 
 /**
@@ -70,6 +77,8 @@ void pushAction(Action *action, Action ***actions, int *actc) {
  */
 void extractionActions(char *str, Action ***actions, int *actc) {
 
+    DEBUG("Début extraction action");
+
     //TODO : faire un automate à état fini pour lire les actions
     //séparées par |, ||, && ou ;
 
@@ -81,14 +90,19 @@ void extractionActions(char *str, Action ***actions, int *actc) {
     ChainingType chaining = CHAINING_PIPE;
     bool background = false;
 
-    while (*startAction != '\0') {
+    char ch;
 
-        char ch = *(startAction + length);
+    do {
+
         length++;
+        ch = *(startAction + length);
+
+        DEBUG("current char : %c, current length : %d", ch, length);
 
         switch (state) {
 
             case READING:
+                DEBUG("READING %c", ch);
 
                 if (ch == '&') {
                     state = AND;
@@ -98,7 +112,7 @@ void extractionActions(char *str, Action ***actions, int *actc) {
 
                     Action *currentAction = createAction(
                         startAction,
-                        length - 1, //on ne prend pas le ;
+                        length - 1,
                         chaining,
                         background
                     );
@@ -112,11 +126,18 @@ void extractionActions(char *str, Action ***actions, int *actc) {
                     length = -1;
                     state = READING;
 
-                }
+                }/* else if (ch == '(') {*/
+
+                /*}*/
                 break;
 
             case AND:
+
+                DEBUG("AND %c", ch);
+
                 if (ch == '&') {
+
+                    DEBUG("&& trouvé");
 
                     Action *currentAction = createAction(
                         startAction,
@@ -129,7 +150,7 @@ void extractionActions(char *str, Action ***actions, int *actc) {
 
                     pushAction(currentAction, actions, actc);
 
-                    startAction = startAction + length + 1;
+                    startAction = startAction + length + 2;
                     background = false;
                     length = -1;
                     state = READING;
@@ -143,7 +164,12 @@ void extractionActions(char *str, Action ***actions, int *actc) {
                 break;
 
             case PIPE:
+
+                DEBUG("PIPE %c", ch);
+
                 if (ch == '|') {
+
+                    DEBUG("|| trouvé");
 
                     Action *currentAction = createAction(
                         startAction,
@@ -156,21 +182,34 @@ void extractionActions(char *str, Action ***actions, int *actc) {
 
                     pushAction(currentAction, actions, actc);
 
-                    startAction = startAction + length + 1;
+                    startAction = startAction + length + 2;
                     background = false;
                     length = -1;
                     state = READING;
-                }
+                } // TODO |
+                break;
 
             case ERROR:
+                DEBUG("ERROR state");
             default:
+                DEBUG("DEFAULT state");
                 fprintf(stderr, "Can't read command %s\n", str);
+                exit(1);
                 break;
         }
 
-    }
+    } while (ch != '\n' && ch != '\0');
 
+    Action *currentAction = createAction(
+        startAction,
+        length, //on ne prend pas le \n
+        chaining,
+        background
+    );
 
+    pushAction(currentAction, actions, actc);
+
+    DEBUG("END of switch");
 
     //pour l'instant on crée une action fake
 
@@ -182,6 +221,11 @@ void extractionActions(char *str, Action ***actions, int *actc) {
     /*(*actions)[2] = &actionYesAnd;*/
 
     //ls / | cat && yes
+
+
+    for (int i = 0; i < *actc; i ++) {
+        printf("action %d = %s\n", i, (*actions)[i]->cmd);
+    }
 
     exit(1);
 
