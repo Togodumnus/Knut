@@ -27,11 +27,17 @@ int kcp_file_to_dir(const char *file_name, char *dir_path) {
 	if (dir_path[strlen(dir_path)-1]!='/') {
 		strcat(dir_path, "/"); 
 	} // au cas ou l'utilisateur à entré le chemin sans / à la fin (/home/user au lieu de /home/user/)
+
+	if (file_name[0]=='/') { // chemin absolu
+		dir_path[strlen(dir_path)-1]=0;
+	}
+
 	char dir_pathFull[strlen(dir_path)]; // Besoin d'une 2eme variable car sinon dir_path change 
 
 	strcpy(dir_pathFull, dir_path); 
 	strcat(dir_pathFull, file_name); // dir_pathFull devient le chemin du fichier
 	
+	printf("s %s\n",dir_pathFull);
 	fclose(fopen(dir_pathFull, "w")); // on créé le fichier puis on ferme le FILE
 	kcp_file_to_file(file_name, dir_pathFull); // puis on copie le fichier dans la nouveau fichier créé
 	memset (dir_pathFull, 0, sizeof (dir_pathFull)); // on vide le chemin du fichier 
@@ -56,12 +62,21 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
 		return(-1);
 	}
 
+	if (dir_path_dest[strlen(dir_path_dest)-1]!='/') {
+		strcat(dir_path_dest, "/");
+	}
+
+	if (dir_path_src[0]=='/') { // chemin absolu
+		dir_path_dest[strlen(dir_path_dest)-1]=0;
+	}
+
 	// Pour créé les repertoire qui seront copié 
 	char make_dir[strlen(dir_path_src)+strlen(dir_path_dest)];
 	memset (make_dir, 0, sizeof (make_dir));
 	strcat(make_dir, dir_path_dest);
 	strcat(make_dir, dir_path_src);
-	mkdir(make_dir, 0775);
+	mkdir(make_dir, 0775); // pb le dossier se fait pas  chemin absolu?
+	printf("%s\n",make_dir );
 
 	while ((dptr_src=readdir(dirp_src))) { // on lit le dossier source
 		if ((strcmp(dptr_src->d_name,"..")!=0)&&(strcmp(dptr_src->d_name,".")!=0)) { // on ne tiens pas compte de . et ..
@@ -80,12 +95,16 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
 				exit(-1);
 			}
 
+
 			if (S_ISREG(st.st_mode)) { // fichier "normal"
 				kcp_file_to_dir(path, dir_path_dest);
 			}
 			else if (S_ISDIR(st.st_mode)) { // repertoire
 				kcp_dir_to_dir(path, dir_path_dest);
-				// probleme à regler aussi : kcp dir1 dir2
+				// probleme à regler : 
+				// gros dossier (core dumped)
+				// les chemins absolus (core dumped)
+				//  ../dir1 (pas de sortie)
 			}
 			else { // autre (liens, pipe, device...)
 				// à copier aussi ?
