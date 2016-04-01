@@ -28,6 +28,10 @@ Action* createAction(char *start, int length, int type, bool background) {
     DEBUG("createAction length %d", length);
 
     Action *action = (Action *) malloc(sizeof(Action));
+    if (*action == NULL) {
+        perror("Malloc error");
+        exit(EXIT_FAILURE);
+    }
     action->length = length;
     //on copie la commande
     action->cmd = (char *) malloc((length + 1) * sizeof(char));
@@ -55,6 +59,11 @@ void pushAction(Action *action, Action ***actions, int *actc) {
 
     (*actc)++;
     *actions = (Action **) realloc(*actions, (*actc) * sizeof(Action*));
+
+    if (*actions == NULL) {
+        perror("Realloc error");
+        exit(EXIT_FAILURE);
+    }
 
     DEBUG("Push action to %d",  (*actc) - 1);
     (*actions)[(*actc) - 1] = action; //on lie action
