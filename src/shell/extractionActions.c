@@ -28,7 +28,7 @@ Action* createAction(char *start, int length, int type, bool background) {
     DEBUG("createAction length %d", length);
 
     Action *action = (Action *) malloc(sizeof(Action));
-    if (*action == NULL) {
+    if (action == NULL) {
         perror("Malloc error");
         exit(EXIT_FAILURE);
     }
