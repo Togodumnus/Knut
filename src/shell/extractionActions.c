@@ -32,7 +32,6 @@ Action* createAction(char *start, int length, int type, bool background) {
         perror("Malloc error");
         exit(EXIT_FAILURE);
     }
-    action->length = length;
     //on copie la commande
     action->cmd = (char *) malloc((length + 1) * sizeof(char));
     strncpy(action->cmd, start, length);
