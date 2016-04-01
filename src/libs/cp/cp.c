@@ -55,6 +55,7 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
 		printf("Erreur lors de l'ouverture du dossier");
 		return(-1);
 	}
+
 	// Pour créé les repertoire qui seront copié 
 	char make_dir[strlen(dir_path_src)+strlen(dir_path_dest)];
 	memset (make_dir, 0, sizeof (make_dir));
@@ -63,31 +64,35 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
 	mkdir(make_dir, 0775);
 
 	while ((dptr_src=readdir(dirp_src))) { // on lit le dossier source
-		char path[strlen(dir_path_src)]; // pour avoir le path des fichiers du dossier
+		if ((strcmp(dptr_src->d_name,"..")!=0)&&(strcmp(dptr_src->d_name,".")!=0)) { // on ne tiens pas compte de . et ..
 
-		if (dir_path_src[strlen(dir_path_src)-1]=='/'){ 
-			sprintf(path,"%s%s",dir_path_src,dptr_src->d_name);
-		}
-		else {		
-			sprintf(path,"%s/%s",dir_path_src,dptr_src->d_name);
-		}
+			char path[strlen(dir_path_src)]; // pour avoir le path des fichiers du dossier
 
-		if (lstat(path, &st)==-1) {
-			printf("erreur stat");
-			exit(-1);
-		}
+			if (dir_path_src[strlen(dir_path_src)-1]=='/'){ 
+				sprintf(path,"%s%s",dir_path_src,dptr_src->d_name);
+			}
+			else {		
+				sprintf(path,"%s/%s",dir_path_src,dptr_src->d_name);
+			}
 
-		if (S_ISREG(st.st_mode)) { // fichier "normal"
-			kcp_file_to_dir(path, dir_path_dest);
-		}
-		else if (S_ISDIR(st.st_mode)) { // repertoir
-			//kcp_dir_to_dir(path, dir_path_dest);
-			// boucle infini 
-		}
-		else { // autre (liens, pipe, device...)
-			// à copier aussi ?
+			if (lstat(path, &st)==-1) {
+				printf("erreur stat");
+				exit(-1);
+			}
+
+			if (S_ISREG(st.st_mode)) { // fichier "normal"
+				kcp_file_to_dir(path, dir_path_dest);
+			}
+			else if (S_ISDIR(st.st_mode)) { // repertoire
+				kcp_dir_to_dir(path, dir_path_dest);
+				// probleme à regler aussi : kcp dir1 dir2
+			}
+			else { // autre (liens, pipe, device...)
+				// à copier aussi ?
+			}
 		}
 	}
+	closedir(dirp_src);
 	
 
 	/*
