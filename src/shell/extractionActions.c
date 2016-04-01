@@ -79,17 +79,56 @@ void extractionActions(char *str, Action ***actions, int *actc) {
 
     DEBUG("Début extraction action");
 
-    //TODO : faire un automate à état fini pour lire les actions
-    //séparées par |, ||, && ou ;
-
+    /**
+     * state
+     *
+     * État de l'automate
+     * @see extractionActions.h
+     */
     enum EXTRACTION_STATES state = READING;
 
-    int length = -1;         //taille de l'action courante
-    char *startAction = str; //pointer sur le début de l'action
+    /**
+     * length
+     *
+     * Taille de l'action courante
+     */
+    int length = -1;
 
+    /**
+     * startAction
+     *
+     * Pointeur sur le premier caractère de l'action courante
+     */
+    char *startAction = str;
+
+    /**
+     * chaining
+     *
+     * Type de chaînage de l'action courante
+     */
     ChainingType chaining = CHAINING_PIPE;
+
+    /**
+     * background
+     *
+     * true si l'action courante est suivie de & et doit être executée
+     */
     bool background = false;
 
+    /**
+     * bracket_depth
+     *
+     * Sert à se situer en profondeur dans les parenthèse
+     * On accèpte en effet les action du typte (ls && (echo salut; echo test))
+     *                                         |------------ action ----------|
+     */
+    int bracket_depth = 0;
+
+    /**
+     * ch
+     *
+     * Caractère courant
+     */
     char ch;
 
     do {
@@ -106,9 +145,12 @@ void extractionActions(char *str, Action ***actions, int *actc) {
 
                 if (ch == '&') {
                     state = AND;
+                    background = true; //c'est peut-être un & seul
                 } else if (ch == '|') {
                     state = PIPE;
                 } else if (ch == ';') {
+
+                    //on enregistre l'action courante et on RAZ
 
                     Action *currentAction = createAction(
                         startAction,
@@ -126,9 +168,9 @@ void extractionActions(char *str, Action ***actions, int *actc) {
                     length = -1;
                     state = READING;
 
-                }/* else if (ch == '(') {*/
-
-                /*}*/
+                } else if (ch == '(') {
+                    state = BRACKET;
+                }
                 break;
 
             case AND:
@@ -137,6 +179,7 @@ void extractionActions(char *str, Action ***actions, int *actc) {
 
                 if (ch == '&') {
 
+                    background = false; //en fait ce n'est pas un "&" seul
                     DEBUG("&& trouvé");
 
                     Action *currentAction = createAction(
@@ -156,7 +199,6 @@ void extractionActions(char *str, Action ***actions, int *actc) {
                     state = READING;
 
                 } else if (ch == ' ') {
-                    background = true;
                     state = READING;
                 } else {
                     state = ERROR;
@@ -178,7 +220,7 @@ void extractionActions(char *str, Action ***actions, int *actc) {
                         background
                     );
 
-                    chaining = CHAINING_COMMA;
+                    chaining = CHAINING_OR;
 
                     pushAction(currentAction, actions, actc);
 
@@ -186,7 +228,45 @@ void extractionActions(char *str, Action ***actions, int *actc) {
                     background = false;
                     length = -1;
                     state = READING;
-                } // TODO |
+                } else if (ch == ' ') {
+
+                    DEBUG("| trouvé");
+
+                    Action *currentAction = createAction(
+                        startAction,
+                        length - 2, //on ne prend pas le ||
+                        chaining,
+                        background
+                    );
+
+                    chaining = CHAINING_PIPE;
+
+                    pushAction(currentAction, actions, actc);
+
+                    startAction = startAction + length + 1;
+                    background = false;
+                    length = -1;
+                    state = READING;
+
+                } else {
+                    state = ERROR;
+                }
+                break;
+
+            case BRACKET:
+                if (ch == '(') {
+                    DEBUG("(++");
+                    bracket_depth++;
+                } else if (ch == ')') {
+                    if (bracket_depth == 0) {
+                        DEBUG(")-->READING");
+                        state = READING;
+                    } else {
+                        DEBUG(")--");
+                        bracket_depth--;
+                    }
+                }
+
                 break;
 
             case ERROR:
@@ -200,6 +280,8 @@ void extractionActions(char *str, Action ***actions, int *actc) {
 
     } while (ch != '\n' && ch != '\0');
 
+
+    //ajout de la dernière action
     Action *currentAction = createAction(
         startAction,
         length, //on ne prend pas le \n
@@ -209,24 +291,17 @@ void extractionActions(char *str, Action ***actions, int *actc) {
 
     pushAction(currentAction, actions, actc);
 
-    DEBUG("END of switch");
+    DEBUG("END extraction action");
 
-    //pour l'instant on crée une action fake
-
-    /**actc = 2;*/
-
-    /**actions = (Action **) malloc(*actc * sizeof(Action*));*/
-    /*(*actions)[0] = &actionLsPipe;*/
-    /*(*actions)[1] = &actionCatPipe;*/
-    /*(*actions)[2] = &actionYesAnd;*/
-
-    //ls / | cat && yes
-
-
+    //debug
     for (int i = 0; i < *actc; i ++) {
-        printf("action %d = %s\n", i, (*actions)[i]->cmd);
+        DEBUG(
+            "action %d = %s (chaining %d) (background %d)",
+            i,
+            (*actions)[i]->cmd,
+            (*actions)[i]->chainingType,
+            (*actions)[i]->background
+        );
     }
-
-    exit(1);
 
 }
