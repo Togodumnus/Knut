@@ -33,6 +33,13 @@ struct Action {
      */
     char *cmd;
 
+    /**
+     * length
+     *
+     * La taille de Action.cmd
+     */
+    int length;
+
     ChainingType chainingType;
 
     /**

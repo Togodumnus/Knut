@@ -28,6 +28,7 @@ Action* createAction(char *start, int length, int type, bool background) {
     DEBUG("createAction length %d", length);
 
     Action *action = (Action *) malloc(sizeof(Action));
+    action->length = length;
     //on copie la commande
     action->cmd = (char *) malloc((length + 1) * sizeof(char));
     strncpy(action->cmd, start, length);
