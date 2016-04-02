@@ -9,8 +9,6 @@
 #include "Command.h"
 #include "../DEBUG.h"
 
-#include "test.h" //TODO remove
-
 /**
  * createString
  *
