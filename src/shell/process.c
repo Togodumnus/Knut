@@ -194,6 +194,7 @@ int process(char *str, int fdInput, int fdOutput) {
 
             DEBUG("[child %d] \t%d start",i, getpid());
 
+            //TODO remove comment
             /*if (action->chainingType == CHAINING_PIPE) {*/
                 DEBUG("[child %d] \tReplacing stdin (%d) with %d",
                         i, fileno(stdin), pstdin[PIPE_READ]);
@@ -242,7 +243,8 @@ int process(char *str, int fdInput, int fdOutput) {
             }
         }
 
-        /*free(action);*/
+        freeCommand(cmd);
+        freeAction(action);
     }
 
     DEBUG("[parent] end");

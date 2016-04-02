@@ -11,3 +11,5 @@ enum EXTRACTION_STATES {
     BRACKET,
     ERROR
 };
+
+void freeAction(Action *action);

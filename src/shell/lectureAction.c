@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <unistd.h> //remove
 
 #include "lectureAction.h"
 #include "Action.h"
@@ -23,6 +24,7 @@
 char *createString(char *str, int length) {
 
     char *string = (char *) malloc((length + 1) * sizeof(char));
+    DEBUG("Malloc string = %p, %d", string, getpid());
     if (string == NULL) {
         perror("Malloc error");
         exit(EXIT_FAILURE);
@@ -76,7 +78,7 @@ void completeCmdAndArg(Command *cmd, char *start, int length) {
     if (length > 0 && *start != ' ') { //on n'ajoute pas de chaîne vide
         char *string = createString(start, length);
         addArg(cmd, string);
-        if (cmd->cmd == NULL) {
+        if (cmd->cmd == NULL) { //premier argument = le nom de la command
             cmd->cmd = string;
         }
     }
@@ -242,7 +244,6 @@ Command *lectureAction(Action *action) {
     } else {
         completeCmdAndArg(cmd, start, length);
     }
-    DEBUG("ici %d %p", cmd->argc, cmd->argv);
     cmd->argv[cmd->argc] = NULL;
 
     //débug
@@ -258,5 +259,24 @@ Command *lectureAction(Action *action) {
     DEBUG("appendFile: %d", cmd->appendFile);
 
     return cmd;
+}
+
+/**
+ * freeCommand
+ *
+ * @param  {Command *}  cmd
+ */
+void freeCommand(Command *cmd) {
+
+    //le tableau d'argument
+    for (int i = 0; i < cmd->argc; i++) {
+        free(cmd->argv[i]);
+    }
+    free(cmd->argv);
+
+    //la commande
+    //free(cmd->cmd); //pas besoin car déjà fait par free(argv[0])
+
+    free(cmd);
 }
 

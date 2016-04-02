@@ -12,3 +12,5 @@ enum LECTURE_STATES {
     CHEVRON,
     READING_FILE
 };
+
+void freeCommand(Command *cmd);

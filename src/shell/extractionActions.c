@@ -314,3 +314,14 @@ void extractionActions(char *str, Action ***actions, int *actc) {
     }
 
 }
+
+/**
+ * freeAction
+ *
+ * @param  {Action *}   action
+ */
+void freeAction(Action *action) {
+    free(action->cmd); //on free la chaîne de charactères
+    free(action);
+}
+
