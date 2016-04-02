@@ -1,11 +1,12 @@
 #ifndef __APPLE__
     #define _GNU_SOURCE
 #endif
-#include "stdio.h"
-#include "stdlib.h"
-#include "stdbool.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -16,6 +17,7 @@
 #include "Command.h"
 #include "utils.h"
 #include "libs.h"
+#include "server.h"
 #include "extractionActions.h"
 #include "lectureAction.h"
 
@@ -144,11 +146,66 @@ int process(char *str, int fdInput, int fdOutput) {
 
         //Gestion des redirections d'entrées
 
+        //cf. man bash, "Here Documents"
         DEBUG(
             "[parent]\tredirect input from file = %s",
             cmd->fromFile != NULL ? "true" : "false"
         );
-        if (cmd->fromFile != NULL) {
+
+        //here documement
+        if (cmd->fromFile != NULL && cmd->appendFile) {
+            //cmd->fromFile n'est pas un fichier ici mais le code de stop
+            int length = strlen(cmd->fromFile);
+            DEBUG(
+                "[parent]\there document, (stop=%s(%d))",
+                cmd->fromFile, length
+            );
+
+            //on modifie le stop pour le comparer avec une ligne de l'input
+            char *stop = (char *) malloc((length + 1) * sizeof(char));
+            if (stop == NULL) {
+                perror("Malloc error");
+                exit(EXIT_FAILURE);
+            }
+            strcpy(stop, cmd->fromFile);
+            stop[length] = '\n';
+
+            //on crée un pipe pour stocker l'entrée
+            int tmpPipe[2];
+            if (pipe(tmpPipe) == -1) {
+                perror("Error pipe creation");
+                exit(EXIT_FAILURE);
+            }
+
+            size_t n;
+            char *line = NULL;
+
+            //on lit l'input tant qu'on ne reçoit pas le stop
+            while (line == NULL || strcmp(line, stop) != 0) {
+                dprintf(fdOutput, YELLOW "➜ " END);
+                if (!isSocket(fdInput)) {
+                    fflush(stdin);
+                }
+
+                if (line != NULL) { //pas le 1er getline
+                    write(tmpPipe[PIPE_WRITE], line, n);
+                }
+
+                n = 0;
+                if (isSocket(fdInput)) { //c'est un socket
+                    n = getLineSocket(&line, &n, fdInput);
+                } else { //c'est stdin
+                    n = getline(&line, &n, stdin);
+                }
+
+            }
+
+            close(tmpPipe[PIPE_WRITE]);
+
+            pstdin[PIPE_READ] = tmpPipe[PIPE_READ];
+
+        } else if (cmd->fromFile != NULL) {
+
             char *mode = "r";
             FILE *file = fopen(cmd->fromFile, mode);
             if (file == NULL) {

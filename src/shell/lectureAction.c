@@ -191,8 +191,7 @@ Command *lectureAction(Action *action) {
                 if (ch == '<' || ch == '>' || ch == ' ') {
                     if (ch == '<') {
                         fromFile = true;
-                        state = READING_FILE;
-                        start += 1;
+                        state = CHEVRON;
                     } else if (ch == '>') {
                         toFile = true;
                         state = CHEVRON;
@@ -207,8 +206,9 @@ Command *lectureAction(Action *action) {
                 break;
 
             case CHEVRON:
+                DEBUG("CHEVRON %c", ch);
                 state = READING_FILE;
-                if (ch == '>') {
+                if (ch == '>' || ch == '<') {
                     appendFile = true;
                     start += 1;
                 }
@@ -241,6 +241,7 @@ Command *lectureAction(Action *action) {
         cmd->appendFile = appendFile;
     } else if (fromFile) {
         cmd->fromFile = createString(start, length);
+        cmd->appendFile = appendFile;
     } else {
         completeCmdAndArg(cmd, start, length);
     }
@@ -256,7 +257,7 @@ Command *lectureAction(Action *action) {
     }
     DEBUG("toFile: %s", cmd->toFile);
     DEBUG("fromFile: %s", cmd->fromFile);
-    DEBUG("appendFile: %d", cmd->appendFile);
+    DEBUG("appendFile: %s", cmd->appendFile == true ? "true" : "false");
 
     return cmd;
 }
