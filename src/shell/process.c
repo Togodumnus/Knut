@@ -37,7 +37,7 @@ void exec(Action *action, Command *cmd) {
     if (cmd->type == SIMPLE) {
 
         if (EXEC_MODE == EXECUTABLE_MODE) {
-            DEBUG("[child] EXECUTABLE %s", action->cmd);
+            DEBUG("[child] EXECUTABLE %s (%d arg)", cmd->cmd, cmd->argc);
             execvp(cmd->cmd, cmd->argv);
             exit(1); //erreur de exec si ici
         } else { //LIB_DYNAMIC_MODE ou LIB_STATIC_MODE
@@ -58,7 +58,7 @@ void exec(Action *action, Command *cmd) {
 
     } else if (cmd->type == COMPLEX) {
         DEBUG("[child] COMPLEX CMD %s", action->cmd);
-        exit(process(action->cmd, fileno(stdin), fileno(stdout)));
+        exit(process(cmd->cmd, fileno(stdin), fileno(stdout)));
     } else {
         perror("Unknown action type");
         exit(1);
@@ -75,8 +75,6 @@ int process(char *str, int fdInput, int fdOutput) {
     int actc = 0; //nombre d'actions
     extractionActions(str, &actions, &actc);
     DEBUG("[parent]\t%d actions to do", actc);
-
-    exit(1);
 
     int status = 0; //status code of execution
 
@@ -99,8 +97,9 @@ int process(char *str, int fdInput, int fdOutput) {
     for (int i = 0; i < actc; i++) {
 
         Action *action = actions[i];
-        DEBUG("[parent]\taction %d (%p): %s", i, action, action->cmd);
         Command *cmd = lectureAction(action);
+        DEBUG("[parent]\taction %d (%p): %s", i, action, action->cmd);
+        DEBUG("[parent] cmd : %s", cmd->cmd);
 
         // Gestion du chaînage d'entrée/sortie
         DEBUG("[parent]\tchaining type = %d", action->chainingType);
