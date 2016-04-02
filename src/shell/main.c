@@ -46,8 +46,8 @@ enum execution_mode EXEC_MODE = EXECUTABLE_MODE;
  * Affiche le prompt avant une commande
  */
 void printPrompt(int fd) {
-    dprintf(fd, "Toto @ KnutShell\n"); //TODO
-    dprintf(fd, "> "); //TODO flush with fsync here ?
+    dprintf(fd, GREEN "Toto" WHITE " @ " YELLOW "KnutShell\n" END); //TODO
+    dprintf(fd, YELLOW "> " END); //TODO flush with fsync here ?
 
     char eot = 4; //EOT : end of transmission
     if (write(fd, &eot, sizeof(char)) == -1) {
