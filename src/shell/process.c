@@ -251,26 +251,21 @@ int process(char *str, int fdInput, int fdOutput) {
 
             DEBUG("[child %d] \t%d start",i, getpid());
 
-            //TODO remove comment
-            /*if (action->chainingType == CHAINING_PIPE) {*/
-                DEBUG("[child %d] \tReplacing stdin (%d) with %d",
-                        i, fileno(stdin), pstdin[PIPE_READ]);
-                DEBUG("[child %d] \tReplacing stdout (%d) with %d",
-                        i, fileno(stdout), pstdout[PIPE_WRITE]);
+            DEBUG("[child %d] \tReplacing stdin (%d) with %d",
+                    i, fileno(stdin), pstdin[PIPE_READ]);
+            DEBUG("[child %d] \tReplacing stdout (%d) with %d",
+                    i, fileno(stdout), pstdout[PIPE_WRITE]);
 
-                //replace stdin
-                if (pstdin[PIPE_READ] != fileno(stdin)) {
-                    close(fileno(stdin));
-                    dup2(pstdin[PIPE_READ], fileno(stdin));
-                    close(pstdin[PIPE_READ]);
-                }
-                //replace stdout
-                if (pstdout[PIPE_WRITE] != fileno(stdout)) {
-                    close(fileno(stdout));
-                    dup2(pstdout[PIPE_WRITE], fileno(stdout));
-                    close(pstdout[PIPE_WRITE]);
-                }
-            /*}*/
+            //replace stdin
+            if (pstdin[PIPE_READ] != fileno(stdin)) {
+                close(fileno(stdin));
+                dup2(pstdin[PIPE_READ], fileno(stdin));
+            }
+            //replace stdout
+            if (pstdout[PIPE_WRITE] != fileno(stdout)) {
+                close(fileno(stdout));
+                dup2(pstdout[PIPE_WRITE], fileno(stdout));
+            }
 
             //Exécution de la commande
             //@see process.c#exec()

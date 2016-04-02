@@ -142,7 +142,7 @@ void loopClient(char *addr, int port, int (*readInput)(char **msg)) {
             perror("reception error");
         }
 
-        DEBUG("[client] end of response %d", errno);
+        DEBUG("[client] end of response");
 
         //On envoi un message
         char *msg = NULL;

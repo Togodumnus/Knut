@@ -70,8 +70,6 @@ int readInputServer(int fd) {
 
     int fdInput, fdOutput;
 
-    DEBUG("ici"); //TODO
-
     if (isSocket(fd)) { //c'est un socket
         n = getLineSocket(&line, &n, fd);
 
@@ -90,13 +88,14 @@ int readInputServer(int fd) {
         dprintf(fd, "\nBye !\n");
         if (fd == fileno(stdin)) {
             exit(1);
+        } else {
+            close(fd);
         }
     } else {
         DEBUG("User: %s", line);
         process(line, fdInput, fdOutput);
         DEBUG("[server] end of process");
         printPrompt(fd);
-
     }
 
     //free(line); //TODO
