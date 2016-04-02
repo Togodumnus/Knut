@@ -289,8 +289,9 @@ int process(char *str, int fdInput, int fdOutput) {
             //Si l'action doit s'effectuer en background
             //on n'attend pas et on met le status à 0
             if (action->background) {
-                //TODO : le child va resté en zoombie ici jusqu'à la mort
-                //du shell, est-ce que c'est grave ?
+                //TODO : le child peut rester en zoombie si le père meurt avant
+                //lui
+                dprintf(fdOutput, "Process %d in background\n", pid_child);
                 status = 0;
             } else {
                 //Attente de la terminaison du fils
