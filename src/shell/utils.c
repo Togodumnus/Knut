@@ -50,7 +50,7 @@ void updatePATH(const char* prefix) {
     char *newPATH = (char *) malloc(PATH_MAX * sizeof(char));
     if (newPATH == NULL) {
         perror("Malloc error");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     sprintf(newPATH, "PATH=%s:%s", prefix, getenv("PATH"));
@@ -113,6 +113,6 @@ void printPrompt(int fd) {
     char eot = 4; //EOT : end of transmission
     if (write(fd, &eot, sizeof(char)) == -1) {
         perror("Can't end transmission with file descriptor");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }

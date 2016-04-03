@@ -73,7 +73,7 @@ void configServeur(char *port) {
     int result_code;
     if ((result_code = getaddrinfo(hostname, port, &config, &serveur_info)) != 0) {
         fprintf(stderr, "server: %s\n", gai_strerror(result_code));
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -106,7 +106,7 @@ SOCKET createServerSocket(int port) {
     int yes = 1;
     if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
         perror("setsockopt");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     //On tente un bind
@@ -117,7 +117,7 @@ SOCKET createServerSocket(int port) {
         if (errno == EADDRINUSE) { //le port est occupé
             return -1;
         } else {
-            exit(1);
+            exit(EXIT_FAILURE);
         }
     }
 
@@ -151,7 +151,7 @@ SOCKET initSocket(int *port) {
         *port = p;
         if (listen(listener, MAX_QUEUE) == -1) {
             perror("listen()");
-            exit(1);
+            exit(EXIT_FAILURE);
         }
     }
 
@@ -200,7 +200,7 @@ void selectSocket(fd_set *master, fd_set *result, int max) {
     //On attent les socket de master prêts en lecture
     if ((nbRead = select(max + 1, result, NULL, NULL, NULL)) == -1) {
         perror("select error");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     DEBUG("[server] %d file descriptors ready", nbRead);
@@ -235,7 +235,7 @@ int acceptConnection(SOCKET fd, fd_set *master, int *max) {
 
     if (client_sock < 0) {
         perror("ERROR on accept");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     //update du socket max si nécessaire
@@ -297,7 +297,7 @@ ssize_t getLineSocket(char **line, size_t *size, int fd) {
     char *buf = (char *) malloc((BLOCK_SIZE + 1) * sizeof(char)); // +1 pour \0
     if (buf == NULL) {
         perror("Malloc error");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     int blocks = 1;  //nombre de blocs utilisé pour buf
 
@@ -317,7 +317,7 @@ ssize_t getLineSocket(char **line, size_t *size, int fd) {
                 continue;
             } else {
                 perror("Socket error");
-                exit(1);
+                exit(EXIT_FAILURE);
             }
         } else if (numRead == 0) { //End of file
             if (totRead == 0) {    //on a rien lu
@@ -333,7 +333,7 @@ ssize_t getLineSocket(char **line, size_t *size, int fd) {
                 buf = (char *) realloc(buf, blocks * BLOCK_SIZE * sizeof(char));
                 if (buf == NULL) {
                     perror("Realloc error");
-                    exit(1);
+                    exit(EXIT_FAILURE);
                 }
             }
 
@@ -381,7 +381,7 @@ int readInputServer(int fd) {
     if (n == 0) { //End of file
         dprintf(fd, "\nBye !\n");
         if (fd == fileno(stdin)) {
-            exit(1);
+            exit(EXIT_FAILURE);
         } else {
             close(fd);
         }
@@ -410,7 +410,7 @@ void loopServer() {
     int socketServeur = -1; //le socket d'écoute de connexions
     if ((socketServeur = initSocket(&port)) == -1) {
         perror("Can't create socket");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     DEBUG("[server] socket serveur fd=%d on port %d", socketServeur, port);

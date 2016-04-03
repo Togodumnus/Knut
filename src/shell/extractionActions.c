@@ -282,7 +282,7 @@ void extractionActions(char *str, Action ***actions, int *actc) {
             default:
                 DEBUG("DEFAULT state");
                 fprintf(stderr, "Can't read command %s\n", str);
-                exit(1);
+                exit(EXIT_FAILURE);
                 break;
         }
 

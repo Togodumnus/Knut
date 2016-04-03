@@ -226,7 +226,7 @@ Command *lectureAction(Action *action) {
 
             default:
                 fprintf(stderr, "Can't read %s", action->cmd);
-                exit(1);
+                exit(EXIT_FAILURE);
                 break;
 
         }

@@ -48,7 +48,7 @@ void exec(Action *action, Command *cmd) {
             } else {
                 printf("Unknow error : can't exec %s\n", cmd->cmd);
             }
-            exit(1); //erreur de exec si ici
+            exit(EXIT_FAILURE); //erreur de exec si ici
         } else { //LIB_DYNAMIC_MODE ou LIB_STATIC_MODE
 
             DEBUG("[child] LIB %s", action->cmd);
@@ -60,7 +60,7 @@ void exec(Action *action, Command *cmd) {
                 DEBUG("[child] EXECUTABLE %s", action->cmd);
                 execvp(cmd->cmd, cmd->argv);
                 DEBUG("execvp error");
-                exit(1); //erreur de exec si ici
+                exit(EXIT_FAILURE); //erreur de exec si ici
             } else {
                 exit((*libFunc)(cmd->argc, cmd->argv));
             }
@@ -71,7 +71,7 @@ void exec(Action *action, Command *cmd) {
         exit(process(cmd->cmd, fileno(stdin), fileno(stdout)));
     } else {
         perror("Unknown action type");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -104,7 +104,7 @@ int process(char *str, int fdInput, int fdOutput) {
 
     if (pstdin == NULL || pstdout == NULL) {
         perror("Error pipes allocation");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     pstdin[PIPE_READ]   = fdInput;
@@ -228,7 +228,7 @@ int process(char *str, int fdInput, int fdOutput) {
             FILE *file = fopen(cmd->fromFile, mode);
             if (file == NULL) {
                 perror("Redirection output : Not such file");
-                exit(1);
+                exit(EXIT_FAILURE);
             }
             pstdin[PIPE_READ] = fileno(file);
         }
@@ -248,7 +248,7 @@ int process(char *str, int fdInput, int fdOutput) {
             FILE *file = fopen(cmd->toFile, mode);
             if (file == NULL) {
                 perror("Redirection output : Not such file");
-                exit(1);
+                exit(EXIT_FAILURE);
             }
             DEBUG("here %d", fileno(file));
             pstdout[PIPE_WRITE] = fileno(file);

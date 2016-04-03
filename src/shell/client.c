@@ -67,7 +67,7 @@ int createClientSocket(char *addr, int port) {
     char *port_ch = (char *) malloc(6 * sizeof(char));
     if (port_ch == NULL) {
         perror("malloc error");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     sprintf(port_ch, "%d", port);
 
@@ -77,7 +77,7 @@ int createClientSocket(char *addr, int port) {
 
     if ((status = getaddrinfo(addr, port_ch, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     DEBUG("Connection to %s:%d", addr, port);
@@ -90,12 +90,12 @@ int createClientSocket(char *addr, int port) {
 
     if (sock == -1) {
         perror("Socket error");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     if (connect(sock, servinfo->ai_addr, servinfo->ai_addrlen) < 0) {
         perror("connect()");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     //On met le socket en état non bloquant pour que recv ne soit pas bloquant
