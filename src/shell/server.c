@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 #include <stdbool.h>
 
+#include "process.h"
 #include "server.h"
 #include "utils.h"
 #include "../DEBUG.h"
@@ -245,7 +246,6 @@ int acceptConnection(SOCKET fd, fd_set *master, int *max) {
     //ajout du socket client dans la liste des socket à écouter
     FD_SET(client_sock, master);
 
-    //TODO : debug here
     DEBUG("[server] new connection from %s on socket %d",
         inet_ntop( //trouver son ip
             client_addr.ss_family,
@@ -257,69 +257,6 @@ int acceptConnection(SOCKET fd, fd_set *master, int *max) {
 
     return client_sock;
 
-}
-
-/**
- * loopServer
- *
- * Boucle principale de l'entrée.
- * Création d'un serveur et écoute les connexions entrantes et stdin.
- * Si une connexion socket ou stdin est prêt à lire, appel de readFd
- *
- * @param   {void (*)(ind port)}  callbackInit     Une fonction appellée après
- *                                                 l'init avec le port choisi
- * @param   {void (*)(ind port)}  callbackSockInit Une fonction appellée après
- *                                                 une nouvelle connexion
- * @param   {int (*)(ind fd)}     readFd           Une fonction pour lire un fd
- */
-void loopServer(void (*callbackInit)(int fd), void (*callbackSockInit)(int fd),
-        int (*readFd)(int fd)) {
-
-    int port = -1;
-    int socketServeur = -1; //le socket d'écoute de connexions
-    if ((socketServeur = initSocket(&port)) == -1) {
-        perror("Can't create socket");
-        exit(1);
-    }
-
-    DEBUG("[server] socket serveur fd=%d on port %d", socketServeur, port);
-    (*callbackInit)(port);
-
-    //Écoute
-
-    fd_set socketsToRead; //la liste de socket à lire
-    int maxSocket;        //le plus grand fd parmis socketsToRead
-    initListen(socketServeur, &socketsToRead, &maxSocket);
-
-    while (42) {
-
-        fd_set readyToRead;
-        selectSocket(&socketsToRead, &readyToRead, maxSocket);
-
-        //On regarde la plage où se trouvent tous nos file descriptor
-        for (int fd = 0; fd <= maxSocket; fd++) {
-
-            if (FD_ISSET(fd, &readyToRead)) { //fd est prêt à être lu
-
-                //une nouvelle connection sur le serveur
-                if (fd == socketServeur) {
-                    int sock = acceptConnection(fd, &socketsToRead, &maxSocket);
-                    callbackSockInit(sock);
-                } else { //Une entrée
-
-                    DEBUG("[server] Reading input %d", fd);
-
-                    int n = (*readFd)(fd);
-
-                    if (n == 0) {
-                        FD_CLR(fd, &socketsToRead);
-                        close(fd);
-                    }
-                }
-            }
-        }
-
-    }
 }
 
 /**
@@ -415,3 +352,105 @@ ssize_t getLineSocket(char **line, size_t *size, int fd) {
     return totRead;
 }
 
+/**
+ * readInputServer
+ *
+ * Read command from fd and process it
+ */
+int readInputServer(int fd) {
+
+    size_t n;
+    char *line = NULL;
+
+    int fdInput, fdOutput;
+
+    if (isSocket(fd)) { //c'est un socket
+        n = getLineSocket(&line, &n, fd);
+
+        fdInput  = fd;
+        fdOutput = fd;
+    } else { //c'est stdin
+        n = getline(&line, &n, stdin);
+
+        fdInput  = fileno(stdin);
+        fdOutput = fileno(stdout);
+    }
+
+    DEBUG("[server] Received : %s", line);
+
+    if (n == 0) { //End of file
+        dprintf(fd, "\nBye !\n");
+        if (fd == fileno(stdin)) {
+            exit(1);
+        } else {
+            close(fd);
+        }
+    } else {
+        DEBUG("User: %s", line);
+        process(line, fdInput, fdOutput);
+        DEBUG("[server] end of process");
+        printPrompt(fd);
+    }
+
+    free(line);
+
+    return n;
+}
+
+/**
+ * loopServer
+ *
+ * Boucle principale de l'entrée.
+ * Création d'un serveur et écoute les connexions entrantes et stdin.
+ * Si une connexion socket ou stdin est prêt à lire, appel de readFd
+ */
+void loopServer() {
+
+    int port = -1;
+    int socketServeur = -1; //le socket d'écoute de connexions
+    if ((socketServeur = initSocket(&port)) == -1) {
+        perror("Can't create socket");
+        exit(1);
+    }
+
+    DEBUG("[server] socket serveur fd=%d on port %d", socketServeur, port);
+
+    printf("Listening on port %d\n", port);
+    printPrompt(fileno(stdin));
+
+    //Écoute
+
+    fd_set socketsToRead; //la liste de socket à lire
+    int maxSocket;        //le plus grand fd parmis socketsToRead
+    initListen(socketServeur, &socketsToRead, &maxSocket);
+
+    while (42) {
+
+        fd_set readyToRead;
+        selectSocket(&socketsToRead, &readyToRead, maxSocket);
+
+        //On regarde la plage où se trouvent tous nos file descriptor
+        for (int fd = 0; fd <= maxSocket; fd++) {
+
+            if (FD_ISSET(fd, &readyToRead)) { //fd est prêt à être lu
+
+                //une nouvelle connection sur le serveur
+                if (fd == socketServeur) {
+                    int sock = acceptConnection(fd, &socketsToRead, &maxSocket);
+                    printPrompt(sock);
+                } else { //Une entrée
+
+                    DEBUG("[server] Reading input %d", fd);
+
+                    int n = readInputServer(fd);
+
+                    if (n == 0) {
+                        FD_CLR(fd, &socketsToRead);
+                        close(fd);
+                    }
+                }
+            }
+        }
+
+    }
+}

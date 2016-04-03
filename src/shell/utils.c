@@ -101,3 +101,18 @@ void readArgs(int argc, char *argv[],
     }
 
 }
+
+/**
+ * printPrompt
+ *
+ * Affiche le prompt avant une commande
+ */
+void printPrompt(int fd) {
+    dprintf(fd, GREEN "Toto" WHITE " @ " YELLOW "KnutShell\n" END);
+
+    char eot = 4; //EOT : end of transmission
+    if (write(fd, &eot, sizeof(char)) == -1) {
+        perror("Can't end transmission with file descriptor");
+        exit(1);
+    }
+}

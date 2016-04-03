@@ -74,7 +74,17 @@ void exec(Action *action, Command *cmd) {
     }
 }
 
-//TODO write doc
+/**
+ * process
+ *
+ * Éxécution de la commande
+ *
+ * @param  {char *} str         La commande à exécuter
+ * @param  {int}    fdInput     File descriptot
+ * @param  {int}    fdOutput    File descriptot
+ *
+ * @return {int}            Status de retour
+ */
 int process(char *str, int fdInput, int fdOutput) {
 
     DEBUG("process command (in:%d, out:%d): %s", fdInput, fdOutput, str);

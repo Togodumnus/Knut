@@ -13,3 +13,4 @@ void updatePATH(const char* prefix);
 void readArgs(int argc, char *argv[],
         enum execution_mode *mode, char **addr, int *connect);
 
+void printPrompt(int fd);

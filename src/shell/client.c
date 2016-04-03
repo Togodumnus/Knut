@@ -106,6 +106,21 @@ int createClientSocket(char *addr, int port) {
 }
 
 /**
+ * readInputClient
+ *
+ * Read stdin command to msg
+ *
+ * @param  {char **}    msg
+ */
+int readInputClient(char **msg) {
+
+    size_t n;
+    n = getline(msg, &n, stdin);
+
+    return n;
+}
+
+/**
  * loopClient
  *
  * Boucle principale de l'entrée.
@@ -113,10 +128,8 @@ int createClientSocket(char *addr, int port) {
  *
  * @param  {char *}                 addr
  * @param  {int}                    port
- * @param  {int (*)(char **msg)}    readInput   La fonction qui lit l'entrée
- *                                              utilisateur
  */
-void loopClient(char *addr, int port, int (*readInput)(char **msg)) {
+void loopClient(char *addr, int port) {
 
     const char eot = 4;
     int socketClient = createClientSocket(addr, port);
@@ -143,7 +156,7 @@ void loopClient(char *addr, int port, int (*readInput)(char **msg)) {
 
         //On envoi un message
         char *msg = NULL;
-        int n = (*readInput)(&msg); //entrée utilisateur
+        int n = readInputClient(&msg); //entrée utilisateur
 
         DEBUG("[client] Sending %s", msg);
 
@@ -158,4 +171,3 @@ void loopClient(char *addr, int port, int (*readInput)(char **msg)) {
     }
 
 }
-
