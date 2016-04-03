@@ -21,7 +21,6 @@ const int BUFFER_SIZE = 1024;
  * @return {char *}             Un pointeur vers une nouvelle chaîne
  */
 char *appendToStr(char *str, char ch) {
-
     int l = strlen(str);
 
     char *newStr = (char *) malloc((l + 1) * sizeof(char));
@@ -37,11 +36,11 @@ char *appendToStr(char *str, char ch) {
     return newStr;
 }
 
-void cat(char *str1, char *str2) {
-	int i;
+char *cat(char *str1, char *str2) {	int i;
 	for (i=0; i<strlen(str2);i++) {
-		appendToStr(str1, str2[i]);
+		str1 = appendToStr(str1, str2[i]);
 	}
+	return str1;
 }
 
 
@@ -276,7 +275,7 @@ int main(int argc, char * const argv[]) {
 	//return kcp(argc, argv);
 	char * str1 = "bonjour c'est ";
 	char * str2 = "papa";
-	cat(str1,str2);
+	cat(str1, str2);
 	printf("%s\n", str1);
 	return 0;
 }
