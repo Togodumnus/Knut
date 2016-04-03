@@ -11,6 +11,29 @@
 const int BUFFER_SIZE = 1024;
 
 /**
+ * appendToStr
+ *
+ * Ajout de ch à la fin de str
+ *
+ * @param  {char *}     str     La chaîne à compléter
+ * @param  {char}       ch      Le caractère à ajouter
+ */
+void appendToStr(char *str, char ch) {
+
+    int l = strlen(str);
+
+    char *str = (char *) realloc(str, (l + 1) * sizeof(char));
+    if (str == NULL) {
+        perror("Realloc error");
+        exit(EXIT_FAILURE);
+    }
+
+    str[l-1] = ch;
+    str[l] = '\0';
+
+}
+
+/**
  * kcp_file_to_file
  *
  * Copie le contenu d'un fichier dans un autre
