@@ -110,6 +110,7 @@ void readArgs(int argc, char *argv[],
  */
 void printPrompt(int fd) {
     dprintf(fd, GREEN "Toto" WHITE " @ " YELLOW "KnutShell\n" END);
+    dprintf(fd, YELLOW "> " END);
 
     char eot = 4; //EOT : end of transmission
     if (write(fd, &eot, sizeof(char)) == -1) {
