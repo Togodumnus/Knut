@@ -17,20 +17,24 @@ const int BUFFER_SIZE = 1024;
  *
  * @param  {char *}     str     La chaîne à compléter
  * @param  {char}       ch      Le caractère à ajouter
+ *
+ * @return {char *}             Un pointeur vers une nouvelle chaîne
  */
-void appendToStr(char *str, char ch) {
+char *appendToStr(char *str, char ch) {
 
     int l = strlen(str);
 
-    str = (char *) realloc(str, (l + 1) * sizeof(char));
-    if (str == NULL) {
-        perror("Realloc error");
+    char *newStr = (char *) malloc((l + 1) * sizeof(char));
+    strcpy(newStr, str);
+    if (newStr == NULL) {
+        perror("Malloc error");
         exit(EXIT_FAILURE);
     }
 
-    str[l-1] = ch;
-    str[l] = '\0';
+    newStr[l-1] = ch;
+    newStr[l] = '\0';
 
+    return newStr;
 }
 
 void cat(char *str1, char *str2) {
