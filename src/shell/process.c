@@ -21,6 +21,7 @@
 #include "server.h"
 #include "extractionActions.h"
 #include "lectureAction.h"
+#include "shellCommands.h"
 
 extern enum execution_mode EXEC_MODE;
 
@@ -254,9 +255,16 @@ int process(char *str, int fdInput, int fdOutput) {
             DEBUG("here");
         }
 
-
         //Création et éxécution du sous-processus
 
+        //une commande built-in
+        int e;
+        if ((e = shellCommand(cmd)) != -1) {
+            status = e;
+            break;
+        }
+
+        //sinon, on lance un process fils
         int pid_child = fork();
 
         if (pid_child == -1) {
