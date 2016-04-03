@@ -1,8 +1,9 @@
-#define _XOPEN_SOURCE
+#define _XOPEN_SOURCE 700
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <unistd.h>
 #ifdef __APPLE__
     #include <limits.h>
 #else
