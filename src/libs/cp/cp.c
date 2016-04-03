@@ -73,11 +73,15 @@ int kcp_file_to_dir(char *file_path, char *dir_path) {
 	strcpy(file_pathFull, dir_path);
 	strcat(file_pathFull,  basename(file_path)); // file_pathFull devient le chemin du fichier
 
+	// la c'est bon
+	printf("avant %s\n", dir_path);
 	if ((f=fopen(file_pathFull, "w"))==NULL) { // création du fichier 
         printf("Can't open %s\n", file_pathFull);
         exit(EXIT_FAILURE);
 	}
-	fclose(f1);
+	// la c'est plus bon
+	printf("après %s\n", dir_path);
+	fclose(f);
 	kcp_file_to_file(file_path, file_pathFull); // puis on copie le fichier dans la nouveau fichier créé
 	memset (file_pathFull, 0, sizeof (file_pathFull)); // on vide le chemin du fichier
 	return 0;
@@ -92,6 +96,7 @@ int kcp_file_to_dir(char *file_path, char *dir_path) {
  * @param  {char const*}  argv   Les arguments
  */
 int kcp_files_to_dir(int argc, char * const argv[]) {
+	struct stat st;
 	int i;
 	for (i = 1; i < argc-1; i++){
 		// Pour savoir si ce n'est pas un dossier que l'on essaye de copier 
@@ -124,7 +129,7 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
 	char * path_to_copy;
 
 	if ((dirp_src=opendir(dir_path_src))==NULL) { // on ouvre le dossier sourc
-		printf("Can't open directory %s"; dir_path_src);
+		printf("Can't open directory %s", dir_path_src);
 		exit(EXIT_FAILURE);
 	}
 
@@ -144,10 +149,12 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
 	strcat(make_dir, path_to_copy);
 	mkdir(make_dir, 0775);
 
+
+	char path[strlen(dir_path_src)]; // pour avoir le path des fichiers du dossier
 	while ((dptr_src=readdir(dirp_src))) { // on lit le dossier source
 		if ((strcmp(dptr_src->d_name,"..")!=0)&&(strcmp(dptr_src->d_name,".")!=0)) { // on ne tiens pas compte de . et ..
-
-			char path[strlen(dir_path_src)]; // pour avoir le path des fichiers du dossier
+			
+			memset(path, 0, sizeof(path));
 
 			if (path_to_copy[strlen(dir_path_src)-1]=='/'){
 				sprintf(path,"%s%s",dir_path_src,dptr_src->d_name);
@@ -160,7 +167,6 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
 				printf("error lstat\n");
 				exit(EXIT_FAILURE);
 			}
-
 			if (S_ISDIR(st.st_mode)) { // repertoire
 				kcp_dir_to_dir(path, make_dir);
 			}
@@ -184,7 +190,7 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
  */
 int kcp_dirs_to_dir(int argc, char * const argv[]) {
 	int i;
-	for (i = 1; i < argc-1; i++){
+	for (i = 2; i < argc-1; i++){
 		kcp_dir_to_dir(argv[i],argv[argc-1]);
 	}
 	return 0;
@@ -200,6 +206,7 @@ int kcp_dirs_to_dir(int argc, char * const argv[]) {
  * @param  {char const*}  argv   Les arguments
  */
 int kcp(int argc, char * const argv[]) {
+	struct stat st;
 	char c;
 	while((c = getopt(argc, argv, "r")) != -1) {
 		switch(c) {
@@ -210,5 +217,22 @@ int kcp(int argc, char * const argv[]) {
 				exit(EXIT_FAILURE);
 		}
 	}
-	return kcp_files_to_dir(argc, argv);
+	if (lstat(argv[argc-1], &st)==-1) {
+		printf("error lstat\n");
+		exit(EXIT_FAILURE);
+	}
+	if (S_ISDIR(st.st_mode)) { // repertoire
+		return kcp_files_to_dir(argc, argv);
+	}
+	else  {
+		if (argc>3) {
+			printf("cp: target %s is not a directory\n", argv[argc-1]);
+			exit(EXIT_FAILURE);
+		}
+		return kcp_file_to_file(argv[1], argv[2]);
+	}
+}
+
+int main(int argc, char * const argv[]) {
+	return kcp(argc, argv);
 }
