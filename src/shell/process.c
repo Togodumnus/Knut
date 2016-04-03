@@ -9,6 +9,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <errno.h>
 
 #include "process.h"
 
@@ -38,6 +39,14 @@ void exec(Action *action, Command *cmd) {
         if (EXEC_MODE == EXECUTABLE_MODE) {
             DEBUG("[child] EXECUTABLE %s (%d arg)", cmd->cmd, cmd->argc);
             execvp(cmd->cmd, cmd->argv);
+            DEBUG("execvp error %d", errno);
+            if (errno == ENOENT) {
+                fprintf(stderr, "%s : no such file \n", cmd->cmd);
+            } else if (errno == EACCES) {
+                fprintf(stderr, "Can't access %s\n", cmd->cmd);
+            } else {
+                fprintf(stderr, "Unknow error : can't exec %s\n", cmd->cmd);
+            }
             exit(1); //erreur de exec si ici
         } else { //LIB_DYNAMIC_MODE ou LIB_STATIC_MODE
 
@@ -49,6 +58,7 @@ void exec(Action *action, Command *cmd) {
                 DEBUG("[child] NO LIB %s", action->cmd);
                 DEBUG("[child] EXECUTABLE %s", action->cmd);
                 execvp(cmd->cmd, cmd->argv);
+                DEBUG("execvp error");
                 exit(1); //erreur de exec si ici
             } else {
                 exit((*libFunc)(cmd->argc, cmd->argv));
