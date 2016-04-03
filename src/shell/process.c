@@ -41,11 +41,11 @@ void exec(Action *action, Command *cmd) {
             execvp(cmd->cmd, cmd->argv);
             DEBUG("execvp error %d", errno);
             if (errno == ENOENT) {
-                fprintf(stderr, "%s : no such file \n", cmd->cmd);
+                printf("%s : no such file \n", cmd->cmd);
             } else if (errno == EACCES) {
-                fprintf(stderr, "Can't access %s\n", cmd->cmd);
+                printf("Can't access %s\n", cmd->cmd);
             } else {
-                fprintf(stderr, "Unknow error : can't exec %s\n", cmd->cmd);
+                printf("Unknow error : can't exec %s\n", cmd->cmd);
             }
             exit(1); //erreur de exec si ici
         } else { //LIB_DYNAMIC_MODE ou LIB_STATIC_MODE
