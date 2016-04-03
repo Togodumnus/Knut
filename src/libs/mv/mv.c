@@ -3,7 +3,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <stdlib.h> 
+#include <stdlib.h>
+#include <libgen.h>
+
 
 int kmv_file_to_dir(char * file, char * dir_path) {
     char * pathFull = (char *) malloc(strlen(file) + strlen(dir_path));
@@ -18,7 +20,7 @@ int kmv_file_to_dir(char * file, char * dir_path) {
     }
     
     strcat(pathFull, dir_path);
-    strcat(pathFull, file);
+    strcat(pathFull, basename(file));
 
     rename(file, pathFull);
     return 0;
@@ -43,7 +45,7 @@ int kmv(int argc, char * const argv[]) {
         rename(argv[1], argv[2]);
         return 0;
     }
-    if (S_ISREG(st_mode)) { // renommage aussi
+    if (S_ISREG(st.st_mode)) { // renommage aussi
         if (argc>3) {
             printf("mv: target %s is not a directory \n", argv[argc-1]);
             exit(EXIT_FAILURE);
