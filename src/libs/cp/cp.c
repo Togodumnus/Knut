@@ -58,24 +58,28 @@ int kcp_file_to_file(const char *path1, const char *path2) {
  * kcp_file_to_dir
  *
  * Copie un fichier dans un répertoire
- * 
+ *
  * @param  {char *}     file_path   La source
  * @param  {char *}     dir_path   La destination
  */
 int kcp_file_to_dir(char *file_path, char *dir_path) {
 	FILE * f;
+
+    // au cas ou l'utilisateur a entré le chemin sans / à la fin
+    // (/home/user au lieu de /home/user/)
 	if (dir_path[strlen(dir_path)-1]!='/') {
 		strcat(dir_path, "/");
-	} // au cas ou l'utilisateur à entré le chemin sans / à la fin (/home/user au lieu de /home/user/)
+	}
 
-	char file_pathFull[strlen(dir_path)]; // Besoin d'une 2eme variable car sinon dir_path change
-
+    char *base = basename(file_path);
+    // Besoin d'une 2eme variable car on change dir_path
+	char file_pathFull[strlen(dir_path) + strlen(base)];
 	strcpy(file_pathFull, dir_path);
-	strcat(file_pathFull,  basename(file_path)); // file_pathFull devient le chemin du fichier
+	strcat(file_pathFull, base); // file_pathFull devient le chemin du fichier
 
 	// la c'est bon
 	printf("avant %s\n", dir_path);
-	if ((f=fopen(file_pathFull, "w"))==NULL) { // création du fichier 
+	if ((f=fopen(file_pathFull, "w"))==NULL) { // création du fichier
         printf("Can't open %s\n", file_pathFull);
         exit(EXIT_FAILURE);
 	}
@@ -99,7 +103,7 @@ int kcp_files_to_dir(int argc, char * const argv[]) {
 	struct stat st;
 	int i;
 	for (i = 1; i < argc-1; i++){
-		// Pour savoir si ce n'est pas un dossier que l'on essaye de copier 
+		// Pour savoir si ce n'est pas un dossier que l'on essaye de copier
 		if (lstat(argv[i], &st)==-1) {
 			printf("error lstat\n");
 			exit(EXIT_FAILURE);
@@ -153,7 +157,7 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
 	char path[strlen(dir_path_src)]; // pour avoir le path des fichiers du dossier
 	while ((dptr_src=readdir(dirp_src))) { // on lit le dossier source
 		if ((strcmp(dptr_src->d_name,"..")!=0)&&(strcmp(dptr_src->d_name,".")!=0)) { // on ne tiens pas compte de . et ..
-			
+
 			memset(path, 0, sizeof(path));
 
 			if (path_to_copy[strlen(dir_path_src)-1]=='/'){
@@ -170,7 +174,7 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
 			if (S_ISDIR(st.st_mode)) { // repertoire
 				kcp_dir_to_dir(path, make_dir);
 			}
-			else { // fichier 
+			else { // fichier
 				kcp_file_to_dir(path, make_dir);
 			}
 		}
