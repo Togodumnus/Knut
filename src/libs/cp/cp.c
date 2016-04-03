@@ -12,11 +12,13 @@ int kcp_file_to_file(const char *path1, const char *path2) {
 	FILE * f1 = fopen(path1, "r");
 	FILE * f2 = fopen(path2, "w");
 
-	char line[10000];
+	char * line;
+ 	size_t len = 0;
+	ssize_t read;
 
-	while(fgets(line, 10000,f1)!=NULL) {
-		fprintf(f2,"%s",line);
-	}
+ 	while ((read = getline(&line, &len, f1)) != -1) {
+       fprintf(f2,"%s",line);
+    }
 
   	fclose(f1);
    	fclose(f2);
@@ -74,7 +76,7 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
 	char * make_dir = malloc(sizeof (path_to_copy) + sizeof(dir_path_dest));
 	strcat(make_dir, dir_path_dest);
 	strcat(make_dir, path_to_copy);
-	mkdir(make_dir, 0775); // pb le dossier se fait pas  chemin absolu?
+	mkdir(make_dir, 0775); 
 	printf("make %s\n",make_dir );
 
 	while ((dptr_src=readdir(dirp_src))) { // on lit le dossier source
