@@ -22,7 +22,7 @@ void appendToStr(char *str, char ch) {
 
     int l = strlen(str);
 
-    char *str = (char *) realloc(str, (l + 1) * sizeof(char));
+    str = (char *) realloc(str, (l + 1) * sizeof(char));
     if (str == NULL) {
         perror("Realloc error");
         exit(EXIT_FAILURE);
@@ -32,6 +32,14 @@ void appendToStr(char *str, char ch) {
     str[l] = '\0';
 
 }
+
+void cat(char *str1, char *str2) {
+	int i;
+	for (i=0; i<strlen(str2);i++) {
+		appendToStr(str1, str2[i]);
+	}
+}
+
 
 /**
  * kcp_file_to_file
@@ -261,5 +269,10 @@ int kcp(int argc, char * const argv[]) {
 }
 
 int main(int argc, char * const argv[]) {
-	return kcp(argc, argv);
+	//return kcp(argc, argv);
+	char * str1 = "bonjour c'est ";
+	char * str2 = "papa";
+	cat(str1,str2);
+	printf("%s\n", str1);
+	return 0;
 }
