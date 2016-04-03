@@ -15,9 +15,15 @@
 #include <stdbool.h>
 
 #include "server.h"
+#include "utils.h"
 #include "../DEBUG.h"
 
-typedef int SOCKET;
+const int PIPE_READ  = 0;
+const int PIPE_WRITE = 1;
+
+const int BUFFER_SIZE = 1024;
+
+const char EOT = 4;
 
 /**
  * HOSTNAME
@@ -190,7 +196,7 @@ void selectSocket(fd_set *master, fd_set *result, int max) {
     DEBUG("[server] Select (max :%d)", max + 1);
 
     *result = *master;
-    //On attente les docket de master prêts en lecture
+    //On attent les socket de master prêts en lecture
     if ((nbRead = select(max + 1, result, NULL, NULL, NULL)) == -1) {
         perror("select error");
         exit(1);

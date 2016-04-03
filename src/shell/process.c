@@ -23,9 +23,6 @@
 
 extern enum execution_mode EXEC_MODE;
 
-const int PIPE_READ  = 0;
-const int PIPE_WRITE = 1;
-
 /**
  * exec
  *

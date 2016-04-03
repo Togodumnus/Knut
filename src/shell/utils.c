@@ -10,6 +10,7 @@
 #endif
 
 #include "utils.h"
+#include "../DEBUG.h"
 
 extern char *optchar;
 

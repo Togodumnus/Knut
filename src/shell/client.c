@@ -13,11 +13,8 @@
 
 #include "../DEBUG.h"
 
+#include "server.h"
 #include "client.h"
-
-typedef int SOCKET;
-
-const int BUFFER_SIZE = 1024;
 
 /**
  * sendall
