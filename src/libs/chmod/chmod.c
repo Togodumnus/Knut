@@ -7,7 +7,7 @@
 
 #include "../../LIB.h"
 
-int octal_decimal(int n) /* Function to convert octal to decimal */
+int octal_decimal(int n)
 {
     int decimal=0, i=0, rem;
     while (n!=0)
@@ -30,8 +30,14 @@ int chmodLib(int argc, char *argv[]) {
            {
                printf("Erreur\n");
                return -1;
-           }  
+           }
+        return 0;
     }
+    return -1;
+}
+
+int chmodLib_R(int argc, char *argv[]){
+    //TODO
     return 0;
 }
 
