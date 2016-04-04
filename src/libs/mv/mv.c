@@ -8,11 +8,18 @@
 #include <libgen.h>
 
 
-int kmv_file_to_dir(char * file, char * dir_path) {
-    char * pathFull = (char *) malloc(strlen(file) + strlen(dir_path));
+/**
+ * Déplace un fichier/dossier dans un dossier 
+ * 
+ *@param  {char *} path_to_move        Le fichier/dossier à déplacer
+ *@param  {char *} dir_path            Le dossier ou est déplacé le fichier/dossier
+ *
+ */
+int kmv_one_to_dir(char * path_to_move, char * dir_path) {
+    char * pathFull = (char *) malloc(strlen(path_to_move) + strlen(dir_path));
     struct stat st;
-    if (lstat(file, &st) == -1) {
-        printf("kmv: cannot stat %s: No such file or directory\n", file);
+    if (lstat(path_to_move, &st) == -1) {
+        printf("kmv: cannot stat %s: No such file or directory\n", path_to_move);
         exit(EXIT_FAILURE);
     }
 
@@ -21,11 +28,11 @@ int kmv_file_to_dir(char * file, char * dir_path) {
     }
     
     strcat(pathFull, dir_path);
-    strcat(pathFull, basename(file));
+    strcat(pathFull, basename(path_to_move));
 
 
-    if (rename(file, pathFull) == -1) {
-        printf("kmv: cannot move %s to %s: No such file or directory\n", file, pathFull);
+    if (rename(path_to_move, pathFull) == -1) {
+        printf("kmv: cannot move %s to %s: No such file or directory\n", path_to_move, pathFull);
         exit(EXIT_FAILURE);
     }
 
@@ -35,10 +42,18 @@ int kmv_file_to_dir(char * file, char * dir_path) {
 
 }
 
-int kmv_files_to_dir(int argc, char * const argv[]) {
+
+/**
+ * Déplace plusieurs fichiers/dossiers dans un dossier 
+ * 
+ *@param  {int}          Nombre d'arguments     
+ *@param  {char * const} Les arguments         
+ *
+ */
+int kmv_some_to_dir(int argc, char * const argv[]) {
     int i;
     for (i = 1; i < argc-1; i++) {
-        kmv_file_to_dir(argv[i], argv[argc-1]);
+        kmv_one_to_dir(argv[i], argv[argc-1]);
     }
     return 0;
 }
@@ -69,7 +84,7 @@ int kmv(int argc, char * const argv[]) {
         }
     }
     else if (S_ISDIR(st.st_mode)) { // deplacer de fichier dans un repertoire
-        return kmv_files_to_dir(argc, argv);
+        return kmv_some_to_dir(argc, argv);
     }
     
     return 0;
