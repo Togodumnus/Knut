@@ -143,11 +143,7 @@ int kcp_files_to_dir(int argc, char * argv[]) {
  */
 int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
 
-    DIR *dirp_src = (DIR *) malloc(sizeof(DIR));
-    if (dirp_src == NULL) {
-        perror("Malloc error");
-        exit(1);
-    }
+    DIR *dirp_src;
     struct dirent *dptr_src;
 
     //ajout d'un / à la destination
