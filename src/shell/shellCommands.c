@@ -20,14 +20,16 @@
  * @retrun {int}        Le code d'erreur ou 0
  */
 int cd(const char *arg) {
-    char path[PATH_MAX];
+    char *path;
 
     if (arg == NULL) { //si cd seul
         path = getenv("HOME");
     } else if (*arg == '~') {
         //On remplace le ~ par le chemin $HOME
+        path = (char *) malloc(PATH_MAX * sizeof(char));
         sprintf(path, "%s%s", getenv("HOME"), arg + 1);
     } else {
+        path = (char *) malloc(PATH_MAX * sizeof(char));
         strcpy(path, arg);
     }
     DEBUG("cd %s", path);
