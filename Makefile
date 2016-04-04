@@ -73,10 +73,9 @@ libsIntro:
 	@mkdir -p $(binDir)/$(libsDir)/$(staticDir)
 	@mkdir -p $(binDir)/$(libsDir)/$(dynamicDir)
 
-libsBuild: $(LIBS)
+libsBuild:
+	$(foreach lib, $(LIBS), $(MAKE) -C $(srcDir)/$(libsDir)/$(lib);)
 
-yes:
-	$(MAKE) -C $(srcDir)/$(libsDir)/yes
 
 ################################################################################
 #							Compilation du shell							   #
