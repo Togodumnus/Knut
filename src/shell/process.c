@@ -102,11 +102,6 @@ int process(char *str, int fdInput, int fdOutput) {
     int pstdin[2],
         pstdout[2];
 
-    if (pstdin == NULL || pstdout == NULL) {
-        perror("Error pipes allocation");
-        exit(EXIT_FAILURE);
-    }
-
     pstdin[PIPE_READ]   = fdInput;
     pstdin[PIPE_WRITE]  = -1;
     pstdout[PIPE_READ]  = -1;
