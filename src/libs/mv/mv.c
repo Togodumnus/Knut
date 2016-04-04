@@ -50,7 +50,7 @@ int kmv_one_to_dir(char * path_to_move, char * dir_path) {
  *@param  {char * const} Les arguments         
  *
  */
-int kmv_some_to_dir(int argc, char * const argv[]) {
+int kmv_some_to_dir(int argc, char * argv[]) {
     int i;
     for (i = 1; i < argc-1; i++) {
         kmv_one_to_dir(argv[i], argv[argc-1]);
@@ -58,7 +58,16 @@ int kmv_some_to_dir(int argc, char * const argv[]) {
     return 0;
 }
 
-int kmv(int argc, char * const argv[]) {
+/**
+ * kmv
+ *
+ * Fonction d'entrée pour kmv
+ * Permet d'appeler les bonnes fonctions en fonction des entrées
+ *
+ * @param  {int *}   argc   Le nombre d'argument
+ * @param  {char *}  argv   Les arguments
+ */
+int kmv(int argc, char * argv[]) {
     struct stat st;
     if (lstat(argv[argc-1], &st) == -1){ // renommage
         if (strcmp(dirname(argv[argc-1]), ".")==0) {
@@ -89,8 +98,3 @@ int kmv(int argc, char * const argv[]) {
     
     return 0;
 }
-
-int main(int argc, char * const argv[]) {
-    return kmv(argc, argv);
-}
-
