@@ -31,6 +31,8 @@ INVERSE_C   =\033[7m
 
 DONE = "$(OK_C)✓ Done$(NO_C)"
 
+export #export de toutes les variables par défaut
+
 #
 # Règles
 #
@@ -73,39 +75,8 @@ libsIntro:
 
 libsBuild: $(LIBS)
 
-# Commande yes
-
-yes: yesIntro $(binDir)/$(libsDir)/yes \
-			  $(binDir)/$(libsDir)/$(staticDir)/libyes.a \
-			  $(binDir)/$(libsDir)/$(dynamicDir)/libyes.so
-	@echo "	"$(DONE)
-
-yesIntro:
-	@echo "	☞ yes"
-
-#exécutable
-$(binDir)/$(libsDir)/yes: $(objDir)/$(libsDir)/yes/yes.o \
-						  $(objDir)/$(libsDir)/yes/main.o
-	@echo "		$(BOLD_C)- Executable$(NO_C)"
-	@$(CC) -o $(binDir)/$(libsDir)/yes $^ $(LDFLAGS)
-	@echo "		$(CC) -o $(binDir)/$(libsDir)/yes $^ $(LDFLAGS)"
-	@echo "		"$(DONE)
-
-#librairie statique
-$(binDir)/$(libsDir)/$(staticDir)/libyes.a: $(objDir)/$(libsDir)/yes/yes.o
-	$(call make-static-lib,$@,$^)
-
-#librairie dynamique
-$(binDir)/$(libsDir)/$(dynamicDir)/libyes.so: $(objDir)/$(libsDir)/yes/yes.o
-	$(call make-dynamic-lib,$@,$^)
-
-
-# Compilation des fichiers des libs
-
-$(objDir)/$(libsDir)/%.o: $(srcDir)/$(libsDir)/%.c
-	@mkdir -p $(objDir)/$(libsDir)/yes
-	@$(CC) $(CFLAGS) $(libCFLAGS) $(debug) -o $@ $^
-	@echo "		$(OK_C)"`basename $@`"$(NO_C)"
+yes:
+	$(MAKE) -C $(srcDir)/$(libsDir)/yes
 
 ################################################################################
 #							Compilation du shell							   #
@@ -140,24 +111,15 @@ $(objDir)/$(shellDir)/%.o: $(srcDir)/$(shellDir)/%.c
 	@echo "	$(CC) $(CFLAGS) $(debug) -o $@ $^"
 	@echo "	"$(DONE)
 
+
 ################################################################################
 #									Fonctions								   #
 ################################################################################
 
-# $(call make-static-lib, /path/to/maLib.a, <.o files>)
-define make-static-lib
-	@echo "		$(BOLD_C)- Static$(NO_C)"
-	@ar -cr $1 $2
-	@echo "		ar -cr $1 $2"
-	@ranlib $1
-	@echo "		ranlib $1"
-	@echo "		"$(DONE)
-endef
-
-# $(call make-dynamic-lib,$@,$^)
-define make-dynamic-lib
-	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
-	@$(CC) -shared -o $1 $2
-	@echo "		$(CC) -shared -o $@ $^"
-	@echo "		"$(DONE)
+define compile-shell-dep
+	@echo "	⇾ Compiling $1"
+	@mkdir -p $(objDir)/$(shellDir)
+	@$(CC) $(CFLAGS) $3 $(debug) -o $1 $2
+	@echo "	$(CC) $(CFLAGS) $(debug) -o $1 $2"
+	@echo "	"$(DONE)
 endef
