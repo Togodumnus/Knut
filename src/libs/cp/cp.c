@@ -255,7 +255,3 @@ int kcp(int argc, char *argv[]) {
         return kcp_file_to_file(argv[1], argv[2]);
     }
 }
-
-int main(int argc, char *argv[]) {
-    return kcp(argc, argv);
-}
