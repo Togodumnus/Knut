@@ -20,7 +20,7 @@
  * @retrun {int}        Le code d'erreur ou 0
  */
 int cd(const char *arg) {
-    char *path = (char *) malloc(sizeof(char) * PATH_MAX);
+    char path[PATH_MAX];
 
     if (arg == NULL) { //si cd seul
         path = getenv("HOME");
@@ -44,8 +44,6 @@ int cd(const char *arg) {
     } else {
         return 0;
     }
-
-    free(path);
 }
 
 /**

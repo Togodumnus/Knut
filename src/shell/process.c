@@ -99,8 +99,8 @@ int process(char *str, int fdInput, int fdOutput) {
     int status = 0; //status code of execution
 
     //let's create pipes to chain stdin and stdout
-    int *pstdin  = (int *) malloc(2 * sizeof(int)),
-        *pstdout = (int *) malloc(2 * sizeof(int));
+    int pstdin[2],
+        pstdout[2];
 
     if (pstdin == NULL || pstdout == NULL) {
         perror("Error pipes allocation");
@@ -180,11 +180,7 @@ int process(char *str, int fdInput, int fdOutput) {
             );
 
             //on modifie le stop pour le comparer avec une ligne de l'input
-            char *stop = (char *) malloc((length + 1) * sizeof(char));
-            if (stop == NULL) {
-                perror("Malloc error");
-                exit(EXIT_FAILURE);
-            }
+            char stop[length + 1];
             strcpy(stop, cmd->fromFile);
             stop[length] = '\n';
 
@@ -327,8 +323,6 @@ int process(char *str, int fdInput, int fdOutput) {
 
     DEBUG("[parent] end");
 
-    free(pstdin);
-    free(pstdout);
     free(actions);
 
     return status;

@@ -134,14 +134,13 @@ void loadDynamicLibs(const char *libdir) {
     DEBUG("loading dynamic libs");
 
     DIR *directory;
-    struct dirent *file;
-
-    const char *EXTENSION = "so";
 
     directory = opendir(libdir); //on ouvre le dossier
     if (directory != NULL) {
-        while ((file = readdir(directory))) { //on parcours tous les fichiers
+        struct dirent *file;
+        const char *EXTENSION = "so";
 
+        while ((file = readdir(directory))) { //on parcours tous les fichiers
             //on charge les fichiers .so uniquement
             char *file_extension = fileExtension(file->d_name);
             if (file_extension != NULL

@@ -219,7 +219,7 @@ void selectSocket(fd_set *master, fd_set *result, int max) {
  */
 int acceptConnection(SOCKET fd, fd_set *master, int *max) {
 
-    int client_sock = -1;
+    int client_sock;
 
     //info du client
     char   remoteIP[INET6_ADDRSTRLEN];
@@ -301,16 +301,13 @@ ssize_t getLineSocket(char **line, size_t *size, int fd) {
     }
     int blocks = 1;  //nombre de blocs utilisé pour buf
 
-    size_t  totRead; //nombre total d'octets lus à l'instant t
-    ssize_t numRead; //nombre d'octets lus par read()
-
     char ch;
+    size_t totRead = 0; //nombre total d'octets lus à l'instant t
 
-    totRead = 0;
     while (true) {  //on fait la supposition qu'on trouvera toujours le
                     //caractère '\n'
 
-        numRead = read(fd, &ch, sizeof(char));
+        ssize_t numRead = read(fd, &ch, sizeof(char));
 
         if (numRead == -1) {
             if (errno == EINTR) {  //Interruption, restart read()
