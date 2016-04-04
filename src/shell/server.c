@@ -378,7 +378,7 @@ int readInputServer(int fd) {
 
     DEBUG("[server] Received : %s", line);
 
-    if (n == 0) { //End of file
+    if (strlen(line) == 0) { //End of file
         dprintf(fd, "\nBye !\n");
         if (fd == fileno(stdin)) {
             exit(EXIT_FAILURE);
