@@ -48,17 +48,10 @@ char *fileExtension(char *file) {
  */
 void updatePATH(const char* prefix) {
 
-    char *newPATH = (char *) malloc(PATH_MAX * sizeof(char));
-    if (newPATH == NULL) {
-        perror("Malloc error");
-        exit(EXIT_FAILURE);
-    }
-
+    char newPATH[PATH_MAX];
     sprintf(newPATH, "PATH=%s:%s", prefix, getenv("PATH"));
 
     putenv(newPATH);
-
-    free(newPATH);
 }
 
 /***
