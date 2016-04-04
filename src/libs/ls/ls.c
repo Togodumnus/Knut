@@ -10,9 +10,12 @@
 #include <time.h>
 
 /**
-* Fonction qui renvois l'abréviation du mois
-* Prend en entrée le numéro du mois (0-11)
-*/
+* mountName
+* 
+* Retourne le nom du mois 
+* 
+ * @param  {int}  nb   Le numéro du mois 
+ */
 char * mouthName(int nb) {
 	switch(nb) {
 		case 0:
@@ -43,7 +46,19 @@ char * mouthName(int nb) {
 	return "Error";
 }
 
-int lslib(/*FILE *kstdin, FILE *kstderr, FILE *kstdout, */int kargc, char* kargv[]) {
+int kls_no_opt(int argc, char * argv[]) {
+	return 0;
+}
+
+int kls_l(int argc, char * argv[]) {
+	return 0;
+}
+
+int kls_a(int argc, char * argv[]) {
+	return 0;
+}
+
+int kls_al(int argc, char * argv[]) {
 	DIR *dirp;
 	struct dirent *dptr;
 
@@ -107,28 +122,44 @@ int lslib(/*FILE *kstdin, FILE *kstderr, FILE *kstdout, */int kargc, char* kargv
 	}
 	else {
 		printf("Error too many arguments\n");
-		return -1;
+		exit(EXIT_FAILURE);
 	}
 	closedir(dirp);
 	return 0;
 }
 
-int main(int argc, char *argv[]) {
-	//lslib(argc, argv);
+int kls(int argc, char *argv[]) {
 	char c;
-	while((c = getopt(argc, argv, "ali")) != -1) {
+
+	int aFlag, lFlag = 0
+
+	while((c = getopt(argc, argv, "al")) != -1) {
 		switch(c) {
 			case 'a':
-				printf("a\n");
+				aFlag = 1;
 				break;
 			case 'l':
-				printf("l\n");
+				lFlag = 1;
 				break;
-			case 'i': //i = afficher inode number
-				printf("i\n");
-				break;	
+			case '?':
+				printf("kls: option requires an argument -- '%c'\n",c);
+		}
+		if ((aFlag)&&(lFlag)) {
+			return kls_al(argc, argv);
+		}
+		else if (aFlag) {
+			return kls_a(argc, argv);
+		}
+		else if (lFlag) {
+			return kls_l(argc, argv);
+		}
+		else {
+			return kls_no_opt(argc, argv);
 		}
 	}
 	return 0;
+}
 
+int main(int argc, char *argv[]) {
+	return kls(argv, argv);
 }
