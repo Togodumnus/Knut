@@ -51,7 +51,6 @@ void *getAdresse(struct sockaddr *sa) {
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-struct addrinfo *serveur_info;  //full host config returned by getaddrinfo
 
 /**
  * configServeur
@@ -60,7 +59,7 @@ struct addrinfo *serveur_info;  //full host config returned by getaddrinfo
  *
  * @param  {char *} port
  */
-void configServeur(char *port) {
+void configServeur(char *port, struct addrinfo **serveur_info) {
 
     struct addrinfo config; //config
     char *hostname = NULL;  //on est serveur
@@ -71,7 +70,7 @@ void configServeur(char *port) {
     config.ai_flags    = AI_PASSIVE;    //config d'un serveur
 
     int result_code;
-    if ((result_code = getaddrinfo(hostname, port, &config, &serveur_info)) != 0) {
+    if ((result_code = getaddrinfo(hostname, port, &config, serveur_info)) != 0) {
         fprintf(stderr, "server: %s\n", gai_strerror(result_code));
         exit(EXIT_FAILURE);
     }
@@ -89,10 +88,12 @@ void configServeur(char *port) {
  */
 SOCKET createServerSocket(int port) {
 
+    struct addrinfo *serveur_info = NULL;
+
     char port_buf[6];
     sprintf((char *)port_buf, "%d", port);
     port_buf[5] = '\0';
-    configServeur(port_buf);
+    configServeur(port_buf, &serveur_info);
 
     //Création du socket serveur
     SOCKET listener;
@@ -376,6 +377,7 @@ int readInputServer(int fd) {
     DEBUG("[server] Received : %s", line);
 
     if (strlen(line) == 0) { //End of file
+        free(line);
         dprintf(fd, "\nBye !\n");
         if (fd == fileno(stdin)) {
             exit(EXIT_FAILURE);
@@ -387,9 +389,9 @@ int readInputServer(int fd) {
         process(line, fdInput, fdOutput);
         DEBUG("[server] end of process");
         printPrompt(fd);
+        free(line);
     }
 
-    free(line);
 
     return n;
 }

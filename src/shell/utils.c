@@ -57,6 +57,8 @@ void updatePATH(const char* prefix) {
     sprintf(newPATH, "PATH=%s:%s", prefix, getenv("PATH"));
 
     putenv(newPATH);
+
+    free(newPATH);
 }
 
 /***
