@@ -8,6 +8,7 @@
 #include <pwd.h>
 #include <grp.h>
 #include <time.h>
+#include <string.h>
 
 /**
 * mountName
@@ -68,32 +69,35 @@ int kls_al(int argc, char * argv[]) {
 
 	struct tm *tmInfo;
 
-	char *path;
+	char path[strlen(argv[argc-1])];
+
 	
-	if (kargv[1]==NULL) {
-		path = "."; // repetoire courant
+	if (!strcmp(argv[argc-1],"-al")) { // si y'a pas de chemin donné dans kls
+		strcpy(path, "."); // repetoire courant
 	}
 	else {
-		path = kargv[1];
+		strcpy(path, argv[argc-1]);
 	}
+
+	printf("%s\n",path);
 
 	if ((dirp=opendir(path))==NULL) {
 		printf("Error\n");
 		return -1;
 	}
 
-	if (kargc<3) {
+	if (argc<4) {
 		while ((dptr=readdir(dirp))) {
 			stat(dptr->d_name, &statls);
 			
 			// ne marche pas
-		/*	if ((statls.st_mode & S_IFSOCK)==S_IFSOCK) printf("s");	// socket
+			if ((statls.st_mode & S_IFSOCK)==S_IFSOCK) printf("s");	// socket
 			else if ((statls.st_mode & S_IFLNK)==S_IFLNK) printf("l");	// symbolic link
 			else if ((statls.st_mode & S_IFREG)==S_IFREG) printf("-");	// regular file
 			else if ((statls.st_mode & S_IFBLK)==S_IFBLK) printf("b");	// block device
 			else if ((statls.st_mode & S_IFDIR)==S_IFDIR) printf("d");	// directory
 			else if ((statls.st_mode & S_IFCHR)==S_IFCHR) printf("c");	// character device
-			else if ((statls.st_mode & S_IFIFO)==S_IFIFO) printf("p");	// FIFO*/
+			else if ((statls.st_mode & S_IFIFO)==S_IFIFO) printf("p");	// FIFO*
 
 			printf("%c",(statls.st_mode & S_IRUSR)==S_IRUSR ? 'r' : '-');	// owner R
 			printf("%c",(statls.st_mode & S_IWUSR)==S_IWUSR ? 'w' : '-');	// owner W
@@ -131,7 +135,7 @@ int kls_al(int argc, char * argv[]) {
 int kls(int argc, char *argv[]) {
 	char c;
 
-	int aFlag, lFlag = 0
+	int aFlag, lFlag = 0;
 
 	while((c = getopt(argc, argv, "al")) != -1) {
 		switch(c) {
@@ -142,24 +146,39 @@ int kls(int argc, char *argv[]) {
 				lFlag = 1;
 				break;
 			case '?':
-				printf("kls: option requires an argument -- '%c'\n",c);
+				printf("kls: invalid option -- '%c'\n",c);
+				break;
 		}
-		if ((aFlag)&&(lFlag)) {
-			return kls_al(argc, argv);
-		}
-		else if (aFlag) {
-			return kls_a(argc, argv);
-		}
-		else if (lFlag) {
-			return kls_l(argc, argv);
-		}
-		else {
-			return kls_no_opt(argc, argv);
-		}
+	}
+	if ((aFlag)&&(lFlag)) {
+		return kls_al(argc, argv);
+	}
+	else if (aFlag) {
+		return kls_a(argc, argv);
+	}
+	else if (lFlag) {
+		return kls_l(argc, argv);
+	}
+	else {
+		return kls_no_opt(argc, argv);
 	}
 	return 0;
 }
 
 int main(int argc, char *argv[]) {
-	return kls(argv, argv);
+	DIR *dirp_src;
+    struct dirent *dptr_src;
+
+    char * dir_path_src_tmp = "/proc/1219":
+
+    if ((dirp_src = opendir(dir_path_src_tmp)) == NULL) {
+        printf("Can't open directory %s %s\n", dir_path_src_tmp, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
+
+    while ((dptr_src = readdir(dirp_src)) != NULL) { //tous les éléments de la source
+    }
+
+
 }
