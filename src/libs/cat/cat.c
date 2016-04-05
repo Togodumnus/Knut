@@ -4,6 +4,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "../../LIB.h"
+
 const int N_FLAG    = 0x1;
 const int E_FLAG    = 0x2;
 const int B_FLAG    = 0x4;
@@ -99,3 +101,13 @@ int kCatLib(int argc,char *argv[]){
     return catLib_option(argc, argv, option);
 }
 
+
+/**
+ * Init
+ *
+ * S'enregistre dans le shell dans le cas d'un chargement de la librairie
+ * dynamique
+ */
+void Init(EnregisterCommande enregisterCommande) {
+    enregisterCommande("cat", kCatLib);
+}
