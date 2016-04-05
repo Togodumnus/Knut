@@ -1,73 +1,96 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <getopt.h>
 #include <string.h>
+#include <ctype.h>
 
-int catLib(int argc, char *argv[]){
-    char buffer[4096];
-    FILE *file;
-    size_t nread;
-    if (argc > 1) {
-        for (int i = 1; i < argc; i++){
-            file = fopen(argv[i],"r");
-            if (file)
-            {
-                while ((nread = fread(buffer, 1, sizeof buffer, file)) > 0){
-                    fwrite(buffer, 1, nread, stdout);
+const int N_FLAG    = 0x1;
+const int E_FLAG    = 0x2;
+const int B_FLAG    = 0x4;
+
+void catLib(FILE *file, int option) {
+    int nbligne = 0;
+
+    char old = '\n',
+         c;
+
+    while ((c = fgetc(file)) != EOF) {
+
+        if (old == '\n') {
+            if ((option & N_FLAG) == N_FLAG
+                    || (((option & B_FLAG) == B_FLAG) && c != '\n')) {
+                nbligne++;
+                printf("   %d ", nbligne);
+            }
+        }
+
+        if ((option & E_FLAG) == E_FLAG) {
+            if (c == '\n') {
+                if (putchar('$') == EOF) {
+                    perror("Write error");
+                    exit(EXIT_FAILURE);
                 }
-                fclose(file);
+            } else if (!isprint(c)) {
+                printf("M-");
+            } else if (iscntrl(c)) {
+                printf("^X");
             }
-            else{
-                printf("Problème avec le ou les fichiers\n");
-                return -1;
-            }
+
+        }
+
+        if (putchar(c) == EOF){
+            perror("Write error");
+            exit(EXIT_FAILURE);
+        }
+
+
+        old = c;
+    }
+
+    putchar('\n');
+}
+
+int catLib_option(int argc, char *argv[], int option){
+    FILE *file;
+
+    for (int i = 1; i < argc; i++){
+        //si on est sur une option, on passe
+        if (*(argv[i]) == '-') {
+            continue;
+        }
+
+        file = fopen(argv[i], "r");
+        if (file != NULL) {
+            catLib(file, option);
+        } else{
+            printf("Erreur avec les fichiers\n");
+            return 1;
         }
     }
-    return 0;
-}
-
-int catLib_n(int argc, char *argv[]){
-    char ligne[4096];
-    int nbligne=1;
-    FILE *file;
-    for (int i = 2; i < argc; i++){
-        file = fopen(argv[i],"r");
-        if(file){
-            while (fgets(ligne,4096,file))
-            {
-                printf("    %d    ",nbligne);
-                if (fputs(ligne, stdout)==EOF)
-                {
-                    printf("L'écriture sur stdout à échoué");
-                    return -1;
-                }
-                nbligne++;
-            }
-        }
-        else{
-            printf("Erreur avec les fichiers\n");
-            return -1;
-        }
-    }  
-    return 0;
-}
-
-int catLib_e(int argc, char *argv[]){
-    //TODO
+    //TODO si rien = stdin
     return 0;
 }
 
 int kCatLib(int argc,char *argv[]){
     int opt = 0;
-    while((opt=getopt(argc, argv, "en"))!=-1)
-    switch (opt)
-    {
-        case 'e':
-            return catLib_e(argc,argv);
-            break;
-        case 'n':
-            return catLib_n(argc, argv);
-            break;
+    int option = 0;
+
+    while((opt = getopt(argc, argv, "enb")) != -1) {
+        switch (opt) {
+            case 'e':
+                option |= E_FLAG;
+                break;
+            case 'n':
+                option |= N_FLAG;
+                break;
+            case 'b':
+                option |= B_FLAG;
+                break;
+
+            default:
+                break;
+        }
     }
-    return catLib(argc,argv);
+    return catLib_option(argc, argv, option);
 }
 
