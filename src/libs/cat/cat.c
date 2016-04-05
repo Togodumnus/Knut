@@ -53,6 +53,7 @@ void catLib(FILE *file, int option) {
 int catLib_option(int argc, char *argv[], int option){
     FILE *file;
 
+    int nbFile = 0;
     for (int i = 1; i < argc; i++){
         //si on est sur une option, on passe
         if (*(argv[i]) == '-') {
@@ -66,8 +67,12 @@ int catLib_option(int argc, char *argv[], int option){
             printf("Erreur avec les fichiers\n");
             return 1;
         }
+        nbFile++;
     }
-    //TODO si rien = stdin
+
+    if (nbFile == 0) { //appel de cat sans fichier = on écoute stdin
+        catLib(stdin, option);
+    }
     return 0;
 }
 
