@@ -111,6 +111,8 @@ int process(char *str, int fdInput, int fdOutput) {
 
     for (int i = 0; i < actc; i++) {
 
+        FILE *file = NULL; //pour redirection
+
         Action *action = actions[i];
         Command *cmd = lectureAction(action);
         DEBUG("[parent]\taction %d (%p): %s", i, action, action->cmd);
@@ -310,6 +312,10 @@ int process(char *str, int fdInput, int fdOutput) {
                 DEBUG("[parent]\tChild %s %d exited with code %d",
                         action->cmd, pid_child, status);
             }
+        }
+
+        if (file != NULL) {
+            fclose(file);
         }
 
         freeCommand(cmd);
