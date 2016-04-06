@@ -1,49 +1,35 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "libs.h"
+#include "shellCommands.h"
+
+#include "../DEBUG.h"
 #include "../libs/yes/yes.h"
 
-//si pas de LIB_STATIC, on charge les librairies dynamiquement
-#ifndef LIB_STATIC
-    #include "dynamicLib.h"
-#endif
-
 /**
- * commandes
+ * LIBS_DIR
  *
- * Liste des commandes disponibles par libraries statiques ou dynamiques
- * Ne pas oublier NULL à la fin du tableau.
- *
- * @see dynamicLib.c#loadLibs()
+ * Répertoire des librairies dynamiques
  */
-char *commandes[] = {"yes", NULL};
-
-/**
- * commandesFonctions
- *
- * Liste des fonctions XXXLib() d'entrée sur les librairies statiques ou
- * dynamiques disponnibles.
- * Doit être dans le même ordre que `char *commandes`.
- *
- * @see dynamicLib.c#loadLibs()
- */
-#ifndef LIB_STATIC
-int (*commandesFonctions[sizeof(commandes) / sizeof(char) - 1])(int, char *[]);
-#else
-int (*commandesFonctions[sizeof(commandes) / sizeof(char) - 1])(int, char *[]) =
-    {yesLib};
-#endif
+char *LIBS_DIR = "./bin/libs/dynamic/";
 
 int main(int argc, char* argv[]) {
 
     #ifndef LIB_STATIC
-    //si pas de LIB_STATIC, on charge les librairies dynamiquement
-    loadLibs(commandes, commandesFonctions);
-    printf("Dynamic\n");
+        //si pas de LIB_STATIC, on charge les librairies dynamiquement
+        loadDynamicLibs(LIBS_DIR);
+        printf("Dynamic\n");
     #else
-    printf("Static\n");
+        //En librairie statique, on connait les fonction a charger
+        enregisterCommande("yes", yesLib);
+        printf("Static\n");
     #endif
 
+    showCommandes();
+
     printf("Hello world\n");
-    commandesFonctions[0](argc, argv);
+
+    /*shellCommand("cd", "~/Documents");*/
+    /*(*findCommande("yes"))(argc, argv);*/
 
 }
