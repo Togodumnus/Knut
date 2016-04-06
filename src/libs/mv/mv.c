@@ -11,15 +11,16 @@
 /**
  * Déplace un fichier/dossier dans un dossier
  *
- *@param  {char *} path_to_move        Le fichier/dossier à déplacer
- *@param  {char *} dir_path            Le dossier ou est déplacé le fichier/dossier
- *
+ * @param  {char *} path_to_move        Le fichier/dossier à déplacer
+ * @param  {char *} dir_path            Le dossier où est déplacé le fichier
+ *                                      / dossier
  */
 int kmv_one_to_dir(char * path_to_move, char * dir_path) {
-    char * pathFull = (char *) malloc(strlen(path_to_move) + strlen(dir_path));
+    char pathFull[strlen(path_to_move) + strlen(dir_path)];
+
     struct stat st;
     if (lstat(path_to_move, &st) == -1) {
-        printf("kmv: cannot stat %s: No such file or directory\n", path_to_move);
+        printf("mv: cannot stat %s: No such file or directory\n", path_to_move);
         exit(EXIT_FAILURE);
     }
 
@@ -30,25 +31,21 @@ int kmv_one_to_dir(char * path_to_move, char * dir_path) {
     strcat(pathFull, dir_path);
     strcat(pathFull, basename(path_to_move));
 
-
     if (rename(path_to_move, pathFull) == -1) {
-        printf("kmv: cannot move %s to %s: No such file or directory\n", path_to_move, pathFull);
+        printf("kmv: cannot move %s to %s: No such file or directory\n",
+                path_to_move, pathFull);
         exit(EXIT_FAILURE);
     }
 
-    free(pathFull);
-
     return 0;
-
 }
 
 
 /**
  * Déplace plusieurs fichiers/dossiers dans un dossier
  *
- *@param  {int}          Nombre d'arguments
- *@param  {char * const} Les arguments
- *
+ * @param  {int}          Nombre d'arguments
+ * @param  {char * const} Les arguments
  */
 int kmv_some_to_dir(int argc, char * argv[]) {
     int i;
@@ -69,30 +66,41 @@ int kmv_some_to_dir(int argc, char * argv[]) {
  */
 int kmv(int argc, char * argv[]) {
     struct stat st;
-    if (lstat(argv[argc-1], &st) == -1){ // renommage
-        if (strcmp(dirname(argv[argc-1]), ".")==0) {
-            if (argc>3) {
+
+    //on regarde le dernier argument
+
+    if (lstat(argv[argc-1], &st) == -1){ //renommage
+        if (strcmp(dirname(argv[argc-1]), ".") == 0) {
+            if (argc > 3) {
                 printf("kmv: target %s is not a directory \n", argv[argc-1]);
                 exit(EXIT_FAILURE);
-            }// pb ici, quand le dossier n'existe pas on doit le créer mais avec cette algo on rentre ici alors qu'on devrais pas
+            }
+            //TODO : pb ici, quand le dossier n'existe pas on doit le créer mais
+            //avec cet algo on rentre ici alors qu'on devrais pas
+
             if (rename(argv[1], argv[2]) == -1) {
-                printf("kmv: cannot move %s to %s: No such file or directory\n", argv[1], argv[2]);
+                printf("kmv: cannot move %s to %s: No such file or directory\n",
+                        argv[1], argv[2]);
                 exit(EXIT_FAILURE);
             }
-        return 0;
+
+            return 0;
         }
     }
+
     if (S_ISREG(st.st_mode)) { // renommage aussi
         if (argc>3) {
             printf("kmv: target %s is not a directory \n", argv[argc-1]);
             exit(EXIT_FAILURE);
         }
         if (rename(argv[1], argv[2]) == -1) {
-            printf("kmv: cannot move %s to %s: No such file or directory\n", argv[1], argv[2]);
+            printf("kmv: cannot move %s to %s: No such file or directory\n",
+                    argv[1], argv[2]);
             exit(EXIT_FAILURE);
         }
     }
-    else if (S_ISDIR(st.st_mode)) { // deplacer de fichier dans un repertoire
+
+    else if (S_ISDIR(st.st_mode)) { // deplacer des fichiers dans un repertoire
         return kmv_some_to_dir(argc, argv);
     }
 
