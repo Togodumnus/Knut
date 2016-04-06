@@ -1,3 +1,4 @@
 #pragma once
 
-int kPsLib(int argc, char *argv[]);
+
+int kPs(int argc, char *argv[]);
