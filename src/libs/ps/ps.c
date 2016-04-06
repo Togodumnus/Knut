@@ -10,17 +10,38 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <ctype.h>
+#include <stdbool.h>
 
+/*TODO 
+
+Lien important : 
+https://www.kernel.org/doc/Documentation/filesystems/proc.txt
+
+TROUVER POURQUOI CERTAINS UID N'ONT PAS DE NOMS D'UTILISATEURS
+
+TROUVER %CPU %MEM TTY
+
+Calcul CPU
+http://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat
+*/
 
 char* REPERTOIRE_PROC = "/proc";
 
 typedef struct{
     char* user;
-    char* pid;
+    int pid;
+    int vsz;
+    int rss;
 }proc;
 
-void print_status(char* path, proc process) {
-    char line[100], *p , finalP[256];
+
+
+void infos_from_status(char* path, proc* process) {
+    char line[100], *p;
+    int tmp = 0, pid=0 ,uid =0, vsz = 0 , rss = 0;
+    struct passwd *user;
+    bool vmSizeHere = false, vmRssHere = false;
+
     FILE* statusf;
 
     statusf = fopen(path, "r");
@@ -29,33 +50,101 @@ void print_status(char* path, proc process) {
     }
 
     while(fgets(line, 100, statusf)) {
+        tmp = 0;
+        //On est dans la ligne Uid : 
         if(strncmp(line, "Uid:", 4) == 0){
-            //printf("%s", line);
-            // Ignore "Uid:" and whitespace
+            //On récupère l'uid de la ligne et on le transforme en int dans la variable uid
             p = line + strlen("Uid:");
             while(isspace(*p)) {
                 ++p;
             }
-            strncpy(finalP,p,strlen(p));
-            finalP[strlen(p)+1] = 0;
-            process.user = finalP;
-            //printf("%s", process.user);  
+            for (int i = 0; i < 5; ++i)
+            {
+                if (isdigit(p[i])){
+                    tmp = p[i] - '0';
+                    uid = 10 * uid + tmp;
+                }
+            }
+
+            //A partir de l'uid, on obtient le nom de l'utilisateur
+            if (!(user = getpwuid(uid))){ // user name
+                process->user = "?";
+            }else{
+                process->user = user->pw_name;
+            } 
         }
-        if(strncmp(line, "Pid:", 4) == 0){
-            //printf("%s\n", line);
+
+        //On est dans la ligne Pid : 
+        else if(strncmp(line, "Pid:", 4) == 0){
+
+            //On récupère le pid qu'on transforme en int 
             p = line + strlen("Pid:");
             while(isspace(*p)) {
                 ++p;
             }
-            strncpy(finalP,p,4);
-            finalP[4] = 0;
-            process.pid = finalP;
-            printf("%s", process.pid);
+            for (int i = 0; i < 5; ++i)
+            {
+                if (isdigit(p[i])){
+                    tmp = p[i] - '0';
+                    pid = 10 * pid + tmp;
+                }
+            }
+
+            //on stocke dans la structure proc le pid
+            process->pid = pid;
         }
+
+        //On est dans la ligne VmSize
+        else if(strncmp(line, "VmSize:", 4) == 0){
+            vmSizeHere = true;
+            //On récupère le pid qu'on transforme en int 
+            p = line + strlen("VmSize:");
+            while(isspace(*p)) {
+                ++p;
+            }
+            for (int i = 0; i < 12; ++i)
+            {
+                if (isdigit(p[i])){
+                    tmp = p[i] - '0';
+                    vsz = 10 * vsz + tmp;
+                }
+            }
+
+            //on stocke dans la structure proc le VSZ
+            process->vsz = vsz;
+        }
+        //On est dans la ligne VmRSS
+        else if(strncmp(line, "VmRSS:", 4) == 0){
+            vmRssHere = true;
+            //On récupère le pid qu'on transforme en int 
+            p = line + strlen("VmRSS:");
+            while(isspace(*p)) {
+                ++p;
+            }
+            for (int i = 0; i < 12; ++i)
+            {
+                if (isdigit(p[i])){
+                    tmp = p[i] - '0';
+                    rss = 10 * rss + tmp;
+                }
+            }
+
+            //on stocke dans la structure proc le VSZ
+            process->rss = rss;
+        }
+        
+    }
+    //Si la ligne vmSize n'existe pas dans le status
+    if (!vmSizeHere){
+        process->vsz = 0;            
+    }
+    if (!vmRssHere){
+        process->rss = 0;            
     }
 
     fclose(statusf);
 }
+
 
 
 int psNoOpt(int argc, char *argv[]){
@@ -71,7 +160,7 @@ int psNoOpt(int argc, char *argv[]){
     }
     printf("repository /proc opened successfully\n");
     
-    printf ("USER       PID  %cCPU  %cMEM    VSZ   RSS TTY      STAT START   TIME COMMAND\n",'%','%');
+    printf ("USER         PID  %cCPU  %cMEM    VSZ      RSS TTY      STAT START   TIME COMMAND\n",'%','%');
 
     while ((fichierLu = readdir(rep)) != NULL){
         if (fichierLu->d_type == 4 && atoi(fichierLu->d_name)!=0){ // Si c'est un dossier correspondant aux processus
@@ -88,22 +177,21 @@ int psNoOpt(int argc, char *argv[]){
             }else{
                 //On a réussi à ouvrir le dossier correspondant au processus
                 while ((fichierLuBis = readdir(sousRep)) != NULL){
+                    proc process;
                     if (strcmp(fichierLuBis->d_name,"status") == 0){ 
-                        proc process;
-
                         char* path_to_status = (char *) malloc(1+strlen(concat_proc_nameOfFile)+strlen("/status"));
                         strcpy(path_to_status, concat_proc_nameOfFile);
                         strcat(path_to_status, "/status");
 
-                        print_status(path_to_status,process);
-                        
+                        infos_from_status(path_to_status,&process);
 
-                        /*stat(fichierLuBis->d_name, &statProc);
-                        struct passwd *user;
 
-                        user = getpwuid(statProc.st_uid); // user name
-                        printf(" %s", user->pw_name);*/
-                    }   
+                    }
+                    printf("%10s %5d %20d %7d \n", 
+                            process.user,
+                            process.pid,
+                            process.vsz,
+                            process.rss);                       
                 }
             }
         }
@@ -121,10 +209,10 @@ int psNoOpt(int argc, char *argv[]){
 
 int kPs(int argc,char *argv[]){
     int opt = 0;
-    while((opt=getopt(argc, argv, "ef"))!=-1)
+    while((opt=getopt(argc, argv, "aux"))!=-1)
     switch (opt)
     {
-        case 'e':
+        case 'aux':
             //return psLib_e(argc,argv);
             break;
         case 'f':
@@ -133,5 +221,3 @@ int kPs(int argc,char *argv[]){
     }
     return psNoOpt(argc,argv);
 }
-
-
