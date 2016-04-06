@@ -36,112 +36,36 @@ typedef struct{
 }proc;
 
 void infos_from_stat(char* path, proc* process) {
-    char line[100], *p;
-    int tmp = 0;
-    struct passwd *user;
-    bool vmSizeHere = false, vmRssHere = false;
 
-    FILE* statusf;
+    /*FILE* statusf;
+    char c;
+    char *infoStat = "\0";
+    char **tabChar = NULL;
+    int posTabChar = 0;
+    int lenInfoStat = 0;
 
     statusf = fopen(path, "r");
     if(!statusf){
         exit(EXIT_FAILURE);
     }
 
-    while(fgets(line, 100, statusf)) {
-        tmp = 0;
-        //On est dans la ligne Uid : 
-        if(strncmp(line, "Uid:", 4) == 0){
-            //On récupère l'uid de la ligne et on le transforme en int dans la variable uid
-            p = line + strlen("Uid:");
-            while(isspace(*p)) {
-                ++p;
-            }
-            for (int i = 0; i < 5; ++i)
-            {
-                if (isdigit(p[i])){
-                    tmp = p[i] - '0';
-                    uid = 10 * uid + tmp;
-                }
-            }
-
-            //A partir de l'uid, on obtient le nom de l'utilisateur
-            if (!(user = getpwuid(uid))){ // user name
-                process->user = "?";
-            }else{
-                process->user = user->pw_name;
-            } 
+    do{
+        c = fgetc(statusf);
+        if (isspace(c)){
+            tabChar[posTabChar] = infoStat;
+            posTabChar++;
+            infoStat = '\0';
+        }else{
+            lenInfoStat = strlen(infoStat);
+            infoStat[lenInfoStat] = c;
+            infoStat[lenInfoStat+1] = '\0';
         }
 
-        //On est dans la ligne Pid : 
-        else if(strncmp(line, "Pid:", 4) == 0){
+        printf("%c\n",c);
+    }while (!feof(statusf));
 
-            //On récupère le pid qu'on transforme en int 
-            p = line + strlen("Pid:");
-            while(isspace(*p)) {
-                ++p;
-            }
-            for (int i = 0; i < 5; ++i)
-            {
-                if (isdigit(p[i])){
-                    tmp = p[i] - '0';
-                    pid = 10 * pid + tmp;
-                }
-            }
 
-            //on stocke dans la structure proc le pid
-            process->pid = pid;
-        }
-
-        //On est dans la ligne VmSize
-        else if(strncmp(line, "VmSize:", 4) == 0){
-            vmSizeHere = true;
-            //On récupère le pid qu'on transforme en int 
-            p = line + strlen("VmSize:");
-            while(isspace(*p)) {
-                ++p;
-            }
-            for (int i = 0; i < 12; ++i)
-            {
-                if (isdigit(p[i])){
-                    tmp = p[i] - '0';
-                    vsz = 10 * vsz + tmp;
-                }
-            }
-
-            //on stocke dans la structure proc le VSZ
-            process->vsz = vsz;
-        }
-        //On est dans la ligne VmRSS
-        else if(strncmp(line, "VmRSS:", 4) == 0){
-            vmRssHere = true;
-            //On récupère le pid qu'on transforme en int 
-            p = line + strlen("VmRSS:");
-            while(isspace(*p)) {
-                ++p;
-            }
-            for (int i = 0; i < 12; ++i)
-            {
-                if (isdigit(p[i])){
-                    tmp = p[i] - '0';
-                    rss = 10 * rss + tmp;
-                }
-            }
-
-            //on stocke dans la structure proc le VSZ
-            process->rss = rss;
-        }
-        
-    }
-    //Si la ligne vmSize n'existe pas dans le status
-    if (!vmSizeHere){
-        process->vsz = 0;            
-    }
-    if (!vmRssHere){
-        process->rss = 0;            
-    }
-
-    fclose(statusf);
+    fclose(statusf);*/
 }
 
 void infos_from_status(char* path, proc* process) {
@@ -292,19 +216,20 @@ int psNoOpt(int argc, char *argv[]){
                         strcat(path_to_status, "/status");
 
                         infos_from_status(path_to_status,&process);
+                        printf("%10s %5d %20d %7d \n",
+                                process.user,
+                                process.pid,
+                                process.vsz,
+                                process.rss);
                     }
-                    else if (strcmp(fichierLuBis->d_name,"stat") == 0){ 
+                    /*else if (strcmp(fichierLuBis->d_name,"stat") == 0){ 
                         char* path_to_stat = (char *) malloc(1+strlen(concat_proc_nameOfFile)+strlen("/stat"));
                         strcpy(path_to_stat, concat_proc_nameOfFile);
-                        strcat(path_to_stat, "/status");
+                        strcat(path_to_stat, "/stat");
 
                         infos_from_stat(path_to_stat,&process);
-                    }
-                    printf("%10s %5d %20d %7d \n",
-                            process.user,
-                            process.pid,
-                            process.vsz,
-                            process.rss);
+                    }*/
+
                 }
             }
         }
@@ -322,10 +247,10 @@ int psNoOpt(int argc, char *argv[]){
 
 int kPs(int argc,char *argv[]){
     int opt = 0;
-    while((opt=getopt(argc, argv, "aux"))!=-1)
+    while((opt=getopt(argc, argv, "ef"))!=-1)
     switch (opt)
     {
-        case 'aux':
+        case 'e':
             //return psLib_e(argc,argv);
             break;
         case 'f':
