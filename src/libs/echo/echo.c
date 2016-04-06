@@ -1,6 +1,7 @@
+#define _GNU_SOURCE
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdbool.h>
 
 #include "../../LIB.h"
