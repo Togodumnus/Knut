@@ -14,8 +14,8 @@ mkdirIntro:
 $(root)/$(binDir)/$(libsDir)/mkdir: $(root)/$(objDir)/$(libsDir)/mkdir/mkdir.o \
 						  $(root)/$(objDir)/$(libsDir)/mkdir/main.o
 	@echo "		$(BOLD_C)- Executable$(NO_C)"
-	@$(CC) -o $(root)/$(binDir)/$(libsDir)/mkdir $^ $(LDFLAGS)
-	@echo "		$(CC) -o $(root)/$(binDir)/$(libsDir)/mkdir $^ $(LDFLAGS)"
+	@$(CC) -o $(root)/$(binDir)/$(libsDir)/mkdir $^ -lm $(LDFLAGS)
+	@echo "		$(CC) -o $(root)/$(binDir)/$(libsDir)/mkdir $^ -lm $(LDFLAGS)"
 	@echo "		"$(DONE)
 
 #librairie statique
@@ -37,5 +37,5 @@ $(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libmkdir.so: $(root)/$(objDir)/$(libs
 #fichiers objets
 $(root)/$(objDir)/$(libsDir)/mkdir/%.o: $(root)/$(srcDir)/$(libsDir)/mkdir/%.c
 	@mkdir -p $(root)/$(objDir)/$(libsDir)/mkdir
-	@$(CC) $(CFLAGS) $(libCFLAGS) $(debug) -o $@ $^
+	@$(CC) $(CFLAGS) $(libCFLAGS)  $(debug) -o $@ $^
 	@echo "		$(OK_C)"`basename $@`"$(NO_C)"

@@ -17,7 +17,7 @@ int octal_decimal(int n) {
     {
         rem = n%10;
         n/=10;
-        decimal += rem*pow(8,i);
+        decimal += rem * pow(8,i);
         ++i;
     }
     return decimal;
