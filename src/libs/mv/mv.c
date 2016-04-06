@@ -9,8 +9,8 @@
 
 
 /**
- * Déplace un fichier/dossier dans un dossier 
- * 
+ * Déplace un fichier/dossier dans un dossier
+ *
  *@param  {char *} path_to_move        Le fichier/dossier à déplacer
  *@param  {char *} dir_path            Le dossier ou est déplacé le fichier/dossier
  *
@@ -26,7 +26,7 @@ int kmv_one_to_dir(char * path_to_move, char * dir_path) {
     if (dir_path[strlen(dir_path)-1] != '/') {
         strcat(dir_path, "/");
     }
-    
+
     strcat(pathFull, dir_path);
     strcat(pathFull, basename(path_to_move));
 
@@ -44,10 +44,10 @@ int kmv_one_to_dir(char * path_to_move, char * dir_path) {
 
 
 /**
- * Déplace plusieurs fichiers/dossiers dans un dossier 
- * 
- *@param  {int}          Nombre d'arguments     
- *@param  {char * const} Les arguments         
+ * Déplace plusieurs fichiers/dossiers dans un dossier
+ *
+ *@param  {int}          Nombre d'arguments
+ *@param  {char * const} Les arguments
  *
  */
 int kmv_some_to_dir(int argc, char * argv[]) {
@@ -95,6 +95,6 @@ int kmv(int argc, char * argv[]) {
     else if (S_ISDIR(st.st_mode)) { // deplacer de fichier dans un repertoire
         return kmv_some_to_dir(argc, argv);
     }
-    
+
     return 0;
 }
