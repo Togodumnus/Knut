@@ -17,7 +17,9 @@ shellDir   = shell
 
 EXEC=knutShell#le shell à compiler
 
-LIBS=yes pwd #librairies à compiler
+#librairies à compiler
+LIBS=yes 	\
+	 pwd    \
 
 #Colors
 NO_C		=\033[0m
