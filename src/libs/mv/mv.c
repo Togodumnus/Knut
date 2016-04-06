@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <libgen.h>
 
+#include "../../LIB.h"
 
 /**
  * Déplace un fichier/dossier dans un dossier
@@ -105,4 +106,14 @@ int kmv(int argc, char * argv[]) {
     }
 
     return 0;
+}
+
+/**
+ * Init
+ *
+ * S'enregistre dans le shell dans le cas d'un chargement de la librairie
+ * dynamique
+ */
+void Init(EnregisterCommande enregisterCommande) {
+    enregisterCommande("mv", kmv);
 }
