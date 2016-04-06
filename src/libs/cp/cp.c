@@ -8,6 +8,8 @@
 #include <errno.h>
 #include <libgen.h>
 
+#include "../../LIB.h"
+
 int indent = 0;
 
 const int BUFFER_SIZE = 1024;
@@ -254,4 +256,14 @@ int kcp(int argc, char *argv[]) {
         }
         return kcp_file_to_file(argv[1], argv[2]);
     }
+}
+
+/**
+ * Init
+ *
+ * S'enregistre dans le shell dans le cas d'un chargement de la librairie
+ * dynamique
+ */
+void Init(EnregisterCommande enregisterCommande) {
+    enregisterCommande("cp", kcp);
 }
