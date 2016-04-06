@@ -4,8 +4,9 @@
 #include <stdio.h>
 
 int kpwd(int argc, char const *argv[]) {
-	char *pwd;
-	pwd = (char *) get_current_dir_name();
+	char *pwd = NULL;
+    size_t n = 0;
+	pwd = (char *) getcwd(pwd, n);
     if (pwd == NULL) {
         perror("get_current_dir_name failure");
         exit(EXIT_FAILURE);
