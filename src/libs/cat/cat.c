@@ -78,6 +78,23 @@ int catLib_option(int argc, char *argv[], int option){
     return 0;
 }
 
+int usage() {
+
+    printf("\
+Knut cat \n\
+\n\
+usage: cat [-enb] [file]\n\
+\n\
+Arguments: \n\
+\t-n\tDisplay line number.\n\
+\t-b\tDisplay line number for non-blank lines.\n\
+\t-e\tDisplay non-printing characters (simple version). \n\
+\t\tEnd of line are $, controls are ^?, non-printing are M-.\n\
+");
+
+    return 0;
+}
+
 int kCatLib(int argc,char *argv[]){
     int opt = 0;
     int option = 0;
@@ -95,6 +112,7 @@ int kCatLib(int argc,char *argv[]){
                 break;
 
             default:
+                return usage();
                 break;
         }
     }
