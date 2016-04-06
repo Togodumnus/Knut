@@ -1,11 +1,13 @@
+#define _GNU_SOURCE
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <stdio.h>
 #include <unistd.h>
-#include <stdlib.h>
 #include <math.h>
 #include <libgen.h>
 #include <string.h>
+#include "../../LIB.h"
 
 /**
  * octal_decimal
@@ -14,14 +16,13 @@
  *
  * @param  {int}  n    Le nombre à convertir
  */
-int octal_decimal(int n)
-{
+int octal_decimal(int n) {
     int decimal=0, i=0, rem;
     while (n!=0)
     {
         rem = n%10;
         n/=10;
-        decimal += rem*pow(8,i);
+        decimal += rem * pow(8,i);
         ++i;
     }
     return decimal;
@@ -33,10 +34,10 @@ int octal_decimal(int n)
  * Option 'v' de mkdir : affiche un message  
  *
  * @param  {char *}  dirname    Le nom du répertoire créé
- */
+*/
 int kmkdir_v(char * dirname) {
-	printf("mkdir: created directory %s\n", dirname);
-	return 0;
+    printf("mkdir: created directory %s\n", dirname);
+    return 0;
 }
 
 /**
@@ -121,6 +122,12 @@ int kmkdir(int argc, char * argv[]) {
 	return 0;
 }
 
-int main(int argc, char * argv[]) {
-	return kmkdir(argc, argv);
+/**
+ * Init
+ *
+ * S'enregistre dans le shell dans le cas d'un chargement de la librairie
+ * dynamique
+ */
+void Init(EnregisterCommande enregisterCommande) {
+    enregisterCommande("mkdir", kmkdir);
 }

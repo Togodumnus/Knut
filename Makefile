@@ -1,21 +1,25 @@
 
 CC = gcc
 CFLAGS = -c -Wall -std=c99 -Werror
-LDFLAGS= -ldl
+LDFLAGS= -ldl -rdynamic
 
 libCFLAGS = -fPIC
 
-debug = -c
+debug = -g #à enlever à la fin du debug
 
-objDir   = obj
-binDir   = bin
-srcDir   = src
-libsDir  = libs
-shellDir = shell
+objDir     = obj
+binDir     = bin
+srcDir     = src
+libsDir    = libs
+dynamicDir = dynamic
+staticDir  = static
+shellDir   = shell
 
 EXEC=knutShell#le shell à compiler
 
-LIBS=yes #librairies à compiler
+#librairies à compiler
+LIBS=yes 	\
+	 mkdir  \
 
 #Colors
 NO_C		=\033[0m
@@ -29,6 +33,8 @@ INVERSE_C   =\033[7m
 
 DONE = "$(OK_C)✓ Done$(NO_C)"
 
+export #export de toutes les variables par défaut
+
 #
 # Règles
 #
@@ -40,7 +46,10 @@ libraries \n\
 - run $(WARN_C)$(binDir)/$(EXEC)$(NO_C) for knutShell with dynamic \
 libraries \n\
   (don't forget $(WARN_C)export LD_LIBRARY_PATH="'$$'"LD_LIBRARY_PATH:\
-$(shell pwd)/bin/libs$(NO_C))"
+$(shell pwd)/$(binDir)/$(libsDir)/$(dynamicDir)$(NO_C))"
+
+dev: CFLAGS += -DDEBUG_FLAG
+dev:all
 
 .PHONY: clean distclean
 
@@ -63,38 +72,12 @@ libs: libsIntro libsBuild
 libsIntro:
 	@echo "$(BOLD_C)☞ Libs$(NO_C)"
 	@mkdir -p $(binDir)/$(libsDir)
+	@mkdir -p $(binDir)/$(libsDir)/$(staticDir)
+	@mkdir -p $(binDir)/$(libsDir)/$(dynamicDir)
 
-libsBuild: $(LIBS)
+libsBuild:
+	$(foreach lib, $(LIBS), $(MAKE) -C $(srcDir)/$(libsDir)/$(lib);)
 
-# Commande yes
-
-yes: yesIntro $(binDir)/$(libsDir)/yes $(binDir)/$(libsDir)/libyesS.a \
-			  $(binDir)/$(libsDir)/libyesD.so
-	@echo "	"$(DONE)
-
-yesIntro:
-	@echo "	☞ yes"
-
-#exécutable
-$(binDir)/$(libsDir)/yes: $(objDir)/$(libsDir)/yes/yes.o \
-						  $(objDir)/$(libsDir)/yes/main.o
-	@echo "		$(BOLD_C)- Executable$(NO_C)"
-	@$(CC) -o $(binDir)/$(libsDir)/yes $^ $(LDFLAGS)
-	@echo "		$(CC) -o $(binDir)/$(libsDir)/yes $^ $(LDFLAGS)"
-	@echo "		"$(DONE)
-
-#librairie statique
-$(binDir)/$(libsDir)/libyesS.a: $(objDir)/$(libsDir)/yes/yes.o
-	$(call make-static-lib,$@,$^)
-
-#librairie dynamique
-$(binDir)/$(libsDir)/libyesD.so: $(objDir)/$(libsDir)/yes/yes.o
-	$(call make-dynamic-lib,$@,$^)
-
-$(objDir)/$(libsDir)/yes/%.o: $(srcDir)/$(libsDir)/yes/%.c
-	@mkdir -p $(objDir)/$(libsDir)/yes
-	@$(CC) $(CFLAGS) $(libCFLAGS) $(debug) -o $@ $^
-	@echo "		$(OK_C)"`basename $@`"$(NO_C)"
 
 ################################################################################
 #							Compilation du shell							   #
@@ -105,16 +88,20 @@ shellIntro:
 	@echo "$(BOLD_C)☞ Compiling Shell$(NO_C)"
 
 shellBuildDynamic: $(objDir)/$(shellDir)/main.o \
-				   $(objDir)/$(shellDir)/dynamicLib.o
+				   $(objDir)/$(shellDir)/libs.o \
+				   $(objDir)/$(shellDir)/utils.o \
+				   $(objDir)/$(shellDir)/shellCommands.o
 	@echo "$(BOLD_C)- using dynamic librairies$(NO_C)"
 	$(CC) -o $(binDir)/$(EXEC) $^ $(LDFLAGS)
 
 shellBuildStatic: $(objDir)/$(shellDir)/main-Static.o \
-				  $(objDir)/$(shellDir)/dynamicLib.o
+				   $(objDir)/$(shellDir)/libs.o \
+				   $(objDir)/$(shellDir)/utils.o \
+				  $(objDir)/$(shellDir)/shellCommands.o
 	@echo "$(BOLD_C)- using static librairies$(NO_C)"
 	$(CC) \
 		-o $(binDir)/$(EXEC)Static $^ \
-		-L$(binDir)/$(libsDir)/ $(addsuffix S, $(addprefix -l, $(LIBS))) $(LDFLAGS)
+		-L$(binDir)/$(libsDir)/$(staticDir) $(addprefix -l, $(LIBS)) $(LDFLAGS)
 	@echo "$(OK_C)✓ Shell Done$(NO_C)"
 
 $(objDir)/$(shellDir)/%.o: $(srcDir)/$(shellDir)/%.c
@@ -122,6 +109,7 @@ $(objDir)/$(shellDir)/%.o: $(srcDir)/$(shellDir)/%.c
 
 $(objDir)/$(shellDir)/%-Static.o: $(srcDir)/$(shellDir)/%.c
 	$(call compile-shell-dep, $@, $^, -DLIB_STATIC)
+
 
 
 ################################################################################
@@ -136,20 +124,3 @@ define compile-shell-dep
 	@echo "	"$(DONE)
 endef
 
-# $(call make-static-lib, /path/to/maLib.a, <.o files>)
-define make-static-lib
-	@echo "		$(BOLD_C)- Static$(NO_C)"
-	@ar -cr $1 $2
-	@echo "		ar -cr $1 $2"
-	@ranlib $1
-	@echo "		ranlib $1"
-	@echo "		"$(DONE)
-endef
-
-# $(call make-dynamic-lib,$@,$^)
-define make-dynamic-lib
-	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
-	@$(CC) -shared -o $1 $2
-	@echo "		$(CC) -shared -o $@ $^"
-	@echo "		"$(DONE)
-endef
