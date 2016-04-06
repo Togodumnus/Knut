@@ -14,7 +14,7 @@ chmodIntro:
 $(root)/$(binDir)/$(libsDir)/chmod: $(root)/$(objDir)/$(libsDir)/chmod/chmod.o \
 						  $(root)/$(objDir)/$(libsDir)/chmod/main.o
 	@echo "		$(BOLD_C)- Executable$(NO_C)"
-	@$(CC) -o $(root)/$(binDir)/$(libsDir)/chmod $^ $(LDFLAGS)
+	@$(CC) -o $(root)/$(binDir)/$(libsDir)/chmod $^ -lm $(LDFLAGS)
 	@echo "		$(CC) -o $(root)/$(binDir)/$(libsDir)/chmod $^ -lm $(LDFLAGS)"
 	@echo "		"$(DONE)
 
