@@ -9,12 +9,14 @@
 #include <grp.h>
 #include <time.h>
 
+#include "../../LIB.h"
+
 /**
 * mountName
-* 
-* Retourne le nom du mois 
-* 
- * @param  {int}  nb   Le numéro du mois 
+*
+* Retourne le nom du mois
+*
+ * @param  {int}  nb   Le numéro du mois
  */
 char * mouthName(int nb) {
 	switch(nb) {
@@ -69,7 +71,7 @@ int kls_al(int argc, char * argv[]) {
 	struct tm *tmInfo;
 
 	char *path;
-	
+
 	if (kargv[1]==NULL) {
 		path = "."; // repetoire courant
 	}
@@ -85,7 +87,7 @@ int kls_al(int argc, char * argv[]) {
 	if (kargc<3) {
 		while ((dptr=readdir(dirp))) {
 			stat(dptr->d_name, &statls);
-			
+
 			// ne marche pas
 		/*	if ((statls.st_mode & S_IFSOCK)==S_IFSOCK) printf("s");	// socket
 			else if ((statls.st_mode & S_IFLNK)==S_IFLNK) printf("l");	// symbolic link
@@ -115,7 +117,7 @@ int kls_al(int argc, char * argv[]) {
 
 			printf(" %d", statls.st_size); // taille
 
-			tmInfo =  localtime(&statls.st_mtime); 
+			tmInfo =  localtime(&statls.st_mtime);
 			printf(" %s %d %d:%d",mouthName(tmInfo->tm_mon), tmInfo->tm_mday, tmInfo->tm_hour, tmInfo->tm_min);
 			printf(" %s\n",dptr->d_name);
 		}
@@ -162,4 +164,14 @@ int kls(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
 	return kls(argv, argv);
+}
+
+/**
+ * Init
+ *
+ * S'enregistre dans le shell dans le cas d'un chargement de la librairie
+ * dynamique
+ */
+void Init(EnregisterCommande enregisterCommande) {
+    enregisterCommande("ls", kls);
 }
