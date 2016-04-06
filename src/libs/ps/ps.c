@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+#include "../../LIB.h"
 
 int psLib(int argc, char *argv[]){
     DIR *rep;
@@ -45,4 +46,12 @@ int kPsLib(int argc,char *argv[]){
     return psLib(argc,argv);
 }
 
-
+/**
+ * Init
+ *
+ * S'enregistre dans le shell dans le cas d'un chargement de la librairie
+ * dynamique
+ */
+void Init(EnregisterCommande enregisterCommande) {
+    enregisterCommande("ps", psLib);
+}

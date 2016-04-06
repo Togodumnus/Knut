@@ -19,6 +19,7 @@ EXEC=knutShell#le shell à compiler
 
 #librairies à compiler
 LIBS=yes 	\
+	 ps     \
 
 #Colors
 NO_C		=\033[0m
