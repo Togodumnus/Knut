@@ -12,9 +12,11 @@
 #include <ctype.h>
 #include <stdbool.h>
 
-/*TODO 
+#include "../../LIB.h"
 
-Lien important : 
+/*TODO
+
+Lien important :
 https://www.kernel.org/doc/Documentation/filesystems/proc.txt
 
 TROUVER POURQUOI CERTAINS UID N'ONT PAS DE NOMS D'UTILISATEURS
@@ -51,7 +53,7 @@ void infos_from_status(char* path, proc* process) {
 
     while(fgets(line, 100, statusf)) {
         tmp = 0;
-        //On est dans la ligne Uid : 
+        //On est dans la ligne Uid :
         if(strncmp(line, "Uid:", 4) == 0){
             //On récupère l'uid de la ligne et on le transforme en int dans la variable uid
             p = line + strlen("Uid:");
@@ -71,13 +73,13 @@ void infos_from_status(char* path, proc* process) {
                 process->user = "?";
             }else{
                 process->user = user->pw_name;
-            } 
+            }
         }
 
-        //On est dans la ligne Pid : 
+        //On est dans la ligne Pid :
         else if(strncmp(line, "Pid:", 4) == 0){
 
-            //On récupère le pid qu'on transforme en int 
+            //On récupère le pid qu'on transforme en int
             p = line + strlen("Pid:");
             while(isspace(*p)) {
                 ++p;
@@ -97,7 +99,7 @@ void infos_from_status(char* path, proc* process) {
         //On est dans la ligne VmSize
         else if(strncmp(line, "VmSize:", 4) == 0){
             vmSizeHere = true;
-            //On récupère le pid qu'on transforme en int 
+            //On récupère le pid qu'on transforme en int
             p = line + strlen("VmSize:");
             while(isspace(*p)) {
                 ++p;
@@ -116,7 +118,7 @@ void infos_from_status(char* path, proc* process) {
         //On est dans la ligne VmRSS
         else if(strncmp(line, "VmRSS:", 4) == 0){
             vmRssHere = true;
-            //On récupère le pid qu'on transforme en int 
+            //On récupère le pid qu'on transforme en int
             p = line + strlen("VmRSS:");
             while(isspace(*p)) {
                 ++p;
@@ -132,14 +134,14 @@ void infos_from_status(char* path, proc* process) {
             //on stocke dans la structure proc le VSZ
             process->rss = rss;
         }
-        
+
     }
     //Si la ligne vmSize n'existe pas dans le status
     if (!vmSizeHere){
-        process->vsz = 0;            
+        process->vsz = 0;
     }
     if (!vmRssHere){
-        process->rss = 0;            
+        process->rss = 0;
     }
 
     fclose(statusf);
@@ -159,7 +161,7 @@ int psNoOpt(int argc, char *argv[]){
         exit(EXIT_FAILURE);
     }
     printf("repository /proc opened successfully\n");
-    
+
     printf ("USER         PID  %cCPU  %cMEM    VSZ      RSS TTY      STAT START   TIME COMMAND\n",'%','%');
 
     while ((fichierLu = readdir(rep)) != NULL){
@@ -170,7 +172,7 @@ int psNoOpt(int argc, char *argv[]){
             strcpy(concat_proc_nameOfFile, REPERTOIRE_PROC);
             strcat(concat_proc_nameOfFile, "/");
             strcat(concat_proc_nameOfFile, fichierLu->d_name);
-            
+
             if ((sousRep=opendir(concat_proc_nameOfFile))==NULL) {
                 printf("Not closed repository\n");
                 exit(EXIT_FAILURE);
@@ -178,7 +180,7 @@ int psNoOpt(int argc, char *argv[]){
                 //On a réussi à ouvrir le dossier correspondant au processus
                 while ((fichierLuBis = readdir(sousRep)) != NULL){
                     proc process;
-                    if (strcmp(fichierLuBis->d_name,"status") == 0){ 
+                    if (strcmp(fichierLuBis->d_name,"status") == 0){
                         char* path_to_status = (char *) malloc(1+strlen(concat_proc_nameOfFile)+strlen("/status"));
                         strcpy(path_to_status, concat_proc_nameOfFile);
                         strcat(path_to_status, "/status");
@@ -187,11 +189,11 @@ int psNoOpt(int argc, char *argv[]){
 
 
                     }
-                    printf("%10s %5d %20d %7d \n", 
+                    printf("%10s %5d %20d %7d \n",
                             process.user,
                             process.pid,
                             process.vsz,
-                            process.rss);                       
+                            process.rss);
                 }
             }
         }
@@ -220,4 +222,14 @@ int kPs(int argc,char *argv[]){
             break;
     }
     return psNoOpt(argc,argv);
+}
+
+/**
+ * Init
+ *
+ * S'enregistre dans le shell dans le cas d'un chargement de la librairie
+ * dynamique
+ */
+void Init(EnregisterCommande enregisterCommande) {
+    enregisterCommande("ps", kPs);
 }
