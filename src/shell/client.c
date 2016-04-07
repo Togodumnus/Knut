@@ -60,47 +60,27 @@ int sendall(int socket, char *buffer, int length, int flag) {
  */
 int createClientSocket(char *addr, int port) {
 
-    int status;
-    struct addrinfo hints = {};      //config
-    struct addrinfo *servinfo;       //info serveur
-
-    char *port_ch = (char *) malloc(6 * sizeof(char));
-    if (port_ch == NULL) {
-        perror("malloc error");
-        exit(EXIT_FAILURE);
-    }
-    sprintf(port_ch, "%d", port);
-
-    hints.ai_family   = AF_UNSPEC;   //IPv4 ou IPv6
-    hints.ai_socktype = SOCK_STREAM; //TCP
-    hints.ai_flags    = AI_PASSIVE;  //remplir automatiquement mon ip
-
-    if ((status = getaddrinfo(addr, port_ch, &hints, &servinfo)) != 0) {
-        fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
-        exit(EXIT_FAILURE);
-    }
+    struct sockaddr_in6 config;
 
     DEBUG("Connection to %s:%d", addr, port);
 
-    SOCKET sock = socket(
-        servinfo->ai_family,
-        servinfo->ai_socktype,
-        servinfo->ai_protocol
-    );
-
+    SOCKET sock = socket(AF_INET6, SOCK_STREAM, 0);
     if (sock == -1) {
         perror("Socket error");
         exit(EXIT_FAILURE);
     }
 
-    if (connect(sock, servinfo->ai_addr, servinfo->ai_addrlen) < 0) {
+    //connection compatible IPV6 ET IPV4
+    memset(&config, 0, sizeof(config));
+    config.sin6_family = AF_INET6;
+    memcpy(&config.sin6_addr, &in6addr_any, sizeof(in6addr_any));
+    config.sin6_port = htons(port);
+
+    if (connect(sock, (struct sockaddr *)&config,
+            sizeof(struct sockaddr_in6)) < 0) {
         perror("connect()");
         exit(EXIT_FAILURE);
     }
-
-    //On met le socket en état non bloquant pour que recv ne soit pas bloquant
-
-    freeaddrinfo(servinfo); // free the linked-list
 
     return sock;
 }

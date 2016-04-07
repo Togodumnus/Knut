@@ -51,31 +51,6 @@ void *getAdresse(struct sockaddr *sa) {
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-
-/**
- * configServeur
- *
- * Configuration du serveur avant lancement d'un socket
- *
- * @param  {char *} port
- */
-void configServeur(char *port, struct addrinfo **serveur_info) {
-
-    struct addrinfo config; //config
-    char *hostname = NULL;  //on est serveur
-
-    memset(&config, 0, sizeof(config)); //RAZ de config
-    config.ai_family   = AF_UNSPEC;     //IPv4 or IPv6
-    config.ai_socktype = SOCK_STREAM;   //TCP
-    config.ai_flags    = AI_PASSIVE;    //config d'un serveur
-
-    int result_code;
-    if ((result_code = getaddrinfo(hostname, port, &config, serveur_info)) != 0) {
-        fprintf(stderr, "server: %s\n", gai_strerror(result_code));
-        exit(EXIT_FAILURE);
-    }
-}
-
 /**
  * createServerSocket
  *
@@ -88,20 +63,18 @@ void configServeur(char *port, struct addrinfo **serveur_info) {
  */
 SOCKET createServerSocket(int port) {
 
-    struct addrinfo *serveur_info = NULL;
-
-    char port_buf[6];
-    sprintf((char *)port_buf, "%d", port);
-    port_buf[5] = '\0';
-    configServeur(port_buf, &serveur_info);
-
     //Création du socket serveur
     SOCKET listener;
     listener = socket(
-        serveur_info->ai_family,
-        serveur_info->ai_socktype,
-        serveur_info->ai_protocol
+        AF_INET6,       //IPV6 ou IPV4
+        SOCK_STREAM,    //TCP
+        0
     );
+
+    if (listener < 0) {
+        perror("socket() failed");
+        exit(EXIT_FAILURE);
+    }
 
     //Empêcher le blocage du socket si on kill le process
     int yes = 1;
@@ -110,9 +83,16 @@ SOCKET createServerSocket(int port) {
         exit(EXIT_FAILURE);
     }
 
-    //On tente un bind
+    struct sockaddr_in6 config; //config
 
-    if (bind(listener, serveur_info->ai_addr, serveur_info->ai_addrlen) < 0) {
+    memset(&config, 0, sizeof(config));
+    config.sin6_family  = AF_INET6;
+    config.sin6_port    = htons(port);
+    config.sin6_addr    = in6addr_any;
+
+    //On tente un bind
+    if (bind(listener, (struct sockaddr *)&config,
+                sizeof(config)) < 0) {
         close(listener);
 
         if (errno == EADDRINUSE) { //le port est occupé
@@ -121,8 +101,6 @@ SOCKET createServerSocket(int port) {
             exit(EXIT_FAILURE);
         }
     }
-
-    freeaddrinfo(serveur_info); //config terminée
 
     return listener;
 }
