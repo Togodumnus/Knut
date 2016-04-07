@@ -92,14 +92,19 @@ int kmkdir_p(char * path, int permissions) {
  * @param  {char[] *}  argv    Les arguments d'entrée
  */
 int kmkdir(int argc, char * argv[]) {
-    if (argc<2) {
+
+    if (argc < 2) {
         printf("kmkdir : missing operand\n");
         exit(EXIT_FAILURE);
     }
+
     int c;
     int vFlag = 0;
+
+    //FIXME : faut aller chercher les permissions du bash
     int permissions = 0775; // permissions de base
-    while((c = getopt(argc, argv, "pmv")) != -1) {
+
+    while ((c = getopt(argc, argv, "pmv")) != -1) {
         switch(c) {
             case 'm':
                 permissions = kmkdir_m(argc, argv);
@@ -113,12 +118,15 @@ int kmkdir(int argc, char * argv[]) {
                 exit(EXIT_FAILURE);
         }
     }
+
     if (mkdir(argv[argc-1], permissions) == -1) {
         perror("kmkdir");
         exit(EXIT_FAILURE);
     }
+
     if (vFlag)
         kmkdir_v(argv[argc-1]);
+
     return 0;
 }
 
