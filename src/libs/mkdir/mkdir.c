@@ -2,17 +2,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 #include <math.h>
-#include <libgen.h>
 #include <string.h>
+#include <stdbool.h>
+#include <errno.h>
+
 #include "../../LIB.h"
+#include "../../DEBUG.h"
+
+const int vFlag = 0x1;
+const int pFlag = 0x2;
+
+#ifdef __APPLE__
+mode_t getumask(void) {
+    mode_t mask = umask( 0 );
+    umask(mask);
+    return mask;
+}
+#endif
 
 /**
  * octal_decimal
  *
- * Convertie un nombre decimal en base octal
+ * Convertit un nombre decimal en octal
  *
  * @param  {int}  n    Le nombre à convertir
  */
@@ -41,45 +54,54 @@ int kmkdir_v(char * dirname) {
 }
 
 /**
- * kmkdir_m
- *
- * Option 'm' de mkdir : droit préciser lors de la création du répertoire
- *
- * @param  {int}       argc    Le nombre d'arguments d'entrée
- * @param  {char[] *}  argv    Les arguments d'entrée
- */
-int kmkdir_m(int argc, char * argv[]) {
-    if (argc<4) {
-        printf("kmkdir : missing operand\n");
-        exit(EXIT_FAILURE);
-    }
-    return octal_decimal(atoi(argv[argc-2]));
-}
-
-/**
  * kmkdir_p
  *
- * Option 'p' de mkdir : créer les répertoires parents nécessaire
+ * Compatible avec l'option 'p' de mkdir :
+ * cré les répertoires parents nécessaire
  *
  * @param  {char *}   path           Le chemin du répertoire à créé
  * @param  {int}      permissions    Les permissions du répertoire créé
+ * @param  {bool}     verbose        Verbose flag
  */
-int kmkdir_p(char * path, int permissions) {
-    if (!strcmp(dirname(path),".")) { // si path est "seul" (usr/) (création du premier dossier)
-        if (mkdir(path, permissions) == -1) {
-            perror("kmkdir p");
-            exit(EXIT_FAILURE);
+int kmkdir_p(char *path, int permissions, bool verbose) {
+
+    DEBUG("will mkdir %s", path);
+
+    char *ch = path;
+    int len = strlen(path);
+
+    if (*path == '/') {
+        ch++;
+    }
+
+    if (path[len - 1] == '/') {
+        path[len - 1] = '\0';
+    }
+
+    for (; *ch; ch++) {
+        if (*ch == '/') {
+            *ch = '\0';
+            DEBUG("mkdir %s", path);
+            if (mkdir(path, permissions) < 0) {
+                if (errno == EEXIST) {
+                    continue;
+                } else {
+                    perror("Mkdir error");
+                    return -1;
+                }
+            } else if (verbose) {
+                printf("Create %s dir\n", path);
+            }
+            *ch = '/';
         }
-        return 0;
     }
-    else { // sinon on rappel kmkdir_p jusqu'à créé le premier dossier
-        kmkdir_p(path, permissions);
+
+    DEBUG("mkdir %s", path);
+    if (mkdir(path, permissions) < 0) {
+        perror("Mkdir error");
+        return -1;
     }
-    // pour les autres dossiers
-    if (mkdir(path, permissions) == -1) {
-            perror("kmkdir p2");
-            exit(EXIT_FAILURE);
-    }
+
     return 0;
 }
 
@@ -99,33 +121,56 @@ int kmkdir(int argc, char * argv[]) {
     }
 
     int c;
-    int vFlag = 0;
+    int flag = 0; //verbose and p flags
+    int nbParams = 1;
 
-    //FIXME : faut aller chercher les permissions du bash
-    int permissions = 0775; // permissions de base
+    //on applique le mask des permissions
+    mode_t permissions = 0777 & ~getumask();
 
-    while ((c = getopt(argc, argv, "pmv")) != -1) {
+    while ((c = getopt(argc, argv, "pm:v")) != -1) {
         switch(c) {
             case 'm':
-                permissions = kmkdir_m(argc, argv);
+                DEBUG("m option");
+                permissions = octal_decimal(atoi(optarg));
+                nbParams += 2;
                 break;
             case 'v':
-                vFlag = 1;
+                DEBUG("v option");
+                flag |= vFlag;
+                nbParams++;
                 break;
             case 'p':
-                kmkdir_p(argv[argc-1], permissions);
-            case '?': // option pas reconnu
+                DEBUG("p option");
+                flag |= pFlag;
+                nbParams++;
+                break;
+            default:
                 exit(EXIT_FAILURE);
         }
     }
 
-    if (mkdir(argv[argc-1], permissions) == -1) {
-        perror("kmkdir");
-        exit(EXIT_FAILURE);
+    if (permissions < 0 || permissions > 0777) {
+        perror("Wrong permissions");
     }
 
-    if (vFlag)
-        kmkdir_v(argv[argc-1]);
+    char *dir = argv[nbParams];
+
+    do {
+        if ((flag & pFlag) == pFlag) {
+            if (kmkdir_p(argv[nbParams], permissions,
+                        (flag & vFlag) == vFlag) == -1) {
+                return EXIT_FAILURE;
+            }
+        } else {
+            if (mkdir(argv[nbParams], permissions) == -1) {
+                perror("Mkdir error");
+                return EXIT_FAILURE;
+            }
+        }
+
+        dir = argv[nbParams++];
+
+    } while (nbParams < argc);
 
     return 0;
 }
