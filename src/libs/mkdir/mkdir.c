@@ -153,8 +153,6 @@ int kmkdir(int argc, char * argv[]) {
         perror("Wrong permissions");
     }
 
-    char *dir = argv[nbParams];
-
     do {
         if ((flag & pFlag) == pFlag) {
             if (kmkdir_p(argv[nbParams], permissions,
@@ -168,7 +166,7 @@ int kmkdir(int argc, char * argv[]) {
             }
         }
 
-        dir = argv[nbParams++];
+        nbParams++;
 
     } while (nbParams < argc);
 
