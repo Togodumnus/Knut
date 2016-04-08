@@ -14,13 +14,19 @@
 const int vFlag = 0x1;
 const int pFlag = 0x2;
 
-#ifdef __APPLE__
+/**
+ * getumask
+ *
+ * Retourne le mask courant
+ *
+ * @see man 3 getumask sinon mais pas dispo sous OSX et impossible de linker
+ * getumask avec gcc. Bizarre.
+ */
 mode_t getumask(void) {
     mode_t mask = umask( 0 );
     umask(mask);
     return mask;
 }
-#endif
 
 /**
  * octal_decimal
