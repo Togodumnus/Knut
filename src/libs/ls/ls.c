@@ -18,13 +18,15 @@
 #define CYAN     "\033[1;36m"
 
 
+#include "../../LIB.h"
+
 /**
  * printColorFile
  * 
  * Affiche le nom du fichier avec la couleur correspondante en fonction du type de fichier
  * 
  * @param  {mode_t}  mode   Le mode_t du fichier
- * @param  {char *}  mode   Le mode_t du fichier
+ * @param  {char *}  mode   Le nom du fichier à affiche
 */
 void printColorFile(mode_t mode, char * path) {
     if (S_ISDIR(mode)) { // repertoire
@@ -60,9 +62,8 @@ void printColorFile(mode_t mode, char * path) {
         printf("%s",path);
         printf("%s", NOCOLOR);
     }
-    
 }
-
+    
 /**
  * monthName
  * 
@@ -231,7 +232,6 @@ int kls_al(int argc, char * argv[], int aFlag) {
     return 0;
 }
 
-
 /**
  * kls
  * 
@@ -270,4 +270,14 @@ int kls(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     return kls(argc, argv);
+}
+
+/**
+ * Init
+ *
+ * S'enregistre dans le shell dans le cas d'un chargement de la librairie
+ * dynamique
+ */
+void Init(EnregisterCommande enregisterCommande) {
+    enregisterCommande("ls", kls);
 }
