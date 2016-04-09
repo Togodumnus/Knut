@@ -58,19 +58,11 @@ char * mouthName(int nb) {
     return "Error";
 }
 
-int kls_no_opt(int argc, char * argv[]) {
+int kls_no_opt(int argc, char * argv[], int aFlag) {
     return 0;
 }
 
-int kls_l(int argc, char * argv[]) {
-    return 0;
-}
-
-int kls_a(int argc, char * argv[]) {
-    return 0;
-}
-
-int kls_al(int argc, char * argv[]) {
+int kls_al(int argc, char * argv[], int aFlag) {
     DIR *dirp;
     struct dirent *dptr;
 
@@ -82,63 +74,66 @@ int kls_al(int argc, char * argv[]) {
 
     char path[strlen(argv[argc-1])];
 
+
     
-    if (!strcmp(argv[argc-1],"-al")) { // si y'a pas de chemin donné dans kls
+    if ((!strcmp(argv[argc-1],"-al"))||(!strcmp(argv[argc-1],"-l"))) { // si y'a pas de chemin donné dans kls
         strcpy(path, "."); // repetoire courant
     }
     else {
         strcpy(path, argv[argc-1]);
     }
 
-    printf("%s\n",path);
-
     if ((dirp=opendir(path))==NULL) {
-        printf("Error\n");
-        return -1;
+        perror("kls");
+        exit(EXIT_FAILURE);
     }
 
     if (argc<4) {
         while ((dptr=readdir(dirp))) {
-            stat(dptr->d_name, &statls);
-            
-            if ((statls.st_mode & S_IFSOCK)==S_IFSOCK) printf("s"); // socket
-            else if ((statls.st_mode & S_IFLNK)==S_IFLNK) printf("l");  // symbolic link
-            else if ((statls.st_mode & S_IFREG)==S_IFREG) printf("-");  // regular file
-            else if ((statls.st_mode & S_IFBLK)==S_IFBLK) printf("b");  // block device
-            else if ((statls.st_mode & S_IFDIR)==S_IFDIR) printf("d");  // directory
-            else if ((statls.st_mode & S_IFCHR)==S_IFCHR) printf("c");  // character device
-            else if ((statls.st_mode & S_IFIFO)==S_IFIFO) printf("p");  // FIFO*
+            // si pas aFlag : on prend pas en compte les fichier cachés etc.. sinon on prend tout
+            if (((!aFlag)&&(dptr->d_name[0] != '.'))||(aFlag)) { 
+                stat(dptr->d_name, &statls);
+        
+                if ((statls.st_mode & S_IFSOCK)==S_IFSOCK) printf("s"); // socket
+                else if ((statls.st_mode & S_IFLNK)==S_IFLNK) printf("l");  // symbolic link
+                else if ((statls.st_mode & S_IFREG)==S_IFREG) printf("-");  // regular file
+                else if ((statls.st_mode & S_IFBLK)==S_IFBLK) printf("b");  // block device
+                else if ((statls.st_mode & S_IFDIR)==S_IFDIR) printf("d");  // directory
+                else if ((statls.st_mode & S_IFCHR)==S_IFCHR) printf("c");  // character device
+                else if ((statls.st_mode & S_IFIFO)==S_IFIFO) printf("p");  // FIFO*
 
-            printf("%c",(statls.st_mode & S_IRUSR)==S_IRUSR ? 'r' : '-');   // owner R
-            printf("%c",(statls.st_mode & S_IWUSR)==S_IWUSR ? 'w' : '-');   // owner W
-            printf("%c",(statls.st_mode & S_IXUSR)==S_IXUSR ? 'x' : '-');   // owner X
-            printf("%c",(statls.st_mode & S_IRGRP)==S_IRGRP ? 'r' : '-');   // group R
-            printf("%c",(statls.st_mode & S_IWGRP)==S_IWGRP ? 'w' : '-');   // group W
-            printf("%c",(statls.st_mode & S_IXGRP)==S_IXGRP ? 'x' : '-');   // group X
-            printf("%c",(statls.st_mode & S_IROTH)==S_IROTH ? 'r' : '-');   // other R
-            printf("%c",(statls.st_mode & S_IWOTH)==S_IWOTH ? 'w' : '-');   // other W
-            printf("%c",(statls.st_mode & S_IXOTH)==S_IXOTH ? 'x' : '-');   // other X
+                printf("%c",(statls.st_mode & S_IRUSR)==S_IRUSR ? 'r' : '-');   // owner R
+                printf("%c",(statls.st_mode & S_IWUSR)==S_IWUSR ? 'w' : '-');   // owner W
+                printf("%c",(statls.st_mode & S_IXUSR)==S_IXUSR ? 'x' : '-');   // owner X
+                printf("%c",(statls.st_mode & S_IRGRP)==S_IRGRP ? 'r' : '-');   // group R
+                printf("%c",(statls.st_mode & S_IWGRP)==S_IWGRP ? 'w' : '-');   // group W
+                printf("%c",(statls.st_mode & S_IXGRP)==S_IXGRP ? 'x' : '-');   // group X
+                printf("%c",(statls.st_mode & S_IROTH)==S_IROTH ? 'r' : '-');   // other R
+                printf("%c",(statls.st_mode & S_IWOTH)==S_IWOTH ? 'w' : '-');   // other W
+                printf("%c",(statls.st_mode & S_IXOTH)==S_IXOTH ? 'x' : '-');   // other X
 
-            printf(" %d", (int) statls.st_nlink); // number of hard links
+                printf(" %d", (int) statls.st_nlink); // number of hard links
 
-            user = getpwuid(statls.st_uid); // user name
-            printf(" %s", user->pw_name);
+                user = getpwuid(statls.st_uid); // user name
+                printf(" %s", user->pw_name);
 
-            grd = getgrgid(statls.st_gid); // group name
-            printf(" %s\t", grd->gr_name);
+                grd = getgrgid(statls.st_gid); // group name
+                printf(" %s\t", grd->gr_name);
 
-            printf(" %d\t",(int) statls.st_size); // taille
+                printf(" %d\t",(int) statls.st_size); // taille
 
-            tmInfo =  localtime(&statls.st_mtime); 
-            printf(" %s %d %d:%d\t",mouthName(tmInfo->tm_mon), tmInfo->tm_mday, tmInfo->tm_hour, tmInfo->tm_min);
-            if (S_ISDIR(statls.st_mode)) {
-                printf("%s",BLUE);
-                printf(" %s",dptr->d_name);
-                printf("%s",NOCOLOR);
-                printf("/\n");
+                tmInfo =  localtime(&statls.st_mtime); 
+                printf(" %s %d %d:%d\t",mouthName(tmInfo->tm_mon), tmInfo->tm_mday, tmInfo->tm_hour, tmInfo->tm_min);
+                if (S_ISDIR(statls.st_mode)) {
+                    printf("%s",BLUE);
+                    printf(" %s",dptr->d_name);
+                    printf("%s",NOCOLOR);
+                    printf("/\n");
+                }
+                else    
+                    printf(" %s\n",dptr->d_name);
             }
-            else    
-                printf(" %s\n",dptr->d_name);
+            
 
         }
     }
@@ -168,17 +163,11 @@ int kls(int argc, char *argv[]) {
                 break;
         }
     }
-    if ((aFlag)&&(lFlag)) {
-        return kls_al(argc, argv);
-    }
-    else if (aFlag) {
-        return kls_a(argc, argv);
-    }
-    else if (lFlag) {
-        return kls_l(argc, argv);
+    if (lFlag) {
+        return kls_al(argc, argv, aFlag);
     }
     else {
-        return kls_no_opt(argc, argv);
+        return kls_no_opt(argc, argv, aFlag);
     }
     return 0;
 }
