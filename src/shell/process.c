@@ -291,6 +291,11 @@ int process(char *str, int fdInput, int fdOutput) {
                 dup2(pstdout[PIPE_WRITE], fileno(stdout));
             }
 
+            //en mode socket on veut rediriger stderr sur le client
+            if (isSocket(fdInput)) {
+                dup2(pstdout[PIPE_WRITE], fileno(stderr));
+            }
+
             //Exécution de la commande
             //@see process.c#exec()
             exec(action, cmd);
