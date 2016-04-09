@@ -166,19 +166,6 @@ int kls(int argc, char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
-	DIR *dirp_src;
-    struct dirent *dptr_src;
-
-    char * dir_path_src_tmp = "/proc/1219":
-
-    if ((dirp_src = opendir(dir_path_src_tmp)) == NULL) {
-        printf("Can't open directory %s %s\n", dir_path_src_tmp, strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-
-
-    while ((dptr_src = readdir(dirp_src)) != NULL) { //tous les éléments de la source
-    }
-
+	return kls(argc, argv);
 
 }
