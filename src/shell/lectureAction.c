@@ -10,6 +10,22 @@
 #include "../DEBUG.h"
 
 /**
+ * removeCharFromString
+ *
+ * Va supprimer le caractère ch de str en décallant la suite de str
+ *
+ * @param  {char *} str     La chaîne
+ * @param  {char *} ch      Un caractère de la str
+ */
+void removeCharFromString(char *str, char *ch) {
+    char copy[strlen(str)];
+    strcpy(copy, str);
+    *ch = '\0';
+    DEBUG("Removing character %ld", (ch - str));
+    strcat(str, copy + (ch - str) + 1);
+}
+
+/**
  * createString
  *
  * Copie un morceau d'une chaîne de charactère après avoir alloué l'espace
@@ -145,6 +161,14 @@ Command *lectureAction(Action *action) {
      */
     char ch;
 
+    /**
+     * withSpace
+     *
+     * True si on est passé sur un \ servant à un argument avec espace.
+     * @Example     cat Mon\ Super \Fichier
+     */
+    bool withSpace = false;
+
     bool done = false;
 
     do {
@@ -186,7 +210,12 @@ Command *lectureAction(Action *action) {
 
             case READING_COMMAND:
                 DEBUG("READING_COMMAND %c", ch);
-                if (ch == '<' || ch == '>' || ch == ' ') {
+                if (ch == '\\') {
+                    DEBUG("READ \\");
+                    withSpace = true;
+                    removeCharFromString(action->cmd, start + length);
+                    length -= 1;
+                } else if (ch == '<' || ch == '>' || ch == ' ') {
                     if (ch == '<') {
                         fromFile = true;
                         state = CHEVRON;
@@ -195,6 +224,10 @@ Command *lectureAction(Action *action) {
                         state = CHEVRON;
                     }
 
+                    if (ch == ' ' && withSpace) {
+                        withSpace = false;
+                        continue;
+                    }
                     //on enregistre le mot précédent
                     completeCmdAndArg(cmd, start, length);
                     start += length + 1; //RAZ
@@ -216,12 +249,24 @@ Command *lectureAction(Action *action) {
 
             case READING_FILE:
                 DEBUG("READING_FILE %c", ch);
-                if (ch == ' ' && length == 0) { //espace au début
+                if (ch == '\\') {
+                    DEBUG("READ \\");
+                    withSpace = true;
+                    removeCharFromString(action->cmd, start + length);
+                    length -=1;
+                } else if (ch == ' ' && length == 0) { //espace au début
                     //ne pas retenir cet espace
                     start += 1;
-                } else if (ch == ' ' && length > 0) { //espace à la fin
+                } else if (ch == ' ' && length > 0 && !withSpace) {
+                    //espace à la fin
                     done = true;
                 }
+
+                if (ch == ' ' && withSpace) {
+                    withSpace = false;
+                    continue;
+                }
+
                 break;
 
             default:
