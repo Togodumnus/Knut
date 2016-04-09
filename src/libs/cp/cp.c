@@ -18,11 +18,34 @@ const int BUFFER_SIZE = 1024;
 const int FOLDER_RIGHT = 0775;
 
 /**
+ * copyPermissions
+ *
+ * @param  {char *} source
+ * @param  {char *} dest
+ */
+void copyPermissions(char *source, char *dest) {
+    struct stat sourceSt;
+
+    if (stat(source, &sourceSt) == -1) {
+        perror("Source doesn't exists");
+        exit(EXIT_FAILURE);
+    }
+
+    if (chmod(dest, sourceSt.st_mode & 07777) == -1) {
+        perror("Can't set file permissions");
+        exit(EXIT_FAILURE);
+    }
+}
+
+/**
  * mkdirFull
  *
  * @param  {char *} path        Le dossier à créer
+ *
+ * @return {int}        -1 si le dossier existe déjà
+ *                      0  si le dossier a bien été créé
  */
-void mkdirFull(char *path) {
+int mkdirFull(char *path) {
     struct stat st;
 
     if (stat(path, &st) == -1) {
@@ -30,7 +53,11 @@ void mkdirFull(char *path) {
             perror("Can't create dir");
             exit(EXIT_FAILURE);
         }
+
+        return 0;
     }
+
+    return -1;
 }
 
 /**
@@ -74,6 +101,9 @@ int kcp_file_to_file(char *path1, char *path2) {
 
     fclose(f1);
     fclose(f2);
+
+    copyPermissions(path1, path2);
+
     return 0;
 }
 
@@ -86,7 +116,7 @@ int kcp_file_to_file(char *path1, char *path2) {
  * @param  {char *}     dir_path   La destination
  */
 int kcp_file_to_dir(char *file_path, char *dir_path) {
-    FILE * f;
+    FILE *f;
 
     // au cas ou l'utilisateur a entré le chemin sans / à la fin
     char *dir = dir_path;
@@ -153,7 +183,10 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
     char dir_path_dest_tmp[strlen(dir_path_dest) + 2];
     strcpy(dir_path_dest_tmp, dir_path_dest);
     strcat(dir_path_dest_tmp, "/");
-    mkdirFull(dir_path_dest_tmp);
+    if (mkdirFull(dir_path_dest_tmp) == 0) {
+        //on a créé un nouveau dossier, on copie les permissions
+        copyPermissions(dir_path_src, dir_path_dest_tmp);
+    }
 
     //ajout d'un / à la source
     char dir_path_src_tmp[strlen(dir_path_src) + 100];
