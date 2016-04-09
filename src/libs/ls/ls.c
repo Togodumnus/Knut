@@ -10,25 +10,67 @@
 #include <time.h>
 #include <string.h>
 
-#define NOCOLOR    "\033[1;00m"
-#define BLACK    "\033[1;30m"
-#define RED      "\033[1;31m"
+#define NOCOLOR  "\033[1;00m"
 #define GREEN    "\033[1;32m"
 #define YELLOW   "\033[1;33m"
 #define BLUE     "\033[1;34m"
 #define PURPLE   "\033[1;35m"
 #define CYAN     "\033[1;36m"
-#define GREY     "\033[1;37m"
 
 
 /**
-* mountName
-* 
-* Retourne le nom du mois 
-* 
+ * printColorFile
+ * 
+ * Affiche le nom du fichier avec la couleur correspondante en fonction du type de fichier
+ * 
+ * @param  {mode_t}  mode   Le mode_t du fichier
+ * @param  {char *}  mode   Le mode_t du fichier
+*/
+void printColorFile(mode_t mode, char * path) {
+    if (S_ISDIR(mode)) { // repertoire
+        printf("%s",BLUE);
+        printf("%s/  ",path);
+        printf("%s",NOCOLOR);
+    }
+    else if (S_ISREG(mode)) { // régulier
+        printf("%s  ",path);
+    }
+    else if (S_ISLNK(mode)) { // lien 
+        printf("%s",CYAN);
+        printf("%s",path);
+        printf("%s",NOCOLOR);
+    }
+    else if (S_ISSOCK(mode)) { // socket
+        printf("%s",PURPLE);
+        printf("%s",path);
+        printf("%s", NOCOLOR);
+    }
+    else if (S_ISCHR(mode)) { // périphérique de caractères
+        printf("%s",YELLOW);
+        printf("%s",path);
+        printf("%s",NOCOLOR);
+    }
+    else if (S_ISBLK(mode)) { //  périphérique de blocs
+        printf("%s",YELLOW);
+        printf("%s",path);
+        printf("%s",NOCOLOR);
+    }
+    else if (S_ISFIFO(mode)) { // fifo
+        printf("%s",YELLOW);
+        printf("%s",path);
+        printf("%s", NOCOLOR);
+    }
+    
+}
+
+/**
+ * monthName
+ * 
+ * Retourne le nom du mois en fonction de son numéro
+ * 
  * @param  {int}  nb   Le numéro du mois 
- */
-char * mouthName(int nb) {
+*/
+char * monthName(int nb) {
     switch(nb) {
         case 0:
             return "janv.";
@@ -58,10 +100,58 @@ char * mouthName(int nb) {
     return "Error";
 }
 
-int kls_no_opt(int argc, char * argv[], int aFlag) {
+/**
+ * kls_no_opt
+ * 
+ * ls avec option -a ou non (dépand de aFlag)
+ * 
+ * @param  {int}       argc   Le nombre d'arguments
+ * @param  {char[] *}  argv   Les arguments d'entrée
+ * @param  {int}       aFlag  Option -a
+*/
+int kls_a(int argc, char * argv[], int aFlag) {
+    DIR *dirp;
+    struct dirent *dptr;
+
+    struct stat statls;
+
+    char path[strlen(argv[argc-1])];
+
+    if ((!strcmp(argv[argc-1],"-a"))||(argc<2)) { // si y'a pas de chemin donné dans kls
+        strcpy(path, "."); // repetoire courant
+    }
+    else {
+        strcpy(path, argv[argc-1]);
+    }
+
+    if ((dirp=opendir(path))==NULL) {
+        perror("kls");
+        exit(EXIT_FAILURE);
+    }
+
+    while ((dptr=readdir(dirp))) {
+        if (stat(dptr->d_name, &statls) == -1) {
+            perror("kls");
+            exit(EXIT_FAILURE);
+        }
+        if (((!aFlag)&&(dptr->d_name[0] != '.'))||(aFlag)) { 
+            printColorFile(statls.st_mode, dptr->d_name);
+        }
+    }
+    printf("\n");
+
     return 0;
 }
 
+/**
+ * kls_al
+ * 
+ * ls avec option -l et -a ou non (dépand de aFlag)
+ * 
+ * @param  {int}       argc   Le nombre d'arguments
+ * @param  {char[] *}  argv   Les arguments d'entrée
+ * @param  {int}       aFlag  Option -a
+*/
 int kls_al(int argc, char * argv[], int aFlag) {
     DIR *dirp;
     struct dirent *dptr;
@@ -73,8 +163,6 @@ int kls_al(int argc, char * argv[], int aFlag) {
     struct tm *tmInfo;
 
     char path[strlen(argv[argc-1])];
-
-
     
     if ((!strcmp(argv[argc-1],"-al"))||(!strcmp(argv[argc-1],"-l"))) { // si y'a pas de chemin donné dans kls
         strcpy(path, "."); // repetoire courant
@@ -92,7 +180,10 @@ int kls_al(int argc, char * argv[], int aFlag) {
         while ((dptr=readdir(dirp))) {
             // si pas aFlag : on prend pas en compte les fichier cachés etc.. sinon on prend tout
             if (((!aFlag)&&(dptr->d_name[0] != '.'))||(aFlag)) { 
-                stat(dptr->d_name, &statls);
+                if (stat(dptr->d_name, &statls) == -1) {
+                    perror("kls");
+                    exit(EXIT_FAILURE);
+                }
         
                 if ((statls.st_mode & S_IFSOCK)==S_IFSOCK) printf("s"); // socket
                 else if ((statls.st_mode & S_IFLNK)==S_IFLNK) printf("l");  // symbolic link
@@ -124,14 +215,9 @@ int kls_al(int argc, char * argv[], int aFlag) {
 
                 tmInfo =  localtime(&statls.st_mtime); 
                 printf(" %s %d %d:%d\t",mouthName(tmInfo->tm_mon), tmInfo->tm_mday, tmInfo->tm_hour, tmInfo->tm_min);
-                if (S_ISDIR(statls.st_mode)) {
-                    printf("%s",BLUE);
-                    printf(" %s",dptr->d_name);
-                    printf("%s",NOCOLOR);
-                    printf("/\n");
-                }
-                else    
-                    printf(" %s\n",dptr->d_name);
+                
+                printColorFile(statls.st_mode, dptr->d_name);
+                printf("\n");
             }
             
 
@@ -145,6 +231,16 @@ int kls_al(int argc, char * argv[], int aFlag) {
     return 0;
 }
 
+
+/**
+ * kls
+ * 
+ * ls avec option -l et -a ou non (dépand de aFlag)
+ * 
+ * @param  {int}       argc   Le nombre d'arguments
+ * @param  {char[] *}  argv   Les arguments d'entrée
+ * @param  {int}       aFlag  Option -a
+*/
 int kls(int argc, char *argv[]) {
     char c;
 
@@ -174,5 +270,4 @@ int kls(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     return kls(argc, argv);
-
 }
