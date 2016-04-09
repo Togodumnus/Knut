@@ -118,6 +118,12 @@ int process(char *str, int fdInput, int fdOutput) {
         DEBUG("[parent]\taction %d (%p): %s", i, action, action->cmd);
         DEBUG("[parent] cmd : %s", cmd->cmd);
 
+        //On autorise l'utisateur à utiliser le caractère \n pour nettoyer
+        //l'écran
+        if (actc == 1 && cmd->cmd == NULL) {
+            return 0;
+        }
+
         // Gestion du chaînage d'entrée/sortie
         DEBUG("[parent]\tchaining type = %d", action->chainingType);
 
