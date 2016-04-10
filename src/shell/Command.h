@@ -29,7 +29,7 @@ struct Command {
 
     char *fromFile;     //par exemple cat > toto.txt
     char *toFile;       //par exemple cat < toto.txt
-    bool appendFile;    //true si >>, false si > <
+    bool appendFile;    //true si >> << false si > <
 };
 
 typedef struct Command Command;
