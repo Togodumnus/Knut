@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0826c3f54b366449997a9c9708357ec19e4348e9
 root=../../..
 
 all: echoIntro $(root)/$(binDir)/$(libsDir)/echo \
@@ -37,4 +41,8 @@ $(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libecho.so: $(root)/$(objDir)/$(libsD
 $(root)/$(objDir)/$(libsDir)/echo/%.o: $(root)/$(srcDir)/$(libsDir)/echo/%.c
 	@mkdir -p $(root)/$(objDir)/$(libsDir)/echo
 	@$(CC) $(CFLAGS) $(libCFLAGS) $(debug) -o $@ $^
+<<<<<<< HEAD
 	@echo "		$(OK_C)"`basename $@`"$(NO_C)"
+=======
+	@echo "		$(OK_C)"`basename $@`"$(NO_C)"
+>>>>>>> 0826c3f54b366449997a9c9708357ec19e4348e9

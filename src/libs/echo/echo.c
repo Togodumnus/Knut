@@ -1,7 +1,9 @@
+#define _GNU_SOURCE
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <stdbool.h>
 
 /**
  * kecho_e
@@ -16,7 +18,7 @@ int kecho_e(int opt, int argc, char * argv[]) {
     int i;
     int j = 0;
     char c;
-    for (i=opt+1;i<argc;i++) {
+    for (i=opt+1; i<argc; i++) {
         while (j < strlen(argv[i])) {
             c = argv[i][j];
             if (c == '\\') {
@@ -62,6 +64,10 @@ int kecho_e(int opt, int argc, char * argv[]) {
                 printf("%c", c);
             j++;
         }
+        if (i < argc - 1) {
+            printf(" ");
+        }
+        j = 0;
     }
     return 0;
 }
@@ -74,8 +80,8 @@ int kecho_e(int opt, int argc, char * argv[]) {
  */
 int kecho(int argc, char * argv[]) {
     int opt = 0;
-    int nFlag = 0; // pour savoir si on a mis l'option -n
-    int eFlag = 0;
+    int nFlag = false; // pour savoir si on a mis l'option -n
+    int eFlag = true;
     if (argc<2) { 
         printf("\n");
         return 0;
@@ -84,11 +90,11 @@ int kecho(int argc, char * argv[]) {
     while((c = getopt(argc, argv, "ne")) != -1) {
         switch(c) {
             case 'e': // Fait de base 
-                eFlag = 1;
+                eFlag = true;
                 opt++;
                 break;
             case 'n': 
-                nFlag = 1;
+                nFlag = true;
                 opt++;
                 break;
             case '?': // option pas reconnu
@@ -110,4 +116,14 @@ int kecho(int argc, char * argv[]) {
     }
     if (!nFlag) printf("\n");   
     return 0;
+}
+
+/**
+ * Init
+ *
+ * S'enregistre dans le shell dans le cas d'un chargement de la librairie
+ * dynamique
+ */
+void Init(EnregisterCommande enregisterCommande) {
+    enregisterCommande("echo", kecho);
 }
