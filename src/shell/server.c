@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <stdbool.h>
+#include <signal.h>
 
 #include "process.h"
 #include "server.h"
@@ -333,45 +334,43 @@ ssize_t getLineSocket(char **line, size_t *size, int fd) {
  *
  * Read command from fd and process it
  */
-int readInputServer(int fd) {
+void readInputServer(int fd) {
 
     size_t n;
     char *line = NULL;
 
     int fdInput, fdOutput;
 
-    if (isSocket(fd)) { //c'est un socket
-        n = getLineSocket(&line, &n, fd);
+    do {
 
-        fdInput  = fd;
-        fdOutput = fd;
-    } else { //c'est stdin
-        n = getline(&line, &n, stdin);
+        if (isSocket(fd)) { //c'est un socket
+            n = getLineSocket(&line, &n, fd);
 
-        fdInput  = fileno(stdin);
-        fdOutput = fileno(stdout);
-    }
+            fdInput  = fd;
+            fdOutput = fd;
+        } else { //c'est stdin
+            n = getline(&line, &n, stdin);
 
-    DEBUG("[server] Received : %s", line);
-
-    if (line == NULL || strlen(line) == 0) { //End of file
-        free(line);
-        dprintf(fd, "\nBye !\n");
-        if (fd == fileno(stdin)) {
-            exit(EXIT_FAILURE);
-        } else {
-            close(fd);
+            fdInput  = fileno(stdin);
+            fdOutput = fileno(stdout);
         }
-    } else {
-        DEBUG("User: %s", line);
-        process(line, fdInput, fdOutput);
-        DEBUG("[server] end of process");
-        printPrompt(fd);
-        free(line);
-    }
 
+        DEBUG("[worker] Received : %s", line);
 
-    return n;
+        if (line != NULL && strlen(line) > 0) {
+            DEBUG("User: %s", line);
+            process(line, fdInput, fdOutput);
+            DEBUG("[worker] end of process");
+            printPrompt(fd);
+        }
+
+    } while (line != NULL && strlen(line) > 0);
+
+    //End of file
+    free(line);
+    dprintf(fd, "\nBye !\n");
+
+    DEBUG("[worker] end of connection");
 }
 
 /**
@@ -419,11 +418,24 @@ void loopServer() {
 
                     DEBUG("[server] Reading input %d", fd);
 
-                    int n = readInputServer(fd);
+                    int child = fork();
 
-                    if (n == 0) {
+                    DEBUG("[server] Create child to handle connection %d", fd);
+                    if (child ==0) { //dans le fils
+                        readInputServer(fd);
+                        DEBUG("[worker] stop, connection end %d", fd);
+
+                        if (fd == fileno(stdin)) {
+                            //on informe le parent qu'il doit se terminer
+                            kill(getppid(), SIGINT);
+                        } else {
+                            close(fd);
+                        }
+
+                        exit(EXIT_SUCCESS);
+                    } else { //dans le parent
+                        //ne plus écouter ce socket
                         FD_CLR(fd, &socketsToRead);
-                        close(fd);
                     }
                 }
             }
