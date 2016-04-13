@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <stdbool.h>
 
+#include "../../LIB.h"
+
 /**
  * kecho_e
  *
@@ -18,7 +20,7 @@ int kecho_e(int opt, int argc, char * argv[]) {
     int i;
     int j = 0;
     char c;
-    for (i=opt+1; i<argc; i++) {
+    for (i=opt; i<argc; i++) {
         while (j < strlen(argv[i])) {
             c = argv[i][j];
             if (c == '\\') {
@@ -79,7 +81,6 @@ int kecho_e(int opt, int argc, char * argv[]) {
  * @param  {char[] *} argv   Les arguments d'entrées
  */
 int kecho(int argc, char * argv[]) {
-    int opt = 0;
     int nFlag = false; // pour savoir si on a mis l'option -n
     int eFlag = true;
     if (argc<2) { 
@@ -91,27 +92,26 @@ int kecho(int argc, char * argv[]) {
         switch(c) {
             case 'e': // Fait de base 
                 eFlag = true;
-                opt++;
                 break;
             case 'n': 
                 nFlag = true;
-                opt++;
                 break;
             case '?': // option pas reconnu
                 perror("Unknow option");
                 exit(EXIT_FAILURE);
         }
     }
+    printf("%d\n",optind);
     // echo avec -e
     if (eFlag) {
-        if (!kecho_e(opt, argc, argv)) {
+        if (!kecho_e(optind, argc, argv)) {
             if (!nFlag) printf("\n");   
             return 0;
         }
     }
     // echo sans -e
     int i;
-    for (i=opt+1;i<argc;i++) {
+    for (i=optind; i<argc; i++) {
         printf("%s ", argv[i]);
     }
     if (!nFlag) printf("\n");   
