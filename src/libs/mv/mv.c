@@ -34,6 +34,15 @@ int copy_and_delete(char * path_to_move, char * dir_path) {
 }
 
 
+/**
+ * getSourceType
+ *
+ * @param  {char *} source
+ * @return {int}    -1 si source n'existe pas sur le disque
+ *                  SRC_DIR si source est un dossier
+ *                  SRC_REG si source est un fichier
+ *                  0 sinon
+ */
 int getSourceType(char *source) {
     struct stat sourceSt;
     if (stat(source, &sourceSt) == -1) {
@@ -51,32 +60,6 @@ int getSourceType(char *source) {
         }
     }
     return 0;
-}
-
-
-/**
- * getSourceType
- *
- * @param  {char *} source
- * @return {int}    -1 si source n'existe pas sur le disque
- *                  SRC_DIR si source est un dossier
- *                  SRC_REG si source est un fichier
- *                  0 sinon
- */
-int kmv_one_to_dir(char * path_to_move, char * dir_path) {
-    char * pathFull = (char *) malloc(strlen(path_to_move) + strlen(dir_path));
-    struct stat st;
-    if (lstat(path_to_move, &st) == -1) {
-        perror("kmv");
-        exit(EXIT_FAILURE);
-    }
-    if (rename(path_to_move, pathFull) == -1) {
-        if (errno == EXDEV)
-            copy_and_delete(path_to_move, dir_path);
-        else
-            exit(EXIT_FAILURE);
-    }
-    return 0; //TODO ?
 }
 
 /**
@@ -155,7 +138,8 @@ int kmv(int argc, char * argv[]) {
 
         //on déplace tous les éléments pointés par les arguments de mv dans
         //target
-        for (int i = 1; i < argc - 1; i++) {
+        int i;
+        for (i = 1; i < argc - 1; i++) {
             DEBUG("Move %s dans %s", argv[i], argv[argc-1]);
             int fileType = getSourceType(argv[i]);
             if (fileType == -1) {
