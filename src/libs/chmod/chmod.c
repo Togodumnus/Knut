@@ -44,8 +44,8 @@ void usage() {
 Knut chmod\n\n\
 usage: chmod [0-7] [-Rfv] file ...\n\
 \n\
-\t-R -r\tRecursive\n\
-\t-v\tVerboser\n\
+\t-R\tRecursive\n\
+\t-v\tVerbose\n\
 ");
 }
 
