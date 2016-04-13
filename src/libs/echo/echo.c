@@ -84,7 +84,7 @@ int kecho_e(int opt, int argc, char * argv[]) {
  */
 int kecho(int argc, char * argv[]) {
     int nFlag = false; // pour savoir si on a mis l'option -n
-    int eFlag = true;
+    int eFlag = false;
     if (argc<2) { 
         printf("\n");
         return 0;
@@ -127,9 +127,4 @@ int kecho(int argc, char * argv[]) {
  */
 void Init(EnregisterCommande enregisterCommande) {
     enregisterCommande("echo", kecho);
-}
-
-int main(int argc, char * argv[])
-{
-    return kecho(argc,argv);
 }
