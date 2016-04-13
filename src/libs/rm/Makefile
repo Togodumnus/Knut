@@ -12,6 +12,7 @@ rmIntro:
 
 #exécutable
 $(root)/$(binDir)/$(libsDir)/rm: $(root)/$(objDir)/$(libsDir)/rm/rm.o \
+						  $(root)/$(objDir)/$(libsDir)/rm/utils.o \
 						  $(root)/$(objDir)/$(libsDir)/rm/main.o
 	@echo "		$(BOLD_C)- Executable$(NO_C)"
 	@$(CC) -o $(root)/$(binDir)/$(libsDir)/rm $^ $(LDFLAGS)
@@ -19,7 +20,8 @@ $(root)/$(binDir)/$(libsDir)/rm: $(root)/$(objDir)/$(libsDir)/rm/rm.o \
 	@echo "		"$(DONE)
 
 #librairie statique
-$(root)/$(binDir)/$(libsDir)/$(staticDir)/librm.a: $(root)/$(objDir)/$(libsDir)/rm/rm.o
+$(root)/$(binDir)/$(libsDir)/$(staticDir)/librm.a: $(root)/$(objDir)/$(libsDir)/rm/rm.o \
+						  $(root)/$(objDir)/$(libsDir)/rm/utils.o
 	@echo "		$(BOLD_C)- Static$(NO_C)"
 	@ar -cr $@ $^
 	@echo "		ar -cr $@ $^"
@@ -28,7 +30,8 @@ $(root)/$(binDir)/$(libsDir)/$(staticDir)/librm.a: $(root)/$(objDir)/$(libsDir)/
 	@echo "		"$(DONE)
 
 #librairie dynamique
-$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/librm.so: $(root)/$(objDir)/$(libsDir)/rm/rm.o
+$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/librm.so: $(root)/$(objDir)/$(libsDir)/rm/rm.o \
+						  $(root)/$(objDir)/$(libsDir)/rm/utils.o
 	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
 	@$(CC) -shared -o $@ $^
 	@echo "		$(CC) -shared -o $@ $^"
