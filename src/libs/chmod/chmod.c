@@ -20,11 +20,14 @@ const int F_FORCE = 1;      //-f
 const int F_REC   = 1<<1;   //-r, -R
 const int F_VERB  = 1<<2;   //-v
 
-int octal_decimal(int n)
-{
+/**
+ * octal_decimal
+ *
+ * @param  {int}    n
+ */
+int octal_decimal(int n) {
     int decimal=0, i=0, rem;
-    while (n!=0)
-    {
+    while (n!=0) {
         rem = n%10;
         n/=10;
         decimal += rem*pow(8,i);
@@ -39,13 +42,26 @@ int octal_decimal(int n)
 void usage() {
     printf("\
 Knut chmod\n\n\
-usage: rm [0-7] [-Rfv] file ...\n\
+usage: chmod [0-7] [-Rfv] file ...\n\
+\n\
+\t-R -r\tRecursive\n\
+\t-v\tVerboser\n\
 ");
 }
 
 void chmodElem(char *path, int options, int perms);
 
+/**
+ * chmodDirContent
+ *
+ * Parcours du contenu d'un répertoire pour chmod
+ *
+ * @param  {char *}     path
+ * @param  {int}        options
+ * @param  {int}        perms
+ */
 void chmodDirContent(char *path, int options, int perms){
+
     DIR *dirp_src;
     struct dirent *dptr_src;
 
@@ -54,6 +70,7 @@ void chmodDirContent(char *path, int options, int perms){
                 path, strerror(errno));
         exit(EXIT_FAILURE);
     }
+
     while ((dptr_src = readdir(dirp_src)) != NULL) {
         DEBUG("%s/%s", path, dptr_src->d_name);
 
@@ -75,7 +92,18 @@ void chmodDirContent(char *path, int options, int perms){
     }
 }
 
+/**
+ * chmodElem
+ *
+ * Modification des permissions de path
+ *
+ * @param  {char *}     path
+ * @param  {int}        options
+ * @paran  {int}        perms
+ */
 void chmodElem(char *path, int options, int perms){
+
+    //infos sur l'élément
     struct stat st;
     if (stat(path, &st) == -1) {
         if (errno == ENOENT) {
@@ -90,6 +118,7 @@ void chmodElem(char *path, int options, int perms){
     if ((options & F_FORCE) != F_FORCE) {
         DEBUG("No force");
         if (access(path, W_OK) != 0) {
+            //demande yes/no
             printf("override permissions for %s ? [y/n] ", path);
             ok = getchar();
             printf("\n");
@@ -108,39 +137,42 @@ void chmodElem(char *path, int options, int perms){
             printf("Changing file %s permissions\n", path);
         }
 
-        //si on est sur un dossier, on regarde si on a l'option -r
+        //si on est sur un dossier,
         if (S_ISDIR(st.st_mode)) {
-            if ((options & F_REC) == F_REC) {
-                DEBUG("Delete %s content", path);
-                chmodDirContent(path, options, perms); //Modicfication des droits du contenu
 
-                DEBUG("chmod %s", path);
-                if (chmod(path,(mode_t)perms) == -1) {
-                    fprintf(stderr, "Can't modify permissions %s : %s\n", path, strerror(errno));
-                    exit(EXIT_FAILURE);
-                }
+            //On regarde si on a l'option -r
+            if ((options & F_REC) == F_REC) {
+                DEBUG("Chmod %s content", path);
+                //modification des droits du contenu
+                chmodDirContent(path, options, perms);
             }
-            else{
-                DEBUG("chmod %s",path);
-                if (chmod(path,(mode_t)perms) == -1) {
-                    fprintf(stderr, "Can't modify %s : %s\n", path, strerror(errno));
-                    exit(EXIT_FAILURE);
-                }
-            }
-        } else { //on est sur un fichier
-            DEBUG("chmod %s", path);
-            if (chmod(path,(mode_t)perms) == -1) {
-                fprintf(stderr, "Can't modify %s : %s\n", path, strerror(errno));
-                exit(EXIT_FAILURE);
-            }
+
+        }
+
+        DEBUG("chmod %s", path);
+        if (chmod(path, (mode_t) perms) == -1) {
+            fprintf(stderr,
+                    "Can't modify permissions %s : %s\n", path,
+                    strerror(errno));
+            exit(EXIT_FAILURE);
         }
 
     }
 
 }
 
+/**
+ * chmodLib
+ *
+ * Fonction d'entrée
+ *
+ * @param  {int}    argc
+ * @param  {char *} argv
+ */
 int chmodLib(int argc, char *argv[]) {
+
     int options = 0;
+
     //Conversion des droits
     //marche seulement quand les options sont après les droits
     int perms = atoi(argv[1]);
