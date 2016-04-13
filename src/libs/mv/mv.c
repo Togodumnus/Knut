@@ -22,7 +22,7 @@ const int SRC_DIR = 0x2;
 /**
  * Copie un fichier et supprime la source
  * Fonction appelé lorsque la source et la destination ne sont pas sur le même disque
- * 
+ *
  *@param  {char *} path_to_move        Le fichier/dossier à déplacer
  *@param  {char *} dir_path            Le dossier ou est déplacé le fichier/dossier
  *
@@ -43,16 +43,14 @@ int getSourceType(char *source) {
             perror("Stat error");
             exit(EXIT_FAILURE);
         }
+
         if (S_ISDIR(sourceSt.st_mode)) {
             return SRC_DIR;
-        } 
-        else if (S_ISREG(sourceSt.st_mode)) {
+        } else if (S_ISREG(sourceSt.st_mode)) {
             return SRC_REG;
-        } 
-        else {
-            return 0;
         }
     }
+    return 0;
 }
 
 
@@ -73,11 +71,12 @@ int kmv_one_to_dir(char * path_to_move, char * dir_path) {
         exit(EXIT_FAILURE);
     }
     if (rename(path_to_move, pathFull) == -1) {
-        if (errno == EXDEV) 
+        if (errno == EXDEV)
             copy_and_delete(path_to_move, dir_path);
-        else 
+        else
             exit(EXIT_FAILURE);
     }
+    return 0; //TODO ?
 }
 
 /**
@@ -126,7 +125,6 @@ usage: mv source target\n\
  * @param  {char *}  argv   Les arguments
  */
 int kmv(int argc, char * argv[]) {
-    struct stat st;
 
     if (argc < 3) {
         usage();
@@ -174,10 +172,10 @@ int kmv(int argc, char * argv[]) {
             }
         }
 
-    } 
+    }
     else if (argc == 3) { //renomage de source en target
         rename(argv[1], argv[2]);
-    } 
+    }
     else {
         usage();
         exit(EXIT_FAILURE);

@@ -19,11 +19,9 @@ EXEC=knutShell#le shell à compiler
 
 #librairies à compiler
 LIBS=yes 	\
-<<<<<<< HEAD
+	 cp		\
 	 rm		\
-=======
 	 mv     \
->>>>>>> 38146a4612c49fc9bbf57b74c1941235516a45a3
 
 #Colors
 NO_C		=\033[0m
