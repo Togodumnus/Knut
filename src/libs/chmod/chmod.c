@@ -42,7 +42,7 @@ int octal_decimal(int n) {
 void usage() {
     printf("\
 Knut chmod\n\n\
-usage: chmod [0-7] [-Rfv] file ...\n\
+usage: chmod [-Rfv] [0-7] file(s) ...\n\
 \n\
 \t-R\tRecursive\n\
 \t-v\tVerbose\n\
