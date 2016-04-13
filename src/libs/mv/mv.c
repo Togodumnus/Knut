@@ -12,7 +12,7 @@
 #include "../rm/utils.h"
 #include "../cp/utils.h"
 
-#include "../../LIB.h"
+#include "../../LIB.h"  
 #include "../../DEBUG.h"
 
 const int SRC_REG = 0x1;
@@ -53,11 +53,11 @@ int getSourceType(char *source) {
             exit(EXIT_FAILURE);
         }
 
-        if (S_ISDIR(sourceSt.st_mode)) {
-            return SRC_DIR;
-        } else if (S_ISREG(sourceSt.st_mode)) {
-            return SRC_REG;
-        }
+    }
+    if (S_ISDIR(sourceSt.st_mode)) {
+        return SRC_DIR;
+    } else if (S_ISREG(sourceSt.st_mode)) {
+        return SRC_REG;
     }
     return 0;
 }
@@ -76,7 +76,16 @@ void moveToDir(char *item, char *target) {
 
     DEBUG("Move item %s to %s", item, path);
 
-    rename(item, path);
+    if (rename(item, path) == -1) {
+        if (errno == EXDEV) {
+            copy_and_delete(item, target);
+        }
+        else {
+            perror("kmv");
+            exit(EXIT_FAILURE);
+        }
+
+    }
 }
 
 /**
