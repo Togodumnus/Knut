@@ -17,11 +17,14 @@
  * @param  {char[] *} argv   Les arguments d'entrées
  */
 int kecho_e(int opt, int argc, char * argv[]) {
+
     int i;
     int j = 0;
     char c;
+
     for (i=opt; i<argc; i++) {
-        while (j < strlen(argv[i])) {
+        int l = strlen(argv[i]);
+        while (j < l) {
             c = argv[i][j];
             if (c == '\\') {
                 j++;
@@ -56,15 +59,15 @@ int kecho_e(int opt, int argc, char * argv[]) {
                         break;
                     case '"':
                         printf("%c", 0x22);
-                        break; 
+                        break;
                     case '?':
                         printf("%c", 0x3F);
                         break;
-                    default: // sinon on affiche 
+                    default: // sinon on affiche
                         printf("\\%c", c);
                 }
             }
-            else 
+            else
                 printf("%c", c);
             j++;
         }
@@ -80,42 +83,50 @@ int kecho_e(int opt, int argc, char * argv[]) {
  * kecho
  *
  * @param  {int}      argc   Le nombre d'arguments
- * @param  {char[] *} argv   Les arguments d'entrées
+ * @param  {char *[]} argv   Les arguments d'entrées
  */
 int kecho(int argc, char * argv[]) {
-    int nFlag = false; // pour savoir si on a mis l'option -n
-    int eFlag = false;
-    if (argc<2) { 
+    bool nFlag = false; // pour savoir si on a mis l'option -n
+    bool eFlag = false;
+
+    if (argc < 2) { //echo sans argument : saut de ligne
         printf("\n");
         return 0;
     }
+
     char c;
     while((c = getopt(argc, argv, "ne")) != -1) {
         switch(c) {
-            case 'e': // Fait de base 
+            case 'e':
                 eFlag = true;
                 break;
-            case 'n': 
+            case 'n':
                 nFlag = true;
                 break;
-            case '?': // option pas reconnu
+            case '?': // option reconnue
+            default:
                 perror("Unknow option");
                 exit(EXIT_FAILURE);
         }
     }
+
     // echo avec -e
     if (eFlag) {
         if (!kecho_e(optind, argc, argv)) {
-            if (!nFlag) printf("\n");   
+            if (!nFlag) printf("\n");
             return 0;
         }
     }
+
     // echo sans -e
+    // on affiche les arguments
     int i;
     for (i=optind; i<argc; i++) {
         printf("%s ", argv[i]);
     }
-    if (!nFlag) printf("\n");   
+
+    if (!nFlag) printf("\n");
+
     return 0;
 }
 
