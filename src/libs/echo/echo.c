@@ -26,7 +26,7 @@ int kecho_e(int opt, int argc, char * argv[]) {
             if (c == '\\') {
                 j++;
                 c = argv[i][j];
-                switch (c) {
+                switch (c) { // affichage du code héxa
                     case 'a':
                         printf("%c",0x07);
                         break;
@@ -60,6 +60,8 @@ int kecho_e(int opt, int argc, char * argv[]) {
                     case '?':
                         printf("%c", 0x3F);
                         break;
+                    default: // sinon on affiche 
+                        printf("\\%c", c);
                 }
             }
             else 
@@ -101,7 +103,6 @@ int kecho(int argc, char * argv[]) {
                 exit(EXIT_FAILURE);
         }
     }
-    printf("%d\n",optind);
     // echo avec -e
     if (eFlag) {
         if (!kecho_e(optind, argc, argv)) {
@@ -126,4 +127,9 @@ int kecho(int argc, char * argv[]) {
  */
 void Init(EnregisterCommande enregisterCommande) {
     enregisterCommande("echo", kecho);
+}
+
+int main(int argc, char * argv[])
+{
+    return kecho(argc,argv);
 }
