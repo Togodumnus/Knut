@@ -12,8 +12,8 @@ mvIntro:
 
 #exécutable
 $(root)/$(binDir)/$(libsDir)/mv: $(root)/$(objDir)/$(libsDir)/mv/mv.o \
-						  $(root)/$(objDir)/$(libsDir)/cp/cp.o \
-						  $(root)/$(objDir)/$(libsDir)/rm/rm.o \
+						  $(root)/$(objDir)/$(libsDir)/cp/utils.o \
+						  $(root)/$(objDir)/$(libsDir)/rm/utils.o \
 						  $(root)/$(objDir)/$(libsDir)/mv/main.o
 	@echo "		$(BOLD_C)- Executable$(NO_C)"
 	@$(CC) -o $(root)/$(binDir)/$(libsDir)/mv $^ $(LDFLAGS)
@@ -22,8 +22,8 @@ $(root)/$(binDir)/$(libsDir)/mv: $(root)/$(objDir)/$(libsDir)/mv/mv.o \
 
 #librairie statique
 $(root)/$(binDir)/$(libsDir)/$(staticDir)/libmv.a: $(root)/$(objDir)/$(libsDir)/mv/mv.o \
-							  $(root)/$(objDir)/$(libsDir)/cp/cp.o \
-							  $(root)/$(objDir)/$(libsDir)/rm/rm.o
+							  $(root)/$(objDir)/$(libsDir)/cp/utils.o \
+							  $(root)/$(objDir)/$(libsDir)/rm/utils.o
 	@echo "		$(BOLD_C)- Static$(NO_C)"
 	@ar -cr $@ $^
 	@echo "		ar -cr $@ $^"
@@ -33,8 +33,8 @@ $(root)/$(binDir)/$(libsDir)/$(staticDir)/libmv.a: $(root)/$(objDir)/$(libsDir)/
 
 #librairie dynamique
 $(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libmv.so: $(root)/$(objDir)/$(libsDir)/mv/mv.o \
-							  $(root)/$(objDir)/$(libsDir)/cp/cp.o \
-							  $(root)/$(objDir)/$(libsDir)/rm/rm.o
+							  $(root)/$(objDir)/$(libsDir)/cp/utils.o \
+							  $(root)/$(objDir)/$(libsDir)/rm/utils.o
 	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
 	@$(CC) -shared -o $@ $^
 	@echo "		$(CC) -shared -o $@ $^"

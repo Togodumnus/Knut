@@ -6,11 +6,11 @@
 #include <unistd.h>
 #include <string.h>
 #include <libgen.h>
-
-#include "../rm/rm.h"
-#include "../cp/cp.h"
 #include <stdbool.h>
 #include <errno.h>
+
+#include "../rm/utils.h"
+#include "../cp/utils.h"
 
 #include "../../LIB.h"
 #include "../../DEBUG.h"
