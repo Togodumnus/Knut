@@ -172,11 +172,7 @@ void chmodElem(char *path, int options, int perms){
 int chmodLib(int argc, char *argv[]) {
 
     int options = 0;
-
-    //Conversion des droits
-    //marche seulement quand les options sont après les droits
-    int perms = atoi(argv[1]);
-    perms = octal_decimal(perms);
+    int perms = 0;
 
     char c;
     while((c = getopt(argc, argv, "Rvf")) != -1) {
@@ -199,12 +195,15 @@ int chmodLib(int argc, char *argv[]) {
                 exit(EXIT_FAILURE);
         }
     }
-
     if (argc < 2) {
         usage();
         exit(EXIT_FAILURE);
     }
-    chmodElem(argv[argc-1], options, perms);
+    perms = atoi(argv[optind]); //on récupère les droits à la bonne place
+    perms = octal_decimal(perms);
+    for (int i = optind+1; i < argc; i ++) {
+        chmodElem(argv[i], options, perms);
+    }
 
     return 0;
 }
