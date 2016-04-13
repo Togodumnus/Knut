@@ -189,7 +189,7 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
     }
 
     //ajout d'un / à la source
-    char dir_path_src_tmp[strlen(dir_path_src) + 100];
+    char dir_path_src_tmp[strlen(dir_path_src) + 2];
     strcpy(dir_path_src_tmp, dir_path_src);
     strcat(dir_path_src_tmp, "/");
 
@@ -205,8 +205,7 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
             struct stat st;
 
             char path[strlen(dir_path_src_tmp) + strlen(dptr_src->d_name) + 2];
-            strcpy(path, dir_path_src);
-            strcat(path, "/");
+            strcpy(path, dir_path_src_tmp);
             strcat(path, dptr_src->d_name);
 
             //distinction fichiers et dossiers
@@ -220,7 +219,6 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
                 strcpy(destDir, dir_path_dest_tmp);
                 strcat(destDir, dptr_src->d_name);
                 strcat(destDir, "/");
-                mkdirFull(dir_path_dest_tmp);
 
                 indent++;
                 kcp_dir_to_dir(path, destDir);
@@ -233,7 +231,7 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
 
     if(closedir(dirp_src) != 0) {
         perror("Closedir error");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     return 0;
