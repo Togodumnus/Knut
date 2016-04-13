@@ -29,8 +29,6 @@ usage: rm [-frRv] file ...\n\
 ");
 }
 
-void rmElement(char *path, int options);
-
 /**
  * rmDirContent
  *

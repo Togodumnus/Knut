@@ -6,7 +6,25 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <libgen.h>
+#include <errno.h>
+#include "../rm/rm.h"
+#include "../cp/cp.h"
 
+
+
+/**
+ * Copie un fichier et supprime la source
+ * Fonction appelé lorsque la source et la destination ne sont pas sur le même disque
+ * 
+ *@param  {char *} path_to_move        Le fichier/dossier à déplacer
+ *@param  {char *} dir_path            Le dossier ou est déplacé le fichier/dossier
+ *
+ */
+int copy_and_delete(char * path_to_move, char * dir_path) {
+    kcp_file_to_dir(path_to_move, dir_path);
+    rmElement(path_to_move, 0);
+    return 0;
+}
 
 /**
  * Déplace un fichier/dossier dans un dossier 
@@ -19,7 +37,7 @@ int kmv_one_to_dir(char * path_to_move, char * dir_path) {
     char * pathFull = (char *) malloc(strlen(path_to_move) + strlen(dir_path));
     struct stat st;
     if (lstat(path_to_move, &st) == -1) {
-        printf("kmv: cannot stat %s: No such file or directory\n", path_to_move);
+        perror("kmv");
         exit(EXIT_FAILURE);
     }
 
@@ -32,8 +50,10 @@ int kmv_one_to_dir(char * path_to_move, char * dir_path) {
 
 
     if (rename(path_to_move, pathFull) == -1) {
-        printf("kmv: cannot move %s to %s: No such file or directory\n", path_to_move, pathFull);
-        exit(EXIT_FAILURE);
+        if (errno == EXDEV) 
+            copy_and_delete(path_to_move, dir_path);
+        else 
+            exit(EXIT_FAILURE);
     }
 
     free(pathFull);
@@ -76,7 +96,7 @@ int kmv(int argc, char * argv[]) {
                 exit(EXIT_FAILURE);
             }// pb ici, quand le dossier n'existe pas on doit le créer mais avec cette algo on rentre ici alors qu'on devrais pas
             if (rename(argv[1], argv[2]) == -1) {
-                printf("kmv: cannot move %s to %s: No such file or directory\n", argv[1], argv[2]);
+                perror("kmv");
                 exit(EXIT_FAILURE);
             }
         return 0;
@@ -88,7 +108,7 @@ int kmv(int argc, char * argv[]) {
             exit(EXIT_FAILURE);
         }
         if (rename(argv[1], argv[2]) == -1) {
-            printf("kmv: cannot move %s to %s: No such file or directory\n", argv[1], argv[2]);
+            perror("kmv");
             exit(EXIT_FAILURE);
         }
     }
