@@ -20,7 +20,6 @@ EXEC=knutShell#le shell à compiler
 #librairies à compiler
 LIBS=yes 	\
 	 cp		\
-	 rm		\
 	 mv     \
 
 #Colors
