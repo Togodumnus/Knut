@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 
+#include "../../DEBUG.h"
 #include "../../LIB.h"
 
 /**
@@ -16,13 +17,16 @@
  * @param  {int}      argc   Le nombre d'arguments
  * @param  {char[] *} argv   Les arguments d'entrées
  */
-int kecho_e(int opt, int argc, char * argv[]) {
+void kecho_e(int opt, int argc, char * argv[]) {
+
+    DEBUG("option e");
 
     int i;
-    int j = 0;
-    char c;
+    for (i = opt; i < argc; i++) { //pour chaque argument
 
-    for (i=opt; i<argc; i++) {
+        //parcours caractère par caractère
+        char c;
+        int j = 0;
         int l = strlen(argv[i]);
         while (j < l) {
             c = argv[i][j];
@@ -31,7 +35,7 @@ int kecho_e(int opt, int argc, char * argv[]) {
                 c = argv[i][j];
                 switch (c) { // affichage du code héxa
                     case 'a':
-                        printf("%c",0x07);
+                        printf("%c", 0x07);
                         break;
                     case 'b':
                         printf("%c", 0x08);
@@ -66,17 +70,19 @@ int kecho_e(int opt, int argc, char * argv[]) {
                     default: // sinon on affiche
                         printf("\\%c", c);
                 }
-            }
-            else
+            } else {
                 printf("%c", c);
+            }
+
             j++;
         }
+
         if (i < argc - 1) {
             printf(" ");
         }
+
         j = 0;
     }
-    return 0;
 }
 
 /**
@@ -112,17 +118,18 @@ int kecho(int argc, char * argv[]) {
 
     // echo avec -e
     if (eFlag) {
-        if (!kecho_e(optind, argc, argv)) {
-            if (!nFlag) printf("\n");
-            return 0;
-        }
-    }
+        kecho_e(optind, argc, argv);
+    } else {
 
-    // echo sans -e
-    // on affiche les arguments
-    int i;
-    for (i=optind; i<argc; i++) {
-        printf("%s ", argv[i]);
+        DEBUG("no -e option");
+
+        // echo sans -e
+        // on affiche les arguments
+        int i;
+        for (i=optind; i<argc; i++) {
+            printf("%s ", argv[i]);
+        }
+
     }
 
     if (!nFlag) printf("\n");
