@@ -126,29 +126,7 @@ usage: mv source target\n\
  * @param  {char *}  argv   Les arguments
  */
 int kmv(int argc, char * argv[]) {
-<<<<<<< HEAD
     struct stat st;
-    if (lstat(argv[argc-1], &st) == -1){ // renommage
-        if (strcmp(dirname(argv[argc-1]), ".")==0) {
-            if (argc>3) {
-                printf("kmv: target %s is not a directory \n", argv[argc-1]);
-                exit(EXIT_FAILURE);
-            }// pb ici, quand le dossier n'existe pas on doit le créer mais avec cette algo on rentre ici alors qu'on devrais pas
-            if (rename(argv[1], argv[2]) == -1) {
-                perror("kmv");
-                exit(EXIT_FAILURE);
-            }
-        return 0;
-        }
-    }
-    if (S_ISREG(st.st_mode)) { // renommage aussi
-        if (argc>3) {
-            printf("kmv: target %s is not a directory \n", argv[argc-1]);
-            exit(EXIT_FAILURE);
-        }
-        if (rename(argv[1], argv[2]) == -1) {
-            perror("kmv");
-=======
 
     if (argc < 3) {
         usage();
@@ -164,7 +142,6 @@ int kmv(int argc, char * argv[]) {
             targetExist = false;
         } else {
             perror("Stat error");
->>>>>>> 38146a4612c49fc9bbf57b74c1941235516a45a3
             exit(EXIT_FAILURE);
         }
     }
@@ -197,15 +174,17 @@ int kmv(int argc, char * argv[]) {
             }
         }
 
-    } else if (argc == 3) { //renomage de source en target
+    } 
+    else if (argc == 3) { //renomage de source en target
         rename(argv[1], argv[2]);
-    } else {
+    } 
+    else {
         usage();
         exit(EXIT_FAILURE);
     }
-
     return 0;
 }
+
 
 /**
  * Init
