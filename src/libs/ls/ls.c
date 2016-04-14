@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+#define _XOPEN_SOURCE 500
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -17,7 +17,6 @@
 #define BLUE     "\033[1;34m"
 #define PURPLE   "\033[1;35m"
 #define CYAN     "\033[1;36m"
-
 
 #include "../../LIB.h"
 
