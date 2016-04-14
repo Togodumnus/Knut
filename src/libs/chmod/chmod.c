@@ -82,7 +82,7 @@ void chmodDirContent(char *path, int options, int perms){
             strcat(child_path, "/");
             strcat(child_path, dptr_src->d_name);
 
-            chmodElem(child_path, options, perms); //on supprime l'élément
+            chmodElem(child_path, options, perms); //on modifie les droits de l'élément
         }
     }
 
