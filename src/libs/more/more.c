@@ -234,6 +234,11 @@ void usage() {
 Knut more \n\
 \n\
 usage: more file ...\n\
+\n\
+COMMANDS\n\
+    SPACE, RETURN, z\tShow next line\n\
+    d or ^D\t\tShow next page\n\
+    q or Q\t\tquit\n\
 ");
 }
 
