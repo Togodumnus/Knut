@@ -1,5 +1,6 @@
-#include <sys/types.h>
+#define _GNU_SOURCE
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -215,7 +216,7 @@ int kls_al(int argc, char * argv[], int aFlag) {
                 printf(" %d\t",(int) statls.st_size); // taille
 
                 tmInfo =  localtime(&statls.st_mtime); 
-                printf(" %s %d %d:%d\t",mouthName(tmInfo->tm_mon), tmInfo->tm_mday, tmInfo->tm_hour, tmInfo->tm_min);
+                printf(" %s %d %d:%d\t",monthName(tmInfo->tm_mon), tmInfo->tm_mday, tmInfo->tm_hour, tmInfo->tm_min);
                 
                 printColorFile(statls.st_mode, dptr->d_name);
                 printf("\n");
@@ -225,7 +226,7 @@ int kls_al(int argc, char * argv[], int aFlag) {
         }
     }
     else {
-        printf("Error too many arguments\n");
+        perror("kls");
         exit(EXIT_FAILURE);
     }
     closedir(dirp);
@@ -263,13 +264,9 @@ int kls(int argc, char *argv[]) {
         return kls_al(argc, argv, aFlag);
     }
     else {
-        return kls_no_opt(argc, argv, aFlag);
+        return kls_a(argc, argv, aFlag);
     }
     return 0;
-}
-
-int main(int argc, char *argv[]) {
-    return kls(argc, argv);
 }
 
 /**
