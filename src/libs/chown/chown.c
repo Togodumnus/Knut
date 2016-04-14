@@ -50,7 +50,7 @@ int isnumber(char *s){
     return 1;
 }
 
-void chownElem(char *path, uid_t uid, gid_t gid);
+void chownElem(char *path, int options, uid_t uid, gid_t gid);
 
 /**
  * chownDirContent
@@ -61,8 +61,35 @@ void chownElem(char *path, uid_t uid, gid_t gid);
  * @param  {uid_t}      uid
  * @param  {gid_t}      gid
  */
-void chownDirContent(char *path, uid_t uid, gid_t gid){
-    //TODO
+void chownDirContent(char *path, int options, uid_t uid, gid_t gid){
+    DIR *dirp_src;
+    struct dirent *dptr_src;
+
+    if ((dirp_src = opendir(path)) == NULL) {
+        fprintf(stderr, "Can't open directory %s : %s\n",
+                path, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
+    while ((dptr_src = readdir(dirp_src)) != NULL) {
+        DEBUG("%s/%s", path, dptr_src->d_name);
+
+        if ((strcmp(dptr_src->d_name, "..") != 0)
+                && (strcmp(dptr_src->d_name, ".") != 0)) {
+
+            char child_path[strlen(path) + strlen(dptr_src->d_name) + 2];
+            strcpy(child_path, path);
+            strcat(child_path, "/");
+            strcat(child_path, dptr_src->d_name);
+
+            chownElem(child_path, options, uid, gid); //on supprime l'élément
+        }
+    }
+
+    if (closedir(dirp_src) != 0) {
+        perror("Closedir error");
+        exit(EXIT_FAILURE);
+    }
 }
 
 /**
@@ -74,9 +101,35 @@ void chownDirContent(char *path, uid_t uid, gid_t gid){
  * @param  {uid_t}      uid
  * @param  {gid_t}      gid
  */
-void chownElem(char *path, uid_t uid, gid_t gid){
-    if (chown(path, uid, gid) == -1) {
-        printf("Erreur\n");
+void chownElem(char *path, int options, uid_t uid, gid_t gid){
+    struct stat st;
+    if (stat(path, &st) == -1) {
+        if (errno == ENOENT) {
+            perror("No such file");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    if ((options & F_VERB) == F_VERB) {
+            printf("Changing %s owner\n", path);
+    }
+    if (S_ISDIR(st.st_mode)) {
+
+        //On regarde si on a l'option -r
+        if ((options & F_REC) == F_REC) {
+            DEBUG("chown %s content", path);
+            //modification des droits du contenu
+            chownDirContent(path, options, uid, gid);
+        }
+
+    }
+
+    DEBUG("chown %s", path);
+    if (chown(path, uid, gid) == -1){
+        fprintf(stderr,
+            "Can't modify owner %s : %s\n", path,
+            strerror(errno));
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -118,14 +171,14 @@ int chownLib(int argc, char *argv[]) {
     gid_t gid = -1;
 
     /* on prend l'utilisateur */
-    token = strtok(argv[1], s);
+    token = strtok(argv[optind], s);
     if (isnumber(token)){
         uid = atoi(token);
     }
     else{
         pwd = getpwnam(token);      /* On essaye d'avoir l'UID par le username */
         if (pwd == NULL) {
-            printf("username invalide\n");
+            printf("invalid username\n");
             exit(EXIT_FAILURE);
         }
         uid = pwd->pw_uid;
@@ -138,13 +191,14 @@ int chownLib(int argc, char *argv[]) {
                 gid = atoi(token);
                 gr = getgrgid(gid);
                 if (uid && gr == NULL){
-                    printf("%s: groupe inconnu", token);
+                    printf("%s: unknown group", token);
                     exit(EXIT_FAILURE);
                 }
             } else {
                 gr = getgrnam(token);
                 if (gr == NULL){
-                    printf("%s: groupe inconnu", token);
+                    printf("%s: unknown group", token);
+                    exit(EXIT_FAILURE);
                 }
                 gid = gr->gr_gid;
             }
@@ -152,7 +206,7 @@ int chownLib(int argc, char *argv[]) {
     }
     
     for (int i = optind+1; i < argc; i ++) {
-        chownElem(argv[i], uid, gid);
+        chownElem(argv[i], options, uid, gid);
     }
 
     return 0;
