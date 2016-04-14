@@ -12,7 +12,7 @@
 #include "../rm/utils.h"
 #include "../cp/utils.h"
 
-#include "../../LIB.h"  
+#include "../../LIB.h"
 #include "../../DEBUG.h"
 
 const int SRC_REG = 0x1;
