@@ -58,7 +58,8 @@ void chownElem(char *path, uid_t uid, gid_t gid);
  * Parcours du contenu d'un répertoire pour chown
  *
  * @param  {char *}     path
- * @param  {int *}      uid
+ * @param  {uid_t}      uid
+ * @param  {gid_t}      gid
  */
 void chownDirContent(char *path, uid_t uid, gid_t gid){
     //TODO
@@ -70,8 +71,8 @@ void chownDirContent(char *path, uid_t uid, gid_t gid){
  * Modification des permissions de path
  *
  * @param  {char *}     path
- * @param  {int *}      uid
- * @param  {char *}     user
+ * @param  {uid_t}      uid
+ * @param  {gid_t}      gid
  */
 void chownElem(char *path, uid_t uid, gid_t gid){
     if (chown(path, uid, gid) == -1) {
@@ -133,7 +134,6 @@ int chownLib(int argc, char *argv[]) {
     while(token != NULL){ 
         token = strtok(NULL, s);
         if(token != NULL){
-            printf("Je ne devais pas passé ici\n");
             if (isnumber(token)) {
                 gid = atoi(token);
                 gr = getgrgid(gid);
