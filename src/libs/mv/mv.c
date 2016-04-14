@@ -193,7 +193,22 @@ int kmv(int argc, char * argv[]) {
         }
 
     } else if (argc == 3) { //renomage de source en target
-        rename(argv[1], argv[2]);
+        if (rename(argv[1], argv[2]) == -1) {
+            if (errno == EXDEV) { //on change de disque, rename ne fonctionne pas
+                                  //on fait une copie puis une suppression de la
+                                  //source
+                if (sourceType == SRC_DIR) {
+                    DEBUG("copy dir %s to %s", argv[1], argv[2]);
+                    copy_dir_and_delete(argv[1], argv[2]);
+                } else { //SRC_REG
+                    DEBUG("copy file %s to %s", argv[1], argv[2]);
+                    copy_file_and_delete(argv[1], argv[2]);
+                }
+            } else {
+                perror("rename error");
+                exit(EXIT_FAILURE);
+            }
+        }
     } else {
         usage();
         exit(EXIT_FAILURE);
