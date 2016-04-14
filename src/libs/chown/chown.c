@@ -19,7 +19,8 @@
 //flags
 const int F_REC   = 1<<1;   //-r, -R
 const int F_VERB  = 1<<2;   //-v
-char *endptr;
+struct  group *gr, *getgrnam(), *getgrgid();
+struct passwd *pwd;
 
 /**
  * usage
@@ -27,14 +28,29 @@ char *endptr;
 void usage() {
     printf("\
 Knut chown\n\n\
-usage: chown [-Rv] new_owner file ...\n\
+usage: chown [-Rv] <owner> [:<group>] file ...\n\
 \n\
 \t-R\tRecursive\n\
 \t-v\tVerbose\n\
 ");
 }
 
-void chownElem(char *path, uid_t uid, char *user);
+/**
+ * isnumber
+ * 
+ * Parcours un char et retourne 1 si il est constitué que de chiffre
+ *
+ * @param {char *}      s
+ */
+int isnumber(char *s){
+    int c;
+    while((c = *s++))
+        if (!isdigit(c))
+            return 0;
+    return 1;
+}
+
+void chownElem(char *path, uid_t uid, gid_t gid);
 
 /**
  * chownDirContent
@@ -44,7 +60,7 @@ void chownElem(char *path, uid_t uid, char *user);
  * @param  {char *}     path
  * @param  {int *}      uid
  */
-void chownDirContent(char *path, uid_t uid){
+void chownDirContent(char *path, uid_t uid, gid_t gid){
     //TODO
 }
 
@@ -57,18 +73,8 @@ void chownDirContent(char *path, uid_t uid){
  * @param  {int *}      uid
  * @param  {char *}     user
  */
-void chownElem(char *path, uid_t uid, char *user){
-    struct passwd *pwd;
-
-    if (*endptr != '\0') {         /* Was not pure numeric string */
-        pwd = getpwnam(user);   /* Try getting UID for username */
-        if (pwd == NULL) {
-            printf("Erreur\n");
-        }
-        uid = pwd->pw_uid;
-    }
-
-    if (chown(path, uid, -1) == -1) {
+void chownElem(char *path, uid_t uid, gid_t gid){
+    if (chown(path, uid, gid) == -1) {
         printf("Erreur\n");
     }
 }
@@ -106,10 +112,47 @@ int chownLib(int argc, char *argv[]) {
         usage();
         exit(EXIT_FAILURE);
     }
-    char *user = argv[1];
-    uid = strtol(argv[1], &endptr, 10);
+    const char s[2] = ":";
+    char *token;
+    gid_t gid = -1;
+
+    /* on prend l'utilisateur */
+    token = strtok(argv[1], s);
+    if (isnumber(token)){
+        uid = atoi(token);
+    }
+    else{
+        pwd = getpwnam(token);      /* On essaye d'avoir l'UID par le username */
+        if (pwd == NULL) {
+            printf("username invalide\n");
+            exit(EXIT_FAILURE);
+        }
+        uid = pwd->pw_uid;
+    }
+    /* on regarde si il y a d'autre token (le groupe) */
+    while(token != NULL){ 
+        token = strtok(NULL, s);
+        if(token != NULL){
+            printf("Je ne devais pas passé ici\n");
+            if (isnumber(token)) {
+                gid = atoi(token);
+                gr = getgrgid(gid);
+                if (uid && gr == NULL){
+                    printf("%s: groupe inconnu", token);
+                    exit(EXIT_FAILURE);
+                }
+            } else {
+                gr = getgrnam(token);
+                if (gr == NULL){
+                    printf("%s: groupe inconnu", token);
+                }
+                gid = gr->gr_gid;
+            }
+        }
+    }
+    
     for (int i = optind+1; i < argc; i ++) {
-        chownElem(argv[i], uid, user);
+        chownElem(argv[i], uid, gid);
     }
 
     return 0;
