@@ -1,5 +1,7 @@
+#define _XOPEN_SOURCE 700
+#define _GNU_SOURCE
+
 #include <unistd.h>
-#define _XOPEN_SOURCE 500
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <stdio.h>
@@ -15,7 +17,7 @@
 #ifdef __APPLE__
 #include <limits.h>
 #else
-#include <sys/limits.h>
+#include <linux/limits.h>
 #endif
 
 #include "../../DEBUG.h"
