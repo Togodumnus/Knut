@@ -18,21 +18,38 @@
 const int SRC_REG = 0x1;
 const int SRC_DIR = 0x2;
 
+const int TYPE_FILE = 0;
+const int TYPE_DIR  = 1;
 
 /**
- * Copie un fichier et supprime la source
+ * copy_file_and_delete
+ *
+ * Copie un dossier et supprime la source
  * Fonction appelé lorsque la source et la destination ne sont pas sur le même
  * disque
  *
- * @param  {char *} path_to_move        Le fichier/dossier à déplacer
- * @param  {char *} dir_path            Le dossier ou est déplacé le
- *                                      fichier/dossier
+ * @param  {char *} path_to_move        Le fichier à déplacer
+ * @param  {char *} dir_path            Le dossier ou est déplacé le fichier
  */
-void copy_and_delete(char * path_to_move, char * dir_path) {
+void copy_file_and_delete(char * path_to_move, char * dir_path) {
     kcp_file_to_dir(path_to_move, dir_path);
-    rmElement(path_to_move, 0);
+    rmElement(path_to_move, F_REC | F_FORCE);
 }
 
+/**
+ * copy_dir_and_delete
+ *
+ * Copie un dossier et supprime la source
+ * Fonction appelé lorsque la source et la destination ne sont pas sur le même
+ * disque
+ *
+ * @param  {char *} path_to_move        Le dossier à déplacer
+ * @param  {char *} dir_path            Le dossier ou est déplacé le dossier
+ */
+void copy_dir_and_delete(char * path_to_move, char * dir_path) {
+    kcp_dir_to_dir(path_to_move, dir_path);
+    rmElement(path_to_move, F_REC | F_FORCE);
+}
 
 /**
  * getSourceType
@@ -44,6 +61,9 @@ void copy_and_delete(char * path_to_move, char * dir_path) {
  *                  0 sinon
  */
 int getSourceType(char *source) {
+
+    DEBUG("getSourceType %s", source);
+
     struct stat sourceSt;
     if (stat(source, &sourceSt) == -1) {
         if (errno == ENOENT) { //target n'existe pas
@@ -65,10 +85,11 @@ int getSourceType(char *source) {
 /**
  * moveToDir
  *
- * @param  {char *} item    File of directory
- * @param  {char *} target  Where to move it
+ * @param  {char *} item    fichier ou dossier
+ * @param  {int}    type    TYPE_FILE ou TYPE_DIR
+ * @param  {char *} target  Où le déplacer
  */
-void moveToDir(char *item, char *target) {
+void moveToDir(char *item, int type, char *target) {
     char path[strlen(target) + strlen(basename(item)) + 2];
     strcpy(path, target);
     strcat(path, "/");
@@ -80,7 +101,13 @@ void moveToDir(char *item, char *target) {
         if (errno == EXDEV) { //on change de disque, rename ne fonctionne pas
                               //on fait une copie puis une suppression de la
                               //source
-            copy_and_delete(item, target);
+            if (type == TYPE_DIR) {
+                DEBUG("copy dir %s to %s", item, target);
+                copy_dir_and_delete(item, target);
+            } else { //TYPE_FILE
+                DEBUG("copy file %s to %s", item, target);
+                copy_file_and_delete(item, target);
+            }
         } else {
             perror("rename error");
             exit(EXIT_FAILURE);
@@ -138,7 +165,7 @@ int kmv(int argc, char * argv[]) {
     //on regarde le 1er argument
     int sourceType = getSourceType(argv[1]);
     if (sourceType == -1) {
-        fprintf(stderr, "Source %s doesn't exist\n", argv[2]);
+        fprintf(stderr, "Source %s doesn't exist\n", argv[1]);
         exit(EXIT_FAILURE);
     }
 
@@ -155,9 +182,9 @@ int kmv(int argc, char * argv[]) {
                 fprintf(stderr, "Source %s doesn't exist\n", argv[i]);
                 exit(EXIT_FAILURE);
             } else if ((fileType & SRC_REG) == SRC_REG) {
-                moveToDir(argv[i], argv[argc - 1 ]);
+                moveToDir(argv[i], TYPE_FILE, argv[argc - 1 ]);
             } else if ((fileType & SRC_DIR) == SRC_DIR) {
-                moveToDir(argv[i], argv[argc - 1]);
+                moveToDir(argv[i], TYPE_DIR, argv[argc - 1]);
             } else {
                 fprintf(stderr, "Source %s is not a file, not a directory\n",
                         argv[i]);
