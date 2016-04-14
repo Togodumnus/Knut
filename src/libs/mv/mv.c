@@ -21,16 +21,16 @@ const int SRC_DIR = 0x2;
 
 /**
  * Copie un fichier et supprime la source
- * Fonction appelé lorsque la source et la destination ne sont pas sur le même disque
+ * Fonction appelé lorsque la source et la destination ne sont pas sur le même
+ * disque
  *
- *@param  {char *} path_to_move        Le fichier/dossier à déplacer
- *@param  {char *} dir_path            Le dossier ou est déplacé le fichier/dossier
- *
+ * @param  {char *} path_to_move        Le fichier/dossier à déplacer
+ * @param  {char *} dir_path            Le dossier ou est déplacé le
+ *                                      fichier/dossier
  */
-int copy_and_delete(char * path_to_move, char * dir_path) {
+void copy_and_delete(char * path_to_move, char * dir_path) {
     kcp_file_to_dir(path_to_move, dir_path);
     rmElement(path_to_move, 0);
-    return 0;
 }
 
 
@@ -38,7 +38,7 @@ int copy_and_delete(char * path_to_move, char * dir_path) {
  * getSourceType
  *
  * @param  {char *} source
- * @return {int}    -1 si source n'existe pas sur le disque
+ * @return {int}    -1 si source n'existe pas
  *                  SRC_DIR si source est un dossier
  *                  SRC_REG si source est un fichier
  *                  0 sinon
@@ -77,14 +77,14 @@ void moveToDir(char *item, char *target) {
     DEBUG("Move item %s to %s", item, path);
 
     if (rename(item, path) == -1) {
-        if (errno == EXDEV) {
+        if (errno == EXDEV) { //on change de disque, rename ne fonctionne pas
+                              //on fait une copie puis une suppression de la
+                              //source
             copy_and_delete(item, target);
-        }
-        else {
-            perror("kmv");
+        } else {
+            perror("rename error");
             exit(EXIT_FAILURE);
         }
-
     }
 }
 
@@ -92,7 +92,6 @@ void moveToDir(char *item, char *target) {
  * usage
  */
 void usage() {
-
     printf("\
 Knut mv \n\
 \n\
@@ -143,7 +142,8 @@ int kmv(int argc, char * argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    if (targetExist && S_ISDIR(targetSt.st_mode)) { //la destination est un dossier
+    //la destination est un dossier
+    if (targetExist && S_ISDIR(targetSt.st_mode)) {
 
         //on déplace tous les éléments pointés par les arguments de mv dans
         //target
@@ -165,11 +165,9 @@ int kmv(int argc, char * argv[]) {
             }
         }
 
-    }
-    else if (argc == 3) { //renomage de source en target
+    } else if (argc == 3) { //renomage de source en target
         rename(argv[1], argv[2]);
-    }
-    else {
+    } else {
         usage();
         exit(EXIT_FAILURE);
     }
