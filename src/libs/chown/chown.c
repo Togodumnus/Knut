@@ -82,7 +82,8 @@ void chownDirContent(char *path, int options, uid_t uid, gid_t gid){
             strcat(child_path, "/");
             strcat(child_path, dptr_src->d_name);
 
-            chownElem(child_path, options, uid, gid); //on supprime l'élément
+            //on modifie l'utilisateur
+            chownElem(child_path, options, uid, gid); 
         }
     }
 
@@ -170,20 +171,20 @@ int chownLib(int argc, char *argv[]) {
     char *token;
     gid_t gid = -1;
 
-    /* on prend l'utilisateur */
+    // on prend l'utilisateur
     token = strtok(argv[optind], s);
     if (isnumber(token)){
         uid = atoi(token);
     }
     else{
-        pwd = getpwnam(token);      /* On essaye d'avoir l'UID par le username */
+        pwd = getpwnam(token);      //On essaye d'avoir l'UID par le username
         if (pwd == NULL) {
             printf("invalid username\n");
             exit(EXIT_FAILURE);
         }
         uid = pwd->pw_uid;
     }
-    /* on regarde si il y a d'autre token (le groupe) */
+    //on regarde si il y a d'autre token (le groupe)
     while(token != NULL){ 
         token = strtok(NULL, s);
         if(token != NULL){
