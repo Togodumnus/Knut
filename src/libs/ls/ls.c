@@ -1,7 +1,7 @@
+#include <unistd.h>
 #define _XOPEN_SOURCE 500
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -10,225 +10,212 @@
 #include <grp.h>
 #include <time.h>
 #include <string.h>
+#include <errno.h>
+#include <stdbool.h>
+#ifdef __APPLE__
+#include <limits.h>
+#else
+#include <sys/limits.h>
+#endif
 
-#define NOCOLOR  "\033[1;00m"
-#define GREEN    "\033[1;32m"
-#define YELLOW   "\033[1;33m"
-#define BLUE     "\033[1;34m"
+#include "../../DEBUG.h"
+#include "../../LIB.h"
+
 #define PURPLE   "\033[1;35m"
 #define CYAN     "\033[1;36m"
+#define RED      "\033[38;5;124m"
 
-#include "../../LIB.h"
+const int FLAG_a = 1;    //-a option
+const int FLAG_l = 1<<1; //-l option
+
+char *monthName[] = {"janv.", "févr.", " mars", "avril", "  mai", " juin",
+                     "juil.", " août", "sept.", " oct.", " nov.", " déc."};
 
 /**
  * printColorFile
  *
- * Affiche le nom du fichier avec la couleur correspondante en fonction du type de fichier
+ * Affiche le nom du fichier avec la couleur correspondante en fonction du type
+ * de fichier
  *
  * @param  {mode_t}  mode   Le mode_t du fichier
  * @param  {char *}  mode   Le nom du fichier à affiche
 */
 void printColorFile(mode_t mode, char * path) {
-    if (S_ISDIR(mode)) { // repertoire
-        printf("%s",BLUE);
-        printf("%s/  ",path);
-        printf("%s",NOCOLOR);
-    }
-    else if (S_ISREG(mode)) { // régulier
-        printf("%s  ",path);
-    }
-    else if (S_ISLNK(mode)) { // lien
-        printf("%s",CYAN);
-        printf("%s",path);
-        printf("%s",NOCOLOR);
-    }
-    else if (S_ISSOCK(mode)) { // socket
-        printf("%s",PURPLE);
-        printf("%s",path);
-        printf("%s", NOCOLOR);
-    }
-    else if (S_ISCHR(mode)) { // périphérique de caractères
-        printf("%s",YELLOW);
-        printf("%s",path);
-        printf("%s",NOCOLOR);
-    }
-    else if (S_ISBLK(mode)) { //  périphérique de blocs
-        printf("%s",YELLOW);
-        printf("%s",path);
-        printf("%s",NOCOLOR);
-    }
-    else if (S_ISFIFO(mode)) { // fifo
-        printf("%s",YELLOW);
-        printf("%s",path);
-        printf("%s", NOCOLOR);
+    if (S_ISDIR(mode)) {                    // repertoire
+        printf(BLUE "%s/" END, path);
+    } else if (S_ISLNK(mode)) {             // lien
+        printf(CYAN "%s" END, path);
+    } else if (S_ISSOCK(mode)) {            // socket
+        printf(PURPLE "%s" END, path);
+    } else if (S_ISCHR(mode) || S_ISBLK(mode) || S_ISFIFO(mode)) {
+        // périphérique de caractères
+        printf(YELLOW "%s" END, path);
+    } else if ((S_IXUSR & mode) == S_IXUSR) {//exécutable
+        printf(RED "%s" END, path);
+    } else {
+        printf("%s", path);
     }
 }
 
 /**
- * monthName
+ * permission
  *
- * Retourne le nom du mois en fonction de son numéro
- *
- * @param  {int}  nb   Le numéro du mois
-*/
-char * monthName(int nb) {
-    switch(nb) {
-        case 0:
-            return "janv.";
-        case 1:
-            return "févr.";
-        case 2:
-            return "mars";
-        case 3:
-            return "avril";
-        case 4:
-            return "mai";
-        case 5:
-            return "juin";
-        case 6:
-            return "juill.";
-        case 7:
-            return "août";
-        case 8:
-            return "sept.";
-        case 9:
-            return "oct.";
-        case 10:
-            return "nov.";
-        case 11:
-            return "déc.";
-    }
-    return "Error";
+ * @param   {mode_t}    mode    Le mode du fichier à inspecter
+ * @param   {char *}    perms   Le tableau de 10 caractère à remplir avec les
+ *                              permissions
+ *                              ex: rwxr--r--
+ */
+void permission(mode_t mode, char* perms) {
+
+    perms[0] = ((S_IRUSR & mode) == S_IRUSR) ? 'r' : '-';
+    perms[1] = ((S_IWUSR & mode) == S_IWUSR) ? 'w' : '-';
+    perms[2] = ((S_IXUSR & mode) == S_IXUSR) ? 'x' : '-';
+
+    perms[3] = ((S_IRGRP & mode) == S_IRGRP) ? 'r' : '-';
+    perms[4] = ((S_IWGRP & mode) == S_IWGRP) ? 'w' : '-';
+    perms[5] = ((S_IXGRP & mode) == S_IXGRP) ? 'x' : '-';
+
+    perms[6] = ((S_IROTH & mode) == S_IROTH) ? 'r' : '-';
+    perms[7] = ((S_IWOTH & mode) == S_IWOTH) ? 'w' : '-';
+    perms[8] = ((S_IXOTH & mode) == S_IXOTH) ? 'x' : '-';
+
+    perms[9] = '\0';
+
 }
 
 /**
- * kls_no_opt
+ * type
  *
- * ls avec option -a ou non (dépand de aFlag)
+ * @param   {mode_t}    mode    Le mode du fichier à inspecter
  *
- * @param  {int}       argc   Le nombre d'arguments
- * @param  {char[] *}  argv   Les arguments d'entrée
- * @param  {int}       aFlag  Option -a
-*/
-int kls_a(int argc, char * argv[], int aFlag) {
-    DIR *dirp;
-    struct dirent *dptr;
+ * @return  {char}      Le type de fichier / dossier
+ */
+char type(mode_t mode) {
+    if((S_IFDIR & mode) == S_IFDIR) {
+        return 'd';
+    } else if ((mode & S_IFLNK) == S_IFLNK) {
+        return 'l';
+    } else if ((mode & S_IFBLK) == S_IFBLK) {
+        return 'b';
+    } else if ((mode & S_IFIFO) == S_IFIFO) {
+        return 'p';
+    } else if ((mode & S_IFCHR) == S_IFCHR) {
+        return 'c';
+    } else if ((mode & S_IFSOCK) == S_IFSOCK) {
+        return 's';
+    } else {
+        return '-';
+    }
+}
+
+/**
+ * isLink
+ *
+ * @return  {boo}   True if the file is a symlink
+ */
+bool isLink(mode_t mode) {
+    return ((mode & S_IFLNK) == S_IFLNK);
+}
+
+/**
+ * kls_file
+ *
+ * Print les infos sur le fichier filepath
+ *
+ * @param  {char *} dir
+ * @param  {char *} filename
+ * @param  {int}    options
+ */
+int kls_file(char *dir, char *filename, int options) {
 
     struct stat statls;
+    bool optL = (options & FLAG_l) == FLAG_l;
 
-    char path[strlen(argv[argc-1])];
+    char filepath[PATH_MAX];
+    sprintf(filepath, "%s/%s", dir, filename);
 
-    if ((!strcmp(argv[argc-1],"-a"))||(argc<2)) { // si y'a pas de chemin donné dans kls
-        strcpy(path, "."); // repetoire courant
-    }
-    else {
-        strcpy(path, argv[argc-1]);
-    }
-
-    if ((dirp=opendir(path))==NULL) {
-        perror("kls");
+    if (stat(filepath, &statls) == -1) {
+        perror("stat error");
         exit(EXIT_FAILURE);
     }
 
-    while ((dptr=readdir(dirp))) {
-        if (stat(dptr->d_name, &statls) == -1) {
-            perror("kls");
-            exit(EXIT_FAILURE);
-        }
-        if (((!aFlag)&&(dptr->d_name[0] != '.'))||(aFlag)) {
-            printColorFile(statls.st_mode, dptr->d_name);
-        }
+    if (optL) {
+        char perms[10];
+        permission(statls.st_mode, perms);
+
+        struct tm *tmInfo;
+        tmInfo = localtime(&statls.st_mtime);
+
+        printf("%c", type(statls.st_mode));
+        printf("%s", perms);
+        printf(" ");
+        printf("%3d", (unsigned int) statls.st_nlink);
+        printf(" ");
+        printf("%s", getpwuid(statls.st_uid)->pw_name);
+        printf(" ");
+        printf("%s", getgrgid(statls.st_gid)->gr_name);
+        printf(" ");
+        printf("%6d", (int) statls.st_size); // taille
+        printf(" ");
+        printf("%s %2d %2d:%02d\t",
+            monthName[tmInfo->tm_mon],
+            tmInfo->tm_mday,
+            tmInfo->tm_hour,
+            tmInfo->tm_min
+        );
     }
-    printf("\n");
+
+    printColorFile(statls.st_mode, filename);
+
+    if (optL) {
+        if (isLink(statls.st_mode)){ //si symlink, ajout de la destination
+            char buf[PATH_MAX];
+            size_t len;
+            if ((len = readlink(filepath, buf, sizeof(buf)-1)) != -1) {
+                buf[len] = '\0';
+            }
+            printf(" -> %s", buf);
+        }
+        printf("\n");
+    } else {
+        printf("    ");
+    }
 
     return 0;
 }
 
 /**
- * kls_al
+ * kls_full
  *
- * ls avec option -l et -a ou non (dépand de aFlag)
- *
- * @param  {int}       argc   Le nombre d'arguments
- * @param  {char[] *}  argv   Les arguments d'entrée
- * @param  {int}       aFlag  Option -a
+ * @param  {char *}     path
+ * @param  {int}        options
 */
-int kls_al(int argc, char * argv[], int aFlag) {
+int kls_full(char *path, int options) {
+
     DIR *dirp;
     struct dirent *dptr;
 
-    struct stat statls;
-    struct passwd *user;
-    struct group *grd;
-
-    struct tm *tmInfo;
-
-    char path[strlen(argv[argc-1])];
-
-    if ((!strcmp(argv[argc-1],"-al"))||(!strcmp(argv[argc-1],"-l"))) { // si y'a pas de chemin donné dans kls
-        strcpy(path, "."); // repetoire courant
-    }
-    else {
-        strcpy(path, argv[argc-1]);
-    }
-
-    if ((dirp=opendir(path))==NULL) {
-        perror("kls");
-        exit(EXIT_FAILURE);
-    }
-
-    if (argc<4) {
-        while ((dptr=readdir(dirp))) {
-            // si pas aFlag : on prend pas en compte les fichier cachés etc.. sinon on prend tout
-            if (((!aFlag)&&(dptr->d_name[0] != '.'))||(aFlag)) {
-                if (stat(dptr->d_name, &statls) == -1) {
-                    perror("kls");
-                    exit(EXIT_FAILURE);
-                }
-
-                if ((statls.st_mode & S_IFSOCK)==S_IFSOCK) printf("s"); // socket
-                else if ((statls.st_mode & S_IFLNK)==S_IFLNK) printf("l");  // symbolic link
-                else if ((statls.st_mode & S_IFREG)==S_IFREG) printf("-");  // regular file
-                else if ((statls.st_mode & S_IFBLK)==S_IFBLK) printf("b");  // block device
-                else if ((statls.st_mode & S_IFDIR)==S_IFDIR) printf("d");  // directory
-                else if ((statls.st_mode & S_IFCHR)==S_IFCHR) printf("c");  // character device
-                else if ((statls.st_mode & S_IFIFO)==S_IFIFO) printf("p");  // FIFO*
-
-                printf("%c",(statls.st_mode & S_IRUSR)==S_IRUSR ? 'r' : '-');   // owner R
-                printf("%c",(statls.st_mode & S_IWUSR)==S_IWUSR ? 'w' : '-');   // owner W
-                printf("%c",(statls.st_mode & S_IXUSR)==S_IXUSR ? 'x' : '-');   // owner X
-                printf("%c",(statls.st_mode & S_IRGRP)==S_IRGRP ? 'r' : '-');   // group R
-                printf("%c",(statls.st_mode & S_IWGRP)==S_IWGRP ? 'w' : '-');   // group W
-                printf("%c",(statls.st_mode & S_IXGRP)==S_IXGRP ? 'x' : '-');   // group X
-                printf("%c",(statls.st_mode & S_IROTH)==S_IROTH ? 'r' : '-');   // other R
-                printf("%c",(statls.st_mode & S_IWOTH)==S_IWOTH ? 'w' : '-');   // other W
-                printf("%c",(statls.st_mode & S_IXOTH)==S_IXOTH ? 'x' : '-');   // other X
-
-                printf(" %d", (int) statls.st_nlink); // number of hard links
-
-                user = getpwuid(statls.st_uid); // user name
-                printf(" %s", user->pw_name);
-
-                grd = getgrgid(statls.st_gid); // group name
-                printf(" %s\t", grd->gr_name);
-
-                printf(" %d\t",(int) statls.st_size); // taille
-
-                tmInfo =  localtime(&statls.st_mtime);
-                printf(" %s %d %d:%d\t",monthName(tmInfo->tm_mon), tmInfo->tm_mday, tmInfo->tm_hour, tmInfo->tm_min);
-
-                printColorFile(statls.st_mode, dptr->d_name);
-                printf("\n");
-            }
-
-
+    if ((dirp = opendir(path)) == NULL) {
+        if (errno == ENOTDIR) {
+            kls_file("", path, options);
+            printf("\n");
+            return 0;
+        } else {
+            perror("opendir error");
+            exit(EXIT_FAILURE);
         }
     }
-    else {
-        perror("kls");
-        exit(EXIT_FAILURE);
+
+    while ((dptr = readdir(dirp))) {
+        //prise en compte des fichiers caché si option
+        if (dptr->d_name[0] != '.' || (options & FLAG_a) == FLAG_a) {
+            kls_file(path, dptr->d_name, options);
+        }
     }
+
+    printf("\n");
     closedir(dirp);
+
     return 0;
 }
 
@@ -244,27 +231,36 @@ int kls_al(int argc, char * argv[], int aFlag) {
 int kls(int argc, char *argv[]) {
     char c;
 
-    int aFlag, lFlag = 0;
+    int options = 0;
 
     while((c = getopt(argc, argv, "al")) != -1) {
         switch(c) {
             case 'a':
-                aFlag = 1;
+                options |= FLAG_a;
                 break;
             case 'l':
-                lFlag = 1;
+                options |= FLAG_l;
                 break;
             case '?':
                 printf("kls: invalid option -- '%c'\n",c);
                 break;
         }
     }
-    if (lFlag) {
-        return kls_al(argc, argv, aFlag);
+
+    if (optind == argc) {
+        return kls_full(".", options);
     }
-    else {
-        return kls_a(argc, argv, aFlag);
+
+    for (int i = optind; i < argc; i++) {
+        //On affiche le répertoire analysé si il y en a plusieurs
+        if (optind != argc -1) {
+            printf("%s:\n", argv[i]);
+        }
+
+        DEBUG("ls %s", argv[i]);
+        kls_full(argv[i], options);
     }
+
     return 0;
 }
 
