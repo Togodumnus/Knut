@@ -17,7 +17,10 @@
 #include <pwd.h>
 #include <string.h>
 
-// Pour converser entrer l'utilisateur et le programme
+//utilisateur par défaut (si aucun argument n'est entré)
+const char DEFAULT_USER[] = "root";
+
+//Pour converser entre l'utilisateur et le programme
 static struct pam_conv conv = {
     #ifdef __APPLE__
     openpam_ttyconv,
@@ -28,21 +31,33 @@ static struct pam_conv conv = {
 };
 struct passwd *pwd;
 
-int ksu(int argc, char *argv[])
-{
+/**
+ * ksu
+ *
+ * Fonction d'entrée de su
+ *
+ * @see https://www.freebsd.org/doc/en/articles/pam/pam-sample-appl.html
+ *      Bon tuto et exemple pour utiliser pam
+ *
+ * @param  {int}        argc
+ * @param  {char *[]}   argv
+ */
+int ksu(int argc, char *argv[]) {
     pam_handle_t *pamh = NULL;
     char ** pam_env_list; // liste des variable d'environnement
     char ** pam_env;
     int retval;
-    const char *user = "root"; // utilisateur par défaut (si aucun argument n'est entrée)
 
     if(argc > 2) {
         fprintf(stderr, "ksu : too many arguments\n");
         exit(EXIT_FAILURE);
     }
 
+    const char *user;
     if(argc == 2) {
         user = argv[1];
+    } else {
+        user = DEFAULT_USER;
     }
 
     retval = pam_start("check_user", user, &conv, &pamh);
