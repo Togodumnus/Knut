@@ -36,22 +36,6 @@ usage: chgrp [-Rv] <group> file ...\n\
 ");
 }
 
-/**
- * isnumber
- * 
- * Parcours un char et retourne 1 si il est constitué que de chiffre
- *
- * @param {char *}      s
- */
-int isnumber(char *s){
-    int c;
-    while((c = *s++))
-        if (!isdigit(c))
-            return 0;
-    return 1;
-}
-
-void chgrpElem(char *path, int options, uid_t uid, gid_t gid);
 
 /**
  * chgrpDirContent
@@ -136,7 +120,7 @@ int chgrpLib(int argc, char *argv[]) {
     }
     token = argv[optind];
     /* on récupère le groupe */
-    if (isnumber(token)) {
+    if (isNumber(token)) {
         gid = atoi(token);
         gr = getgrgid(gid);
         if (uid && gr == NULL){
@@ -151,7 +135,7 @@ int chgrpLib(int argc, char *argv[]) {
         }
         gid = gr->gr_gid;
     }
-    
+
     for (int i = optind+1; i < argc; i ++) {
         chgrpElem(argv[i], options, uid, gid);
     }

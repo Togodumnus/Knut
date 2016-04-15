@@ -80,3 +80,19 @@ void chElem(char *path, int options, uid_t uid, gid_t gid){
         exit(EXIT_FAILURE);
     }
 }
+
+
+/**
+ * isNumber
+ *
+ * Parcours un char et retourne 1 si il est constitué que de chiffre
+ *
+ * @param {char *}      s
+ */
+int isNumber(char *s){
+    int c;
+    while((c = *s++))
+        if (!isdigit(c))
+            return 0;
+    return 1;
+}

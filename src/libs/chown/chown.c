@@ -20,7 +20,7 @@
 //flags
 const int F_REC   = 1<<1;   //-r, -R
 const int F_VERB  = 1<<2;   //-v
-struct  group *gr, *getgrnam(), *getgrgid();
+struct group *gr, *getgrnam(), *getgrgid();
 struct passwd *pwd;
 
 /**
@@ -35,23 +35,6 @@ usage: chown [-Rv] <owner> [:<group>] file ...\n\
 \t-v\tVerbose\n\
 ");
 }
-
-/**
- * isnumber
- * 
- * Parcours un char et retourne 1 si il est constitué que de chiffre
- *
- * @param {char *}      s
- */
-int isnumber(char *s){
-    int c;
-    while((c = *s++))
-        if (!isdigit(c))
-            return 0;
-    return 1;
-}
-
-void chownElem(char *path, int options, uid_t uid, gid_t gid);
 
 /**
  * chownDirContent
@@ -138,7 +121,7 @@ int chownLib(int argc, char *argv[]) {
 
     // on prend l'utilisateur
     token = strtok(argv[optind], s);
-    if (isnumber(token)){
+    if (isNumber(token)){
         uid = atoi(token);
     }
     else{
@@ -150,10 +133,10 @@ int chownLib(int argc, char *argv[]) {
         uid = pwd->pw_uid;
     }
     //on regarde si il y a d'autre token (le groupe)
-    while(token != NULL){ 
+    while(token != NULL){
         token = strtok(NULL, s);
         if(token != NULL){
-            if (isnumber(token)) {
+            if (isNumber(token)) {
                 gid = atoi(token);
                 gr = getgrgid(gid);
                 if (uid && gr == NULL){
@@ -170,7 +153,7 @@ int chownLib(int argc, char *argv[]) {
             }
         }
     }
-    
+
     for (int i = optind+1; i < argc; i ++) {
         chownElem(argv[i], options, uid, gid);
     }
