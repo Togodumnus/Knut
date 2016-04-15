@@ -1,4 +1,11 @@
 
+UNAME = $(shell uname)
+
+PRIV_LD_FLAGS = -lpam
+ifeq ($(UNAME), Linux)
+PRIV_LD_FLAGS += -lpam_misc
+endif
+
 root=../../..
 
 all: suIntro $(root)/$(binDir)/$(libsDir)/su \
@@ -14,9 +21,9 @@ suIntro:
 $(root)/$(binDir)/$(libsDir)/su: $(root)/$(objDir)/$(libsDir)/su/su.o \
 						  $(root)/$(objDir)/$(libsDir)/su/main.o
 	@echo "		$(BOLD_C)- Executable$(NO_C)"
-	@$(CC) -o $(root)/$(binDir)/$(libsDir)/su $^ $(LDFLAGS) -lpam -lpam_misc
+	@$(CC) -o $(root)/$(binDir)/$(libsDir)/su $^ $(LDFLAGS) $(PRIV_LD_FLAGS)
 	@echo "		$(CC) -o $(root)/$(binDir)/$(libsDir)/su $^ $(LDFLAGS) \
-		-lpam -lpam_misc"
+		$(PRIV_LD_FLAGS)"
 	@echo "		"$(DONE)
 
 #librairie statique
@@ -31,8 +38,8 @@ $(root)/$(binDir)/$(libsDir)/$(staticDir)/libsu.a: $(root)/$(objDir)/$(libsDir)/
 #librairie dynamique
 $(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libsu.so: $(root)/$(objDir)/$(libsDir)/su/su.o
 	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
-	@$(CC) -shared -o $@ $^
-	@echo "		$(CC) -shared -o $@ $^"
+	@$(CC) -shared -o $@ $^ $(PRIV_LD_FLAGS)
+	@echo "		$(CC) -shared -o $@ $^ $(PRIV_LD_FLAGS)"
 	@echo "		"$(DONE)
 
 #fichiers objets

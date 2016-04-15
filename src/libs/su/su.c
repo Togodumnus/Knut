@@ -1,21 +1,29 @@
-// TO COMPILE : gcc -Wall su.c -lpam -lpam_misc -o ksu
 /* TODO
 * sudo chown root ksu
 * sudo chgrp root ksu
 * sudo chmod 4711 ksu
 */
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <security/pam_appl.h>
+#ifdef __APPLE__
+#include <security/openpam.h>
+#else
 #include <security/pam_misc.h>
-#include <stdio.h>
+#endif
 #include <unistd.h>
 #include <pwd.h>
 #include <string.h>
 
 // Pour converser entrer l'utilisateur et le programme
 static struct pam_conv conv = {
+    #ifdef __APPLE__
+    openpam_ttyconv,
+    #else
     misc_conv,
+    #endif
     NULL
 };
 struct passwd *pwd;
