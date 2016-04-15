@@ -15,8 +15,8 @@
 
 #include "../../LIB.h"
 #include "../../DEBUG.h"
+#include "utils.h"
 
-const int F_REC   = 1<<1;   //-r, -R
 struct  group *gr, *getgrnam(), *getgrgid();
 struct passwd *pwd;
 
@@ -52,7 +52,7 @@ void chDirContent(char *path, int options, uid_t uid, gid_t gid){
             strcat(child_path, "/");
             strcat(child_path, dptr_src->d_name);
 
-            chElem(child_path, options, uid, gid); //on supprime l'élément
+            chElem(child_path, options, uid, gid);//On mofifie le groupe/les droits
         }
     }
 
@@ -72,25 +72,6 @@ void chDirContent(char *path, int options, uid_t uid, gid_t gid){
  * @param  {gid_t}      gid
  */
 void chElem(char *path, int options, uid_t uid, gid_t gid){
-    struct stat st;
-    if (stat(path, &st) == -1) {
-        if (errno == ENOENT) {
-            perror("No such file");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    if (S_ISDIR(st.st_mode)) {
-
-        //On regarde si on a l'option -r
-        if ((options & F_REC) == F_REC) {
-            DEBUG("ch %s content", path);
-            //modification des droits du contenu
-            chDirContent(path, options, uid, gid);
-        }
-
-    }
-
     DEBUG("ch %s", path);
     if (chown(path, uid, gid) == -1){
         fprintf(stderr,

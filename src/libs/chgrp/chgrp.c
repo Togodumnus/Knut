@@ -63,7 +63,7 @@ void chgrpElem(char *path, int options, uid_t uid, gid_t gid);
  * @param  {gid_t}      gid
  */
 void chgrpDirContent(char *path, int options, uid_t uid, gid_t gid){
-    chDirContent(char *path, int options, uid_t uid, gid_t gid);
+    chDirContent(path, options, uid, gid);
 }
 
 /**
@@ -76,10 +76,27 @@ void chgrpDirContent(char *path, int options, uid_t uid, gid_t gid){
  * @param  {gid_t}      gid
  */
 void chgrpElem(char *path, int options, uid_t uid, gid_t gid){
+    struct stat st;
+    if (stat(path, &st) == -1) {
+        if (errno == ENOENT) {
+            perror("No such file");
+            exit(EXIT_FAILURE);
+        }
+    }
     if ((options & F_VERB) == F_VERB) {
             printf("Changing %s group\n", path);
     }
-    chElem(char *path, int options, uid_t uid, gid_t gid);
+    if (S_ISDIR(st.st_mode)) {
+
+        //On regarde si on a l'option -r
+        if ((options & F_REC) == F_REC) {
+            DEBUG("ch %s content", path);
+            //modification du group du contenu
+            chDirContent(path, options, uid, gid);
+        }
+
+    }
+    chElem(path, options, uid, gid);
 }
 
 /**
@@ -94,6 +111,7 @@ int chgrpLib(int argc, char *argv[]) {
     uid_t uid = -1;
     gid_t gid;
     int options = 0;
+    char *token;
 
     char c;
     while((c = getopt(argc, argv, "Rvf")) != -1) {
@@ -116,18 +134,19 @@ int chgrpLib(int argc, char *argv[]) {
         usage();
         exit(EXIT_FAILURE);
     }
+    token = argv[optind];
     /* on récupère le groupe */
-    if (isnumber(argv[optind])) {
-        gid = atoi(optind);
+    if (isnumber(token)) {
+        gid = atoi(token);
         gr = getgrgid(gid);
         if (uid && gr == NULL){
-            printf("%s: unknown group", optind);
+            printf("%s: unknown group", token);
             exit(EXIT_FAILURE);
         }
     } else {
-        gr = getgrnam(optind);
+        gr = getgrnam(token);
         if (gr == NULL){
-            printf("%s: unknown group", optind);
+            printf("%s: unknown group", token);
             exit(EXIT_FAILURE);
         }
         gid = gr->gr_gid;

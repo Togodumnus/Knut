@@ -63,7 +63,7 @@ void chownElem(char *path, int options, uid_t uid, gid_t gid);
  * @param  {gid_t}      gid
  */
 void chownDirContent(char *path, int options, uid_t uid, gid_t gid){
-    chDirContent(char *path, int options, uid_t uid, gid_t gid);
+    chDirContent(path, options, uid, gid);
 }
 
 /**
@@ -76,10 +76,27 @@ void chownDirContent(char *path, int options, uid_t uid, gid_t gid){
  * @param  {gid_t}      gid
  */
 void chownElem(char *path, int options, uid_t uid, gid_t gid){
+    struct stat st;
+    if (stat(path, &st) == -1) {
+        if (errno == ENOENT) {
+            perror("No such file");
+            exit(EXIT_FAILURE);
+        }
+    }
     if ((options & F_VERB) == F_VERB) {
             printf("Changing %s owner\n", path);
     }
-    chElem(char *path, int options, uid_t uid, gid_t gid);
+    if (S_ISDIR(st.st_mode)) {
+
+        //On regarde si on a l'option -r
+        if ((options & F_REC) == F_REC) {
+            DEBUG("ch %s content", path);
+            //modification des droits du contenu
+            chDirContent(path, options, uid, gid);
+        }
+
+    }
+    chElem(path, options, uid, gid);
 }
 
 /**
@@ -119,20 +136,20 @@ int chownLib(int argc, char *argv[]) {
     char *token;
     gid_t gid = -1;
 
-    /* on prend l'utilisateur */
+    // on prend l'utilisateur
     token = strtok(argv[optind], s);
     if (isnumber(token)){
         uid = atoi(token);
     }
     else{
-        pwd = getpwnam(token);      /* On essaye d'avoir l'UID par le username */
+        pwd = getpwnam(token); //On essaye d'avoir l'UID par le username
         if (pwd == NULL) {
             printf("invalid username\n");
             exit(EXIT_FAILURE);
         }
         uid = pwd->pw_uid;
     }
-    /* on regarde si il y a d'autre token (le groupe) */
+    //on regarde si il y a d'autre token (le groupe)
     while(token != NULL){ 
         token = strtok(NULL, s);
         if(token != NULL){
