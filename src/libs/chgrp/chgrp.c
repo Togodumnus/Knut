@@ -15,7 +15,7 @@
 
 #include "../../LIB.h"
 #include "../../DEBUG.h"
-#include "utils.h"
+#include "../chown/utils.h"
 
 //flags
 const int F_REC   = 1<<1;   //-r, -R
@@ -28,8 +28,8 @@ struct passwd *pwd;
  */
 void usage() {
     printf("\
-Knut chown\n\n\
-usage: chown [-Rv] <owner> [:<group>] file ...\n\
+Knut chgrp\n\n\
+usage: chgrp [-Rv] <group> file ...\n\
 \n\
 \t-R\tRecursive\n\
 \t-v\tVerbose\n\
@@ -51,23 +51,23 @@ int isnumber(char *s){
     return 1;
 }
 
-void chownElem(char *path, int options, uid_t uid, gid_t gid);
+void chgrpElem(char *path, int options, uid_t uid, gid_t gid);
 
 /**
- * chownDirContent
+ * chgrpDirContent
  *
- * Parcours du contenu d'un répertoire pour chown
+ * Parcours du contenu d'un répertoire pour chgrp
  *
  * @param  {char *}     path
  * @param  {uid_t}      uid
  * @param  {gid_t}      gid
  */
-void chownDirContent(char *path, int options, uid_t uid, gid_t gid){
+void chgrpDirContent(char *path, int options, uid_t uid, gid_t gid){
     chDirContent(char *path, int options, uid_t uid, gid_t gid);
 }
 
 /**
- * chownElem
+ * chgrpElem
  *
  * Modification des permissions de path
  *
@@ -75,23 +75,24 @@ void chownDirContent(char *path, int options, uid_t uid, gid_t gid){
  * @param  {uid_t}      uid
  * @param  {gid_t}      gid
  */
-void chownElem(char *path, int options, uid_t uid, gid_t gid){
+void chgrpElem(char *path, int options, uid_t uid, gid_t gid){
     if ((options & F_VERB) == F_VERB) {
-            printf("Changing %s owner\n", path);
+            printf("Changing %s group\n", path);
     }
     chElem(char *path, int options, uid_t uid, gid_t gid);
 }
 
 /**
- * chownLib
+ * chgrpLib
  *
  * Fonction d'entrée
  *
  * @param  {int}    argc
  * @param  {char *} argv
  */
-int chownLib(int argc, char *argv[]) {
-    uid_t uid;
+int chgrpLib(int argc, char *argv[]) {
+    uid_t uid = -1;
+    gid_t gid;
     int options = 0;
 
     char c;
@@ -115,47 +116,25 @@ int chownLib(int argc, char *argv[]) {
         usage();
         exit(EXIT_FAILURE);
     }
-    const char s[2] = ":";
-    char *token;
-    gid_t gid = -1;
-
-    /* on prend l'utilisateur */
-    token = strtok(argv[optind], s);
-    if (isnumber(token)){
-        uid = atoi(token);
-    }
-    else{
-        pwd = getpwnam(token);      /* On essaye d'avoir l'UID par le username */
-        if (pwd == NULL) {
-            printf("invalid username\n");
+    /* on récupère le groupe */
+    if (isnumber(argv[optind])) {
+        gid = atoi(optind);
+        gr = getgrgid(gid);
+        if (uid && gr == NULL){
+            printf("%s: unknown group", optind);
             exit(EXIT_FAILURE);
         }
-        uid = pwd->pw_uid;
-    }
-    /* on regarde si il y a d'autre token (le groupe) */
-    while(token != NULL){ 
-        token = strtok(NULL, s);
-        if(token != NULL){
-            if (isnumber(token)) {
-                gid = atoi(token);
-                gr = getgrgid(gid);
-                if (uid && gr == NULL){
-                    printf("%s: unknown group", token);
-                    exit(EXIT_FAILURE);
-                }
-            } else {
-                gr = getgrnam(token);
-                if (gr == NULL){
-                    printf("%s: unknown group", token);
-                    exit(EXIT_FAILURE);
-                }
-                gid = gr->gr_gid;
-            }
+    } else {
+        gr = getgrnam(optind);
+        if (gr == NULL){
+            printf("%s: unknown group", optind);
+            exit(EXIT_FAILURE);
         }
+        gid = gr->gr_gid;
     }
     
     for (int i = optind+1; i < argc; i ++) {
-        chownElem(argv[i], options, uid, gid);
+        chgrpElem(argv[i], options, uid, gid);
     }
 
     return 0;
@@ -169,5 +148,5 @@ int chownLib(int argc, char *argv[]) {
  * dynamique
  */
 void Init(EnregisterCommande enregisterCommande) {
-    enregisterCommande("chown", chownLib);
+    enregisterCommande("chgrp", chgrpLib);
 }
