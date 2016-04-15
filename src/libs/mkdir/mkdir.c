@@ -63,7 +63,7 @@ int kmkdir_v(char * dirname) {
  * kmkdir_p
  *
  * Compatible avec l'option 'p' de mkdir :
- * cré les répertoires parents nécessaire
+ * crée les répertoires parents nécessaire
  *
  * @param  {char *}   path           Le chemin du répertoire à créé
  * @param  {int}      permissions    Les permissions du répertoire créé
@@ -111,6 +111,17 @@ int kmkdir_p(char *path, int permissions, bool verbose) {
     return 0;
 }
 
+void usage() {
+    printf("\
+Knut mkdir\n\
+\n\
+\t-m mode\tSet the directory permission\n\
+\t-p\tCreate intermediate directories if needed\n\
+\t-v\tVerbose\n\
+");
+
+}
+
 /**
  * kmkdir
  *
@@ -128,7 +139,6 @@ int kmkdir(int argc, char * argv[]) {
 
     int c;
     int flag = 0; //verbose and p flags
-    int nbParams = 1;
 
     //on applique le mask des permissions
     mode_t permissions = 0777 & ~getumask();
@@ -138,19 +148,17 @@ int kmkdir(int argc, char * argv[]) {
             case 'm':
                 DEBUG("m option");
                 permissions = octal_decimal(atoi(optarg));
-                nbParams += 2;
                 break;
             case 'v':
                 DEBUG("v option");
                 flag |= vFlag;
-                nbParams++;
                 break;
             case 'p':
                 DEBUG("p option");
                 flag |= pFlag;
-                nbParams++;
                 break;
             default:
+                usage();
                 exit(EXIT_FAILURE);
         }
     }
@@ -159,22 +167,20 @@ int kmkdir(int argc, char * argv[]) {
         perror("Wrong permissions");
     }
 
-    do {
+    for (int i = optind; i < argc; i++) {
         if ((flag & pFlag) == pFlag) {
-            if (kmkdir_p(argv[nbParams], permissions,
+            if (kmkdir_p(argv[i], permissions,
                         (flag & vFlag) == vFlag) == -1) {
                 return EXIT_FAILURE;
             }
         } else {
-            if (mkdir(argv[nbParams], permissions) == -1) {
+            if (mkdir(argv[i], permissions) == -1) {
                 perror("Mkdir error");
                 return EXIT_FAILURE;
             }
         }
+    }
 
-        nbParams++;
-
-    } while (nbParams < argc);
 
     return 0;
 }
