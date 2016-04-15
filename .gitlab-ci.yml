@@ -3,5 +3,6 @@ image: gcc:latest
 job_compile:
     stage: build
     script:
+        - apt-get install -y libpam0g-dev
         - make
 
