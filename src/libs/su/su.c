@@ -5,12 +5,12 @@
 * sudo chmod 4711 ksu
 */
 
+#include <sys/types.h>
 #include <security/pam_appl.h>
 #include <security/pam_misc.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <pwd.h>
-#include <sys/types.h>
 #include <string.h>
 
 // Pour converser entrer l'utilisateur et le programme
@@ -34,7 +34,7 @@ int ksu(int argc, char *argv[])
     }
 
     if(argc == 2) {
-        user = argv[1]; 
+        user = argv[1];
     }
 
     retval = pam_start("check_user", user, &conv, &pamh);
@@ -43,15 +43,15 @@ int ksu(int argc, char *argv[])
         fprintf(stderr, "Error with pam_start\n");
 
     if (retval == PAM_SUCCESS) // authentification
-        retval = pam_authenticate(pamh, 0);    
+        retval = pam_authenticate(pamh, 0);
 
     if (retval == PAM_SUCCESS)
-        retval = pam_acct_mgmt(pamh, 0);       
+        retval = pam_acct_mgmt(pamh, 0);
 
     if (retval != PAM_SUCCESS) { // pas le bon mdp donc on quitte
         fprintf(stderr, "ksu: Authentication failure\n");
         exit(EXIT_FAILURE);
-    } 
+    }
 
     retval = pam_setcred(pamh, 0);
     if (retval != PAM_SUCCESS)
@@ -63,7 +63,7 @@ int ksu(int argc, char *argv[])
         fprintf(stderr, "Error with openning session\n");
 
     pwd = getpwnam(user);
-    if( setuid(pwd->pw_uid) != 0 ) 
+    if( setuid(pwd->pw_uid) != 0 )
         fprintf(stderr, "Error with setting user id\n");
 
     // variable d'environnement
@@ -81,7 +81,7 @@ int ksu(int argc, char *argv[])
     }
 
     // fermeture PAM
-    if (pam_end(pamh,retval) != PAM_SUCCESS) {     
+    if (pam_end(pamh,retval) != PAM_SUCCESS) {
         pamh = NULL;
         fprintf(stderr, "check_user: failed to release authenticator\n");
         exit(EXIT_FAILURE);
@@ -92,9 +92,4 @@ int ksu(int argc, char *argv[])
         execvp("bash", (char*[]){"bash", NULL});
 
     return retval;
-}
-
-
-int main(int argc, char *argv[]) {
-    return ksu(argc, argv);
 }

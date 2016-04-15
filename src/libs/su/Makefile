@@ -14,8 +14,9 @@ suIntro:
 $(root)/$(binDir)/$(libsDir)/su: $(root)/$(objDir)/$(libsDir)/su/su.o \
 						  $(root)/$(objDir)/$(libsDir)/su/main.o
 	@echo "		$(BOLD_C)- Executable$(NO_C)"
-	@$(CC) -o $(root)/$(binDir)/$(libsDir)/su $^ $(LDFLAGS)
-	@echo "		$(CC) -o $(root)/$(binDir)/$(libsDir)/su $^ $(LDFLAGS)"
+	@$(CC) -o $(root)/$(binDir)/$(libsDir)/su $^ $(LDFLAGS) -lpam -lpam_misc
+	@echo "		$(CC) -o $(root)/$(binDir)/$(libsDir)/su $^ $(LDFLAGS) \
+		-lpam -lpam_misc"
 	@echo "		"$(DONE)
 
 #librairie statique
