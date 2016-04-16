@@ -36,7 +36,6 @@ usage: chown [-Rv] <owner> [:<group>] file ...\n\
 ");
 }
 
-
 /**
  * chownLib
  *
@@ -115,7 +114,6 @@ int chownLib(int argc, char *argv[]) {
 
     return 0;
 }
-
 
 /**
  * Init

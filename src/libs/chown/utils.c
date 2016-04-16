@@ -52,7 +52,8 @@ void chDirContent(char *path, int options, uid_t uid, gid_t gid, int f_rec, int 
             strcat(child_path, "/");
             strcat(child_path, dptr_src->d_name);
 
-            chElem(child_path, options, uid, gid, f_rec, f_verb);//On mofifie le groupe/les droits
+            //On mofifie le groupe/les droits
+            chElem(child_path, options, uid, gid, f_rec, f_verb);
         }
     }
 
