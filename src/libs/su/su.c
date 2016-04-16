@@ -1,4 +1,4 @@
-// TO COMPILE : gcc -Wall ksu.c -lpam -lpam_misc -o ksu
+// TO COMPILE : gcc -Wall su.c -lpam -lpam_misc -o ksu
 /* TODO
 * sudo chown root ksu
 * sudo chgrp root ksu
@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <sys/types.h>
+#include <string.h>
 
 // Pour converser entrer l'utilisateur et le programme
 static struct pam_conv conv = {
@@ -22,6 +23,8 @@ struct passwd *pwd;
 int ksu(int argc, char *argv[])
 {
     pam_handle_t *pamh = NULL;
+    char ** pam_env_list; // liste des variable d'environnement
+    char ** pam_env;
     int retval;
     const char *user = "root"; // utilisateur par défaut (si aucun argument n'est entrée)
 
@@ -54,6 +57,7 @@ int ksu(int argc, char *argv[])
     if (retval != PAM_SUCCESS)
         fprintf(stderr, "Error with user credentials\n");
 
+    // ouverture session
     retval = pam_open_session(pamh, 0);
     if (retval != PAM_SUCCESS)
         fprintf(stderr, "Error with openning session\n");
@@ -62,15 +66,39 @@ int ksu(int argc, char *argv[])
     if( setuid(pwd->pw_uid) != 0 ) 
         fprintf(stderr, "Error with setting user id\n");
 
-    if (pam_end(pamh,retval) != PAM_SUCCESS) {     /* close Linux-PAM */
+    // variable d'environnement
+    pam_env_list = pam_getenvlist(pamh);
+    if (pam_env_list != NULL) {
+        for (pam_env = pam_env_list; *pam_env != NULL; pam_env++) {
+            putenv(*pam_env);
+            free(*pam_env);
+        }
+        free(pam_env_list);
+    }
+    else {
+        fprintf(stderr, "Error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // fermeture PAM
+    if (pam_end(pamh,retval) != PAM_SUCCESS) {     
         pamh = NULL;
         fprintf(stderr, "check_user: failed to release authenticator\n");
         exit(EXIT_FAILURE);
     }
+
+        
+
+
 
     // on lance un nouveau bash avec le nouveau user
     if (retval == PAM_SUCCESS)
         execvp("bash", (char*[]){"bash", NULL});
 
     return retval;
+}
+
+
+int main(int argc, char *argv[]) {
+    return ksu(argc, argv);
 }
