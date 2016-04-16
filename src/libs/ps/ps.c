@@ -41,6 +41,8 @@ typedef struct proc{
     int    vsz;
     int    rss;
     float cpu;
+    char * tty;
+    char* command;
 } proc;
 
 /**
@@ -122,10 +124,49 @@ void getSystemStat(systemStat *sysStat) { //pas utilisée
         sysStat->totalCpuTime += atoi(items[i]);
     }
 
+
     free(items);
     free(line);
 
     fclose(statf);
+}
+
+/**
+ * getProcStat
+ *
+ * Parsing du fichier stat correspondant à un processus
+ *
+ * @param  {char *} path    Le chemin vers le fichier stat
+ * @param  {proc *} process La structure à remplir
+ */
+void getProcStat(char* path,proc *proc) { //pas utilisée
+
+
+    /*FILE *statf = fopen(path, "r");
+    if(!statf){
+        perror("Can't open status");
+        exit(EXIT_FAILURE);
+    }
+
+    char *line = NULL;
+    size_t n = NULL;
+
+    if (getline(&line, &n, statf) == -1) {
+        perror("Can't read file");
+        exit(EXIT_FAILURE);
+    }
+
+    int nb = 0;
+    char **items = split(line, " ", &nb);
+
+    printf("YO : %d \n",atoi(items[0]));
+
+
+    free(items);
+    free(line);
+
+    fclose(statf);
+    */
 }
 
 /**
@@ -151,8 +192,17 @@ void infos_from_status(char* path, proc* process) {
     while (fgets(line, 100, statusf)) {
         char *token;
 
+        //Name
+        if(strncmp(line, "Name:", 4) == 0){
+            token = strtok(line, "\t"); //"Name:"
+            token = strtok(NULL, "\t");
+
+            //on stocke dans la structure proc le Name de la commande
+            process->command = token;
+            DEBUG("%s",line);
+        }
         //Uid
-        if(strncmp(line, "Uid:", 4) == 0){
+        else if(strncmp(line, "Uid:", 4) == 0){
             token = strtok(line, "\t"); //"Uid:"
             token = strtok(NULL, "\t"); //l'uid
 
@@ -192,6 +242,7 @@ void infos_from_status(char* path, proc* process) {
             //on stocke dans la structure proc le VSZ
             process->rss = atoi(token);
         }
+        //On est dans la ligne Name
 
     }
 
@@ -259,11 +310,13 @@ void ps(int options) {
                         infos_from_status(path_to_status, &process);
 
                         printf(
-                            "%10s %5d %20d %7d \n",
+                            "%10s %5d %20d %7d %10s \n",
                             process.user,
                             process.pid,
                             process.vsz,
-                            process.rss
+                            process.rss,
+                            process.command
+
                         );
                     } else if (strcmp(fichierLuBis->d_name, "stat") == 0){
                         char path_to_stat[
@@ -273,9 +326,8 @@ void ps(int options) {
                         strcpy(path_to_stat, processDir);
                         strcat(path_to_stat, "/stat");
 
-                        infos_from_stat(path_to_stat, &process, &sysStat);
+                        getProcStat(path_to_stat, &process);
                     }
-
                 }
             }
         }
