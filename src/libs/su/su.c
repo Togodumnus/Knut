@@ -3,7 +3,7 @@
 * sudo chgrp root ksu
 * sudo chmod 4711 ksu
 */
-
+#define _XOPEN_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -97,8 +97,7 @@ int ksu(int argc, char *argv[]) {
             free(*pam_env);
         }
         free(pam_env_list);
-    }
-    else {
+    } else {
         fprintf(stderr, "Error\n");
         exit(EXIT_FAILURE);
     }
