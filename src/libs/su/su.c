@@ -29,7 +29,7 @@ int ksu(int argc, char *argv[])
     const char *user = "root"; // utilisateur par défaut (si aucun argument n'est entrée)
 
     if(argc > 2) {
-        fprintf(stderr, "ksu : too many arguments\n"); // A REVOIR car su peut à priori en prendre plusieurs
+        fprintf(stderr, "ksu : too many arguments\n");
         exit(EXIT_FAILURE);
     }
 
@@ -86,10 +86,6 @@ int ksu(int argc, char *argv[])
         fprintf(stderr, "check_user: failed to release authenticator\n");
         exit(EXIT_FAILURE);
     }
-
-        
-
-
 
     // on lance un nouveau bash avec le nouveau user
     if (retval == PAM_SUCCESS)
