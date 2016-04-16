@@ -36,53 +36,6 @@ usage: chgrp [-Rv] <group> file ...\n\
 ");
 }
 
-
-/**
- * chgrpDirContent
- *
- * Parcours du contenu d'un répertoire pour chgrp
- *
- * @param  {char *}     path
- * @param  {uid_t}      uid
- * @param  {gid_t}      gid
- */
-void chgrpDirContent(char *path, int options, uid_t uid, gid_t gid){
-    chDirContent(path, options, uid, gid);
-}
-
-/**
- * chgrpElem
- *
- * Modification des permissions de path
- *
- * @param  {char *}     path
- * @param  {uid_t}      uid
- * @param  {gid_t}      gid
- */
-void chgrpElem(char *path, int options, uid_t uid, gid_t gid){
-    struct stat st;
-    if (stat(path, &st) == -1) {
-        if (errno == ENOENT) {
-            perror("No such file");
-            exit(EXIT_FAILURE);
-        }
-    }
-    if ((options & F_VERB) == F_VERB) {
-            printf("Changing %s group\n", path);
-    }
-    if (S_ISDIR(st.st_mode)) {
-
-        //On regarde si on a l'option -r
-        if ((options & F_REC) == F_REC) {
-            DEBUG("ch %s content", path);
-            //modification du group du contenu
-            chDirContent(path, options, uid, gid);
-        }
-
-    }
-    chElem(path, options, uid, gid);
-}
-
 /**
  * chgrpLib
  *
@@ -137,7 +90,7 @@ int chgrpLib(int argc, char *argv[]) {
     }
 
     for (int i = optind+1; i < argc; i ++) {
-        chgrpElem(argv[i], options, uid, gid);
+        chElem(argv[i], options, uid, gid,F_REC,F_VERB);
     }
 
     return 0;

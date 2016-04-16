@@ -20,7 +20,7 @@
 struct  group *gr, *getgrnam(), *getgrgid();
 struct passwd *pwd;
 
-void chElem(char *path, int options, uid_t uid, gid_t gid);
+void chElem(char *path, int options, uid_t uid, gid_t gid, int f_rec, int f_verb);
 
 /**
  * chDirContent
@@ -31,7 +31,7 @@ void chElem(char *path, int options, uid_t uid, gid_t gid);
  * @param  {uid_t}      uid
  * @param  {gid_t}      gid
  */
-void chDirContent(char *path, int options, uid_t uid, gid_t gid){
+void chDirContent(char *path, int options, uid_t uid, gid_t gid, int f_rec, int f_verb){
     DIR *dirp_src;
     struct dirent *dptr_src;
 
@@ -52,7 +52,7 @@ void chDirContent(char *path, int options, uid_t uid, gid_t gid){
             strcat(child_path, "/");
             strcat(child_path, dptr_src->d_name);
 
-            chElem(child_path, options, uid, gid);//On mofifie le groupe/les droits
+            chElem(child_path, options, uid, gid, f_rec, f_verb);//On mofifie le groupe/les droits
         }
     }
 
@@ -71,7 +71,26 @@ void chDirContent(char *path, int options, uid_t uid, gid_t gid){
  * @param  {uid_t}      uid
  * @param  {gid_t}      gid
  */
-void chElem(char *path, int options, uid_t uid, gid_t gid){
+void chElem(char *path, int options, uid_t uid, gid_t gid, int f_rec, int f_verb){
+    struct stat st;
+    if (stat(path, &st) == -1) {
+        if (errno == ENOENT) {
+            perror("No such file");
+            exit(EXIT_FAILURE);
+        }
+    }
+    if ((options & f_verb) == f_verb) {
+            printf("Changing %s owner/group\n", path);
+    }
+    if (S_ISDIR(st.st_mode)) {
+
+        //On regarde si on a l'option -r
+        if ((options & f_rec) == f_rec) {
+            DEBUG("ch %s content", path);
+            //modification des droits du contenu
+            chDirContent(path, options, uid, gid, f_rec, f_verb);
+        }
+    }
     DEBUG("ch %s", path);
     if (chown(path, uid, gid) == -1){
         fprintf(stderr,

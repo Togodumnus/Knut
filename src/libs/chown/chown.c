@@ -36,51 +36,6 @@ usage: chown [-Rv] <owner> [:<group>] file ...\n\
 ");
 }
 
-/**
- * chownDirContent
- *
- * Parcours du contenu d'un répertoire pour chown
- *
- * @param  {char *}     path
- * @param  {uid_t}      uid
- * @param  {gid_t}      gid
- */
-void chownDirContent(char *path, int options, uid_t uid, gid_t gid){
-    chDirContent(path, options, uid, gid);
-}
-
-/**
- * chownElem
- *
- * Modification des permissions de path
- *
- * @param  {char *}     path
- * @param  {uid_t}      uid
- * @param  {gid_t}      gid
- */
-void chownElem(char *path, int options, uid_t uid, gid_t gid){
-    struct stat st;
-    if (stat(path, &st) == -1) {
-        if (errno == ENOENT) {
-            perror("No such file");
-            exit(EXIT_FAILURE);
-        }
-    }
-    if ((options & F_VERB) == F_VERB) {
-            printf("Changing %s owner\n", path);
-    }
-    if (S_ISDIR(st.st_mode)) {
-
-        //On regarde si on a l'option -r
-        if ((options & F_REC) == F_REC) {
-            DEBUG("ch %s content", path);
-            //modification des droits du contenu
-            chDirContent(path, options, uid, gid);
-        }
-
-    }
-    chElem(path, options, uid, gid);
-}
 
 /**
  * chownLib
@@ -155,7 +110,7 @@ int chownLib(int argc, char *argv[]) {
     }
 
     for (int i = optind+1; i < argc; i ++) {
-        chownElem(argv[i], options, uid, gid);
+        chElem(argv[i], options, uid, gid,F_REC,F_VERB);
     }
 
     return 0;
