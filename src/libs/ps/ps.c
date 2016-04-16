@@ -27,6 +27,7 @@ http://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-
 */
 
 const int SLEEP_TIME = 1000000; //10ms
+#define MAJOR_OF(d) ( ((unsigned)(d)>>8u) & 0xfffu )
 
 char* REPERTOIRE_PROC = "/proc";
 
@@ -152,9 +153,7 @@ void getSystemStat(systemStat *sysStat) { //pas utilisée
  * @param  {proc *} process La structure à remplir
  */
 void getProcStat(char* path,proc *proc) { //pas utilisée
-
-
-    /*FILE *statf = fopen(path, "r");
+    FILE *statf = fopen(path, "r");
     if(!statf){
         perror("Can't open status");
         exit(EXIT_FAILURE);
@@ -171,14 +170,63 @@ void getProcStat(char* path,proc *proc) { //pas utilisée
     int nb = 0;
     char **items = split(line, " ", &nb);
 
-    printf("YO : %d \n",atoi(items[0]));
+    int tty = atoi(items[6]); // On a l'entier correspondant au tty du process
 
+/*
+Comment récupérer le tty : 
+The /proc/<pid>/stat files give the tty number for each process (e.g.
+34817). I then go through the /dev/pts directory and stat() each file
+there.  I then compare one of the struct stat members (st_rdev) returned
+by stat() to the tty number found in /proc/<pid>/stat.  If they match,
+then the file stated (e.g. /dev/pts/1) is the terminal that that process
+is attached to.
+*/
+    DIR *processRep;
+    struct dirent *fileTTY;
+    struct stat statTTY;
+
+    proc->tty = "?";
+
+    //Tous les tty dans /dev/pts
+    if ((processRep = opendir("/dev/pts")) == NULL) {
+        printf("Not closed repository\n");
+        exit(EXIT_FAILURE);
+    } else {
+        while ((fileTTY = readdir(processRep))) {
+            if (stat(fileTTY, &statTTY) == -1) {
+                perror("stat error");
+                exit(EXIT_FAILURE);
+            }
+            if (tty == statTTY.st_rdev){
+                proc->tty = fileTTY.d_name;
+            }
+        }
+    }
+
+    //Tous les tty dans /dev
+    if ((processRep = opendir("/dev")) == NULL) {
+        printf("Not closed repository\n");
+        exit(EXIT_FAILURE);
+    } else {
+        while ((fileTTY = readdir(processRep))) {
+            if (strncmp(fileTTY.d_name,"tty",3)){
+                if (stat(fileTTY, &statTTY) == -1) {
+                    perror("stat error");
+                    exit(EXIT_FAILURE);
+                }
+                if (tty == statTTY.st_rdev){
+                    proc->tty = fileTTY.d_name;
+                }
+            }
+        }
+    }
+    
 
     free(items);
     free(line);
 
     fclose(statf);
-    */
+    
 }
 
 /**
