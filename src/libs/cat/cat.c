@@ -52,32 +52,6 @@ void catLib(FILE *file, int option) {
     putchar('\n');
 }
 
-int catLib_option(int argc, char *argv[], int option){
-    FILE *file;
-
-    int nbFile = 0;
-    for (int i = 1; i < argc; i++){
-        //si on est sur une option, on passe
-        if (*(argv[i]) == '-') {
-            continue;
-        }
-
-        file = fopen(argv[i], "r");
-        if (file != NULL) {
-            catLib(file, option);
-        } else{
-            printf("Erreur avec les fichiers\n");
-            return 1;
-        }
-        nbFile++;
-    }
-
-    if (nbFile == 0) { //appel de cat sans fichier = on écoute stdin
-        catLib(stdin, option);
-    }
-    return 0;
-}
-
 int usage() {
 
     printf("\
@@ -116,7 +90,24 @@ int kCatLib(int argc,char *argv[]){
                 break;
         }
     }
-    return catLib_option(argc, argv, option);
+
+    FILE *file;
+    for (int i = optind; i < argc; i++){
+
+        file = fopen(argv[i], "r");
+        if (file != NULL) {
+            catLib(file, option);
+        } else{
+            printf("Erreur avec les fichiers\n");
+            return 1;
+        }
+    }
+
+    if (optind == argc) { //appel de cat sans fichier = on écoute stdin
+        catLib(stdin, option);
+    }
+
+    return 0;
 }
 
 
