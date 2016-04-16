@@ -57,6 +57,18 @@ typedef struct systemStat {
 
 
 /**
+ * freeProc
+ *
+ * free() ce qu'il faut bien
+ *
+ * @param  {proc *} p
+ */
+void freeProc(proc *p) {
+    free(p->command);
+}
+
+
+/**
  * split
  *
  * @param  {char *}     str
@@ -197,9 +209,12 @@ void infos_from_status(char* path, proc* process) {
             token = strtok(line, "\t"); //"Name:"
             token = strtok(NULL, "\t");
 
+            char *name = (char *) malloc((strlen(token) + 1) * sizeof(char));
+            memset(name, '\0', strlen(token) + 1);
+            strcpy(name, token);
+
             //on stocke dans la structure proc le Name de la commande
-            process->command = token;
-            DEBUG("%s",line);
+            process->command = name;
         }
         //Uid
         else if(strncmp(line, "Uid:", 4) == 0){
@@ -318,6 +333,9 @@ void ps(int options) {
                             process.command
 
                         );
+
+                        freeProc(&process);
+
                     } else if (strcmp(fichierLuBis->d_name, "stat") == 0){
                         char path_to_stat[
                             1 + strlen(processDir)
