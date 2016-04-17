@@ -29,6 +29,7 @@ LIBS=yes 	\
 	 mv     \
 	 pwd    \
 	 du     \
+	 more   \
 
 #Colors
 NO_C		=\033[0m

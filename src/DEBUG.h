@@ -11,6 +11,8 @@
 #define GREY   "\033[38;5;7m"
 #define WHITE  "\033[38;5;255m"
 
+#define WHITE_BK  "\033[48;5;255m"
+
 #define END      "\033[m"
 
 #ifdef DEBUG_FLAG
