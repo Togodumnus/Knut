@@ -27,6 +27,7 @@ LIBS=yes 	\
 	 mkdir  \
 	 rm     \
 	 mv     \
+	 pwd    \
 
 #Colors
 NO_C		=\033[0m
