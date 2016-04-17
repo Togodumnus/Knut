@@ -13,7 +13,7 @@
 #include "utils.h"
 #include "../DEBUG.h"
 
-extern char *optchar;
+const int PATH_LENGTH = 2048;
 
 /**
  * fileExtension
@@ -48,10 +48,22 @@ char *fileExtension(char *file) {
  */
 void updatePATH(const char* prefix) {
 
-    char newPATH[PATH_MAX];
-    sprintf(newPATH, "PATH=%s:%s", prefix, getenv("PATH"));
+    char newPATH[PATH_LENGTH];
 
-    putenv(newPATH);
+    char *pwd = NULL;
+    size_t n = 0;
+    pwd = (char *) getcwd(pwd, n);
+    if (pwd == NULL) {
+        perror("get_current_dir_name failure");
+        exit(EXIT_FAILURE);
+    }
+
+    sprintf(newPATH, "%s/%s:%s", pwd, prefix, getenv("PATH"));
+
+    DEBUG("new PATH=%s", newPATH);
+    setenv("PATH", newPATH, 1);
+
+    free(pwd);
 }
 
 /***

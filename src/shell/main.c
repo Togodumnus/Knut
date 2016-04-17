@@ -27,7 +27,7 @@ const char *LIBS_DIR = "./bin/libs/dynamic/";
  *
  * Répertoire de nos commandes exécutable
  */
-const char *EXEC_DIR = "./bin/libs/";
+const char *EXEC_DIR = "bin/libs";
 
 /**
  * EXEC_MODE
