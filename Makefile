@@ -67,7 +67,8 @@ $(shell pwd)/$(binDir)/$(libsDir)/$(dynamicDir)$(NO_C))"
 dev: CFLAGS += -DDEBUG_FLAG
 dev:all
 
-.PHONY: clean distclean
+.PHONY: clean distclean force
+force:;
 
 clean:
 	@echo "$(BOLD_C)☞ Cleaning$(NO_C)"
@@ -91,8 +92,8 @@ libsIntro:
 	@mkdir -p $(binDir)/$(libsDir)/$(staticDir)
 	@mkdir -p $(binDir)/$(libsDir)/$(dynamicDir)
 
-libsBuild:
-	$(foreach lib, $(LIBS), $(MAKE) -C $(srcDir)/$(libsDir)/$(lib);)
+libsBuild: force
+	@$(foreach lib, $(LIBS), $(MAKE) -s -C $(srcDir)/$(libsDir)/$(lib) || exit;)
 
 
 ################################################################################
