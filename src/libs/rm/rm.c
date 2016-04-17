@@ -20,7 +20,6 @@ usage: rm [-frRv] file ...\n\
 ");
 }
 
-
 /**
  * rmLib
  *
