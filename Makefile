@@ -24,6 +24,7 @@ LIBS=yes 	\
 	 cp		\
 	 echo   \
 	 ls	    \
+	 mkdir  \
 	 rm		\
 
 #Colors
