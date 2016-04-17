@@ -179,8 +179,10 @@ void selectSocket(fd_set *master, fd_set *result, int max) {
     *result = *master;
     //On attent les socket de master prêts en lecture
     if ((nbRead = select(max + 1, result, NULL, NULL, NULL)) == -1) {
-        perror("select error");
-        exit(EXIT_FAILURE);
+        if (errno != EINTR) { //si interruption signal, on passe
+            perror("select error");
+            exit(EXIT_FAILURE);
+        }
     }
 
     DEBUG("[server] %d file descriptors ready", nbRead);
@@ -370,6 +372,8 @@ void readInputServer(int fd) {
     free(line);
     dprintf(fd, "\nBye !\n");
 
+    DEBUG("pid = %d", getpid());
+
     DEBUG("[worker] end of connection");
 }
 
@@ -422,12 +426,13 @@ void loopServer() {
 
                     DEBUG("[server] Create child to handle connection %d", fd);
                     if (child ==0) { //dans le fils
+                        setSigHandler(SIGINT_handler_nothing, SIGINT);
                         readInputServer(fd);
                         DEBUG("[worker] stop, connection end %d", fd);
 
                         if (fd == fileno(stdin)) {
                             //on informe le parent qu'il doit se terminer
-                            kill(getppid(), SIGINT);
+                            kill(getppid(), SIGUSR1);
                         } else {
                             close(fd);
                         }

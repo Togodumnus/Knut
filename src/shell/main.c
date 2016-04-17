@@ -69,6 +69,11 @@ int main(int argc, char* argv[]) {
         printf("Bye !\n");
     } else { //utilisation classique du shell
 
+        //afficher un message pour ^C
+        setSigHandler(SIGINT_handler_message, SIGINT);
+        //un fils nous préviens qu'il faut se terminer
+        setSigHandler(SIGUSR1_handler_exit, SIGUSR1);
+
         printf("KnutShell");
 
         if (EXEC_MODE == EXECUTABLE_MODE) {

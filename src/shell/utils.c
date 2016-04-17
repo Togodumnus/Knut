@@ -9,6 +9,7 @@
 #else
     #include <linux/limits.h>
 #endif
+#include <signal.h>
 
 #include "utils.h"
 #include "../DEBUG.h"
@@ -124,4 +125,33 @@ void printPrompt(int fd) {
         perror("Can't end transmission with file descriptor");
         exit(EXIT_FAILURE);
     }
+}
+
+void SIGUSR1_handler_exit(int sig) {
+    DEBUG("SIGUSR1 handler exit pid=%d", getpid());
+    exit(EXIT_SUCCESS);
+}
+
+void SIGINT_handler_nothing(int sig) {
+    DEBUG("SIGINT handler nothing pid=%d", getpid());
+}
+
+void SIGINT_handler_message(int sig) {
+    DEBUG("SIGINT handler message pid=%d", getpid());
+    printf("type ^D or exit to exit\n");
+}
+
+void setSigHandler(void (*handler)(), int sig) {
+
+    if (handler == NULL) { //reset sur le handler par défaut
+        signal(sig, SIG_DFL);
+    } else {
+        struct sigaction act, oact;
+        sigaction(sig, NULL, &oact); //copie du handler actuel
+        act.sa_handler = handler;
+        act.sa_mask  = oact.sa_mask;
+        act.sa_flags = SA_RESTART;
+        sigaction(sig, &act, NULL);
+    }
+
 }

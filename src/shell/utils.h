@@ -14,3 +14,8 @@ void readArgs(int argc, char *argv[],
         enum execution_mode *mode, char **addr, int *connect);
 
 void printPrompt(int fd);
+
+void SIGUSR1_handler_exit(int sig);
+void SIGINT_handler_nothing(int sig);
+void SIGINT_handler_message(int sig);
+void setSigHandler(void (*handler)(), int sig);
