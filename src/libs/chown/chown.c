@@ -81,7 +81,7 @@ int chownLib(int argc, char *argv[]) {
     else{
         pwd = getpwnam(token); //On essaye d'avoir l'UID par le username
         if (pwd == NULL) {
-            printf("invalid username\n");
+            perror("invalid username\n");
             exit(EXIT_FAILURE);
         }
         uid = pwd->pw_uid;
@@ -94,13 +94,13 @@ int chownLib(int argc, char *argv[]) {
                 gid = atoi(token);
                 gr = getgrgid(gid);
                 if (uid && gr == NULL){
-                    printf("%s: unknown group", token);
+                    fprintf(stderr, "%s: unknown group", token);
                     exit(EXIT_FAILURE);
                 }
             } else {
                 gr = getgrnam(token);
                 if (gr == NULL){
-                    printf("%s: unknown group", token);
+                    fprintf(stderr, "%s: unknown group", token);
                     exit(EXIT_FAILURE);
                 }
                 gid = gr->gr_gid;

@@ -39,7 +39,7 @@ int kcp(int argc, char *argv[]) {
         return kcp_files_to_dir(argc, argv);
     } else {
         if (argc > 3) {
-            printf("cp: target %s is not a directory\n", argv[argc-1]);
+            fprintf(stderr, "cp: target %s is not a directory\n", argv[argc-1]);
             exit(EXIT_FAILURE);
         }
         return kcp_file_to_file(argv[1], argv[2]);

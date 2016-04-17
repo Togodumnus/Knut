@@ -74,10 +74,10 @@ int kcp_file_to_file(char *path1, char *path2) {
     FILE * f2 = fopen(path2, "w");
 
     if (f1 == NULL) {
-        printf("Can't open %s\n", path1);
+        fprintf(stderr, "Can't open %s\n", path1);
         exit(EXIT_FAILURE);
     } else if (f2 == NULL) {
-        printf("Can't open %s\n", path2);
+        fprintf(stderr, "Can't open %s\n", path2);
         exit(EXIT_FAILURE);
     }
 
@@ -89,14 +89,14 @@ int kcp_file_to_file(char *path1, char *path2) {
         do {
             nw = write(fileno(f2), buf + nw, n - nw);
             if (nw == -1) {
-                printf("Write error\n");
+                perror("Write error");
                 break;
             }
         } while (nw != n);
     }
 
-    if (n == 1) {
-        printf("Read error\n");
+    if (n == -1) {
+        perror("Read error\n");
     }
 
     fclose(f1);
@@ -128,7 +128,7 @@ int kcp_file_to_dir(char *file_path, char *dir_path) {
     strcpy(file_pathFull + strlen(dir), fileName);
 
     if ((f = fopen(file_pathFull, "w")) == NULL) { // création du fichier
-        printf("Can't open %s\n", file_pathFull);
+        fprintf(stderr, "Can't open %s\n", file_pathFull);
         exit(EXIT_FAILURE);
     }
 
@@ -153,7 +153,7 @@ int kcp_files_to_dir(int argc, char * argv[]) {
     for (i = 1; i < argc-1; i++){
         //On vérifie ce n'est pas un dossier que l'on essaye de copier
         if (stat(argv[i], &st) == -1) {
-            printf("error stat\n");
+            perror("error stat\n");
             exit(EXIT_FAILURE);
         }
         if (S_ISDIR(st.st_mode)) { //si c'est un répertoire, message erreur
@@ -194,7 +194,7 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
     strcat(dir_path_src_tmp, "/");
 
     if ((dirp_src = opendir(dir_path_src_tmp)) == NULL) {
-        printf("Can't open directory %s %s\n", dir_path_src_tmp, strerror(errno));
+        fprintf(stderr, "Can't open directory %s %s\n", dir_path_src_tmp, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -210,7 +210,7 @@ int kcp_dir_to_dir(char *dir_path_src, char *dir_path_dest) {
 
             //distinction fichiers et dossiers
             if (stat(path, &st) == -1) {
-                printf("error stat\n");
+                perror("error stat\n");
                 exit(EXIT_FAILURE);
             }
             if (S_ISDIR(st.st_mode)) { //répertoire

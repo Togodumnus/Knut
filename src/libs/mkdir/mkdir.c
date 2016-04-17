@@ -75,7 +75,7 @@ int kmkdir_p(char *path, int permissions, bool verbose) {
             *ch = '\0';
             DEBUG("mkdir %s", path);
             if (mkdir(path, permissions) < 0) {
-                if (errno == EEXIST) {
+                if (errno == EEXIST) { //existe déjà
                     continue;
                 } else {
                     perror("Mkdir error");
@@ -119,7 +119,7 @@ Knut mkdir\n\
 int kmkdir(int argc, char * argv[]) {
 
     if (argc < 2) {
-        printf("kmkdir : missing operand\n");
+        fprintf(stderr, "kmkdir : missing operand\n");
         exit(EXIT_FAILURE);
     }
 

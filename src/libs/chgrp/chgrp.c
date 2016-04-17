@@ -77,13 +77,13 @@ int chgrpLib(int argc, char *argv[]) {
         gid = atoi(token);
         gr = getgrgid(gid);
         if (uid && gr == NULL){
-            printf("%s: unknown group", token);
+            fprintf(stderr, "%s: unknown group", token);
             exit(EXIT_FAILURE);
         }
     } else {
         gr = getgrnam(token);
         if (gr == NULL){
-            printf("%s: unknown group", token);
+            fprintf(stderr, "%s: unknown group", token);
             exit(EXIT_FAILURE);
         }
         gid = gr->gr_gid;
