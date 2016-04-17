@@ -16,19 +16,7 @@
 #include "../../DEBUG.h"
 #include "../../LIB.h"
 
-/*TODO
-
-Lien important :
-https://www.kernel.org/doc/Documentation/filesystems/proc.txt
-
-TROUVER %CPU %MEM TTY
-
-Calcul CPU
-http://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat
-*/
-
 const int SLEEP_TIME = 1000000; //10ms
-#define MAJOR_OF(d) ( ((unsigned)(d)>>8u) & 0xfffu )
 
 char* REPERTOIRE_PROC = "/proc";
 
@@ -177,6 +165,7 @@ void getProcStat(char* path,proc* process) { //pas utilisée
 
 /*
 Comment récupérer le tty : 
+
 The /proc/<pid>/stat files give the tty number for each process (e.g.
 34817). I then go through the /dev/pts directory and stat() each file
 there.  I then compare one of the struct stat members (st_rdev) returned
@@ -200,21 +189,21 @@ is attached to.
         printf("Not closed repository\n");
         exit(EXIT_FAILURE);
     } else {
-        while ((fileTTY = readdir(processRep))) {
+        while ((fileTTY = readdir(processRep))) { //On parcourt tous les fichiers de /dev/pts
             char path_to_tty[
                 1 + strlen("/dev/pts/")
                 + strlen(fileTTY->d_name)
                 ];
             strcpy(path_to_tty, "/dev/pts/");
             strcat(path_to_tty, fileTTY->d_name);
-            if (stat(path_to_tty, &statTTY) == -1) {
+            if (stat(path_to_tty, &statTTY) == -1) { //On stat() le fichier
                 perror("stat error");
                 exit(EXIT_FAILURE);
             }
             if (tty == (int)statTTY.st_rdev && 
                 strcmp(fileTTY->d_name,".") != 0 &&
                 strcmp(fileTTY->d_name,"..") != 0    
-                ){
+                ){ // On vérifie que le tty correspond 
                 char* tty_name = malloc(
                     1 + 
                     strlen("pts/") + 
@@ -228,7 +217,7 @@ is attached to.
     }
 
 
-    //Tous les tty dans /dev
+    //Même chose que  Tous les tty, mais dans /dev
     if ((processRep = opendir("/dev")) == NULL) {
         printf("Not closed repository\n");
         exit(EXIT_FAILURE);
@@ -255,11 +244,11 @@ is attached to.
 
 
 //--------------------FIN DE LA PARTIE POUR LES TTY---------
+
 //--------------------TROUVER LE TIME-----------------------
 
     int utime = atoi(items[13]);
     int stime = atoi(items[14]);
-
     long hertz = sysconf(_SC_CLK_TCK);
 
     int totalSeconds = (utime+stime)/hertz;
@@ -275,7 +264,6 @@ is attached to.
     timeOf.tm_sec=seconds;
 
     process->timeOf = timeOf; 
-
 
     free(items);
     free(line);
@@ -375,7 +363,7 @@ void infos_from_status(char* path, proc* process) {
  *
  * @param  {int}    options
  */
-void ps(int options) {
+void psE(int options) {
 
     DIR *rep;
     DIR *processRep;
@@ -393,7 +381,7 @@ void ps(int options) {
     /*systemStat sysStat = {0};*/
     /*getSystemStat(&sysStat);*/
 
-    printf("PID\tTTY\tTIME\tCMD\t\n");
+    printf("    PID\t   TTY\t   TIME\t   CMD\t\n ");
 
     while ((fichierLu = readdir(rep)) != NULL){
         //Si c'est un dossier correspondant aux processus
@@ -436,13 +424,14 @@ void ps(int options) {
                         strcat(path_to_stat, "/stat");
 
                         getProcStat(path_to_stat, &process);
+
                         printf(
-                            "%5d   %6s  %2d:%2d:%2d  %s ",
+                            "%5d   %6s  %02d:%02d:%02d  %s ",
                             process.pid,
                             process.tty,
-                            process.timeOf.tm_hour, 
-                            process.timeOf.tm_min, 
-                            process.timeOf.tm_sec,
+                            process.timeOf.tm_hour,
+                            process.timeOf.tm_min,
+                            process.timeOf.tm_hour,
                             process.command
                         );
                     }
@@ -466,18 +455,15 @@ int kPs(int argc,char *argv[]){
     int options = 0;
 
     int opt = 0;
-    while ((opt=getopt(argc, argv, "ef"))!=-1) {
+    while ((opt=getopt(argc, argv, "e"))!=-1) {
         switch (opt) {
             case 'e':
-                //TODO
-                break;
-            case 'f':
-                //TODO
+                psE(options);
                 break;
         }
     }
 
-    ps(options);
+    psE(options);
 
     return 0;
 }
