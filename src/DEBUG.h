@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+#define END    "\033[0m"
+
 #define BLACK  "\033[38;5;232m"
 #define BLUE   "\033[38;5;18m"
 #define RED    "\033[38;5;124m"
@@ -11,7 +13,7 @@
 #define GREY   "\033[38;5;7m"
 #define WHITE  "\033[38;5;255m"
 
-#define END      "\033[m"
+#define WHITE_BK  "\033[48;5;255m"
 
 #ifdef DEBUG_FLAG
     #define debug 1

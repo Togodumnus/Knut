@@ -19,7 +19,8 @@ $(root)/$(binDir)/$(libsDir)/yes: $(root)/$(objDir)/$(libsDir)/yes/yes.o \
 	@echo "		"$(DONE)
 
 #librairie statique
-$(root)/$(binDir)/$(libsDir)/$(staticDir)/libyes.a: $(root)/$(objDir)/$(libsDir)/yes/yes.o
+$(root)/$(binDir)/$(libsDir)/$(staticDir)/libyes.a: \
+		$(root)/$(objDir)/$(libsDir)/yes/yes.o
 	@echo "		$(BOLD_C)- Static$(NO_C)"
 	@ar -cr $@ $^
 	@echo "		ar -cr $@ $^"
@@ -28,7 +29,9 @@ $(root)/$(binDir)/$(libsDir)/$(staticDir)/libyes.a: $(root)/$(objDir)/$(libsDir)
 	@echo "		"$(DONE)
 
 #librairie dynamique
-$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libyes.so: $(root)/$(objDir)/$(libsDir)/yes/yes.o
+$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libyes.so:\
+	$(root)/$(objDir)/$(libsDir)/yes/yes.o \
+	$(root)/$(objDir)/$(libsDir)/yes/lib.o
 	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
 	@$(CC) -shared -o $@ $^
 	@echo "		$(CC) -shared -o $@ $^"
