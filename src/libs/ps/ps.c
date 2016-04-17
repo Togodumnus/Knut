@@ -27,10 +27,11 @@ typedef struct proc{
     int    pid;
     int    vsz;
     int    rss;
-    float cpu;
-    char* tty;
-    char* command;
-    struct tm timeOf;
+    char*  tty;
+    char*  command;
+    int    sec;
+    int    min;
+    int    hour;
 } proc;
 
 /**
@@ -207,16 +208,11 @@ void getProcStat(char* path,proc* process) { //pas utilisée
 
     int totalSeconds = (utime + stime) / hertz;
 
-    int seconds = totalSeconds % 60;
-    int minutes = (totalSeconds / 60) % 60;
-    int hours   = totalSeconds / 3600;
+    DEBUG("totalSeconds = %d", totalSeconds);
 
-    struct tm timeOf;
-    timeOf.tm_hour = hours;
-    timeOf.tm_min = minutes;
-    timeOf.tm_sec = seconds;
-
-    process->timeOf = timeOf;
+    process->sec  = totalSeconds % 60;
+    process->min  = (totalSeconds / 60) % 60;
+    process->hour = totalSeconds / 3600;
 
     free(items);
     free(line);
@@ -369,14 +365,14 @@ void psE() {
                 }
 
                 printf(
-                        "%5d   %6s  %02d:%02d:%02d  %s ",
-                        process.pid,
-                        process.tty,
-                        process.timeOf.tm_hour,
-                        process.timeOf.tm_min,
-                        process.timeOf.tm_hour,
-                        process.command
-                      );
+                    "%5d   %6s  %02d:%02d:%02d  %6s ",
+                    process.pid,
+                    process.tty,
+                    process.hour,
+                    process.min,
+                    process.sec,
+                    process.command
+                );
 
                 freeProc(&process);
             }
