@@ -27,6 +27,7 @@ LIBS=yes 	\
 	 mkdir  \
 	 rm     \
 	 mv     \
+	 pwd    \
 	 du     \
 
 #Colors
