@@ -5,11 +5,7 @@ LDFLAGS= -ldl -rdynamic
 
 libCFLAGS = -fPIC
 
-<<<<<<< HEAD
-debug = -g #à enlever à la fin du debug
-=======
 debug = -g -o1 #à enlever à la fin du debug
->>>>>>> origin/master
 
 objDir     = obj
 binDir     = bin
