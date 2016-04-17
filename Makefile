@@ -36,6 +36,7 @@ LIBS=yes 	\
 	 chown  \
 	 chgrp  \
 	 su     \
+	 ps     \
 
 #Colors
 NO_C		=\033[0m
