@@ -34,7 +34,7 @@ $(root)/$(binDir)/$(libsDir)/$(staticDir)/libchgrp.a:\
 $(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libchgrp.so: \
 	$(root)/$(objDir)/$(libsDir)/chgrp/chgrp.o \
 	$(root)/$(objDir)/$(libsDir)/chown/utils.o \
-	$(root)/$(objDir)/$(libsDir)/chown/lib.o
+	$(root)/$(objDir)/$(libsDir)/chgrp/lib.o
 	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
 	@$(CC) -shared -o $@ $^
 	@echo "		$(CC) -shared -o $@ $^"
