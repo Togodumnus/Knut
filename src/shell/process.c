@@ -190,9 +190,11 @@ int process(char *str, int fdInput, int fdOutput) {
             );
 
             //on modifie le stop pour le comparer avec une ligne de l'input
-            char stop[length + 1];
+            char stop[length + 2];
             strcpy(stop, cmd->fromFile);
             stop[length] = '\n';
+            stop[length + 1] = '\0';
+            DEBUG("stop word = %s", stop);
 
             //on crée un pipe pour stocker l'entrée
             int tmpPipe[2];
@@ -205,7 +207,7 @@ int process(char *str, int fdInput, int fdOutput) {
             char *line = NULL;
 
             //on lit l'input tant qu'on ne reçoit pas le stop
-            while (line == NULL || strcmp(line, stop) != 0) {
+            do {
                 dprintf(fdOutput, YELLOW "➜ " END);
                 if (!isSocket(fdInput)) {
                     fflush(stdin);
@@ -221,8 +223,9 @@ int process(char *str, int fdInput, int fdOutput) {
                 } else { //c'est stdin
                     n = getline(&line, &n, stdin);
                 }
+                DEBUG("get line = %s", line);
 
-            }
+            } while (strlen(line) > 0 && strcmp(line, stop) != 0);
 
             close(tmpPipe[PIPE_WRITE]);
 
