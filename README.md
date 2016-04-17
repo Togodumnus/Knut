@@ -29,6 +29,17 @@ Architecture du projet :
 ```
 
 ## Compiler
+
+**Dépendences :**
+
+Il peut être nécessaire d'installer les librairies PAM pour su :
+
+```
+sudo apt-get install libpam0g-dev
+```
+
+**Les commandes make disponibles :**
+
 ```
 make            #compilation du shell et des commandes
 make dev        #idem, avec messages de debug
