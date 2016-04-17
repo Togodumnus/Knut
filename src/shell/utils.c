@@ -129,6 +129,9 @@ void printPrompt(int fd) {
 
 void SIGUSR1_handler_exit(int sig) {
     DEBUG("SIGUSR1 handler exit pid=%d", getpid());
+    printf("Bye ! \n");
+    fflush(stdout);
+    fflush(stderr);
     exit(EXIT_SUCCESS);
 }
 
@@ -138,7 +141,8 @@ void SIGINT_handler_nothing(int sig) {
 
 void SIGINT_handler_message(int sig) {
     DEBUG("SIGINT handler message pid=%d", getpid());
-    printf("type ^D or exit to exit\n");
+    printf("\ntype ^D or exit to exit\n");
+    printPrompt(fileno(stdin));
 }
 
 void setSigHandler(void (*handler)(), int sig) {

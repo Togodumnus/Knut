@@ -345,6 +345,10 @@ void readInputServer(int fd) {
 
     do {
 
+        if (line) {
+            memset(line, '\0', n);
+        }
+
         if (isSocket(fd)) { //c'est un socket
             n = getLineSocket(&line, &n, fd);
 
@@ -370,9 +374,6 @@ void readInputServer(int fd) {
 
     //End of file
     free(line);
-    dprintf(fd, "\nBye !\n");
-
-    DEBUG("pid = %d", getpid());
 
     DEBUG("[worker] end of connection");
 }
@@ -432,8 +433,10 @@ void loopServer() {
 
                         if (fd == fileno(stdin)) {
                             //on informe le parent qu'il doit se terminer
+                            DEBUG("tell parent to stop");
                             kill(getppid(), SIGUSR1);
                         } else {
+                            dprintf(fd, "\nBye !\n");
                             close(fd);
                         }
 

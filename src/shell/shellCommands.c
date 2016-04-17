@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <signal.h>
 #ifdef __APPLE__
     #include <limits.h>
 #else
@@ -60,6 +61,11 @@ int shellCommand(Command *cmd) {
 
     if (strcmp(cmd->cmd, "cd") == 0) {
         return cd(cmd->argv[1]);
+    } else if (strcmp(cmd->cmd, "exit") == 0) {
+        //on informe le parent qu'il doit se terminer
+        DEBUG("tell parent to stop");
+        kill(getppid(), SIGUSR1);
+        return 0;
     }
 
     return -1;
