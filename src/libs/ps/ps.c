@@ -42,9 +42,10 @@ typedef struct proc{
     int    vsz;
     int    rss;
     float cpu;
-    char * tty;
+    char* tty;
     char* command;
 } proc;
+
 
 /**
  * systemStat
@@ -152,7 +153,7 @@ void getSystemStat(systemStat *sysStat) { //pas utilisée
  * @param  {char *} path    Le chemin vers le fichier stat
  * @param  {proc *} process La structure à remplir
  */
-void getProcStat(char* path,proc *proc) { //pas utilisée
+void getProcStat(char* path,proc* process) { //pas utilisée
     FILE *statf = fopen(path, "r");
     if(!statf){
         perror("Can't open status");
@@ -181,11 +182,16 @@ by stat() to the tty number found in /proc/<pid>/stat.  If they match,
 then the file stated (e.g. /dev/pts/1) is the terminal that that process
 is attached to.
 */
+
+
+    //-----------PARTIE POUR TROUVER LES TTY ---------
     DIR *processRep;
     struct dirent *fileTTY;
     struct stat statTTY;
 
-    proc->tty = "?";
+    char* tty_tmp = "?";
+    bool tty_found = false;
+
 
     //Tous les tty dans /dev/pts
     if ((processRep = opendir("/dev/pts")) == NULL) {
@@ -193,34 +199,57 @@ is attached to.
         exit(EXIT_FAILURE);
     } else {
         while ((fileTTY = readdir(processRep))) {
-            if (stat(fileTTY, &statTTY) == -1) {
+            char path_to_tty[
+                1 + strlen("/dev/pts/")
+                + strlen(fileTTY->d_name)
+                ];
+            strcpy(path_to_tty, "/dev/pts/");
+            strcat(path_to_tty, fileTTY->d_name);
+            if (stat(path_to_tty, &statTTY) == -1) {
                 perror("stat error");
                 exit(EXIT_FAILURE);
             }
-            if (tty == statTTY.st_rdev){
-                proc->tty = fileTTY.d_name;
+            if (tty == (int)statTTY.st_rdev && 
+                strcmp(fileTTY->d_name,".") != 0 &&
+                strcmp(fileTTY->d_name,"..") != 0    
+                ){
+                char* tty_name = malloc(
+                    1 + 
+                    strlen("pts/") + 
+                    strlen (fileTTY->d_name));
+                strcpy(tty_name, "pts/");
+                strcat(tty_name, fileTTY->d_name);
+                tty_tmp = tty_name;
+                tty_found = true;
             }
         }
     }
+
 
     //Tous les tty dans /dev
     if ((processRep = opendir("/dev")) == NULL) {
         printf("Not closed repository\n");
         exit(EXIT_FAILURE);
-    } else {
+    } else if (!tty_found){
         while ((fileTTY = readdir(processRep))) {
-            if (strncmp(fileTTY.d_name,"tty",3)){
-                if (stat(fileTTY, &statTTY) == -1) {
-                    perror("stat error");
-                    exit(EXIT_FAILURE);
-                }
-                if (tty == statTTY.st_rdev){
-                    proc->tty = fileTTY.d_name;
-                }
+            char path_to_tty[
+                1 + strlen("/dev/")
+                + strlen(fileTTY->d_name)
+                ];
+            strcpy(path_to_tty, "/dev/");
+            strcat(path_to_tty, fileTTY->d_name);
+            if (stat(path_to_tty, &statTTY) == -1) {
+                perror("stat error");
+                exit(EXIT_FAILURE);
+            }
+            if (tty == (int)statTTY.st_rdev && 
+                strncmp(fileTTY->d_name,"tty",3) == 0){
+                tty_tmp = fileTTY->d_name;
             }
         }
     }
-    
+
+    process->tty = tty_tmp;
 
     free(items);
     free(line);
@@ -328,6 +357,7 @@ void ps(int options) {
     struct dirent* fichierLu = NULL;
     struct dirent* fichierLuBis = NULL;
 
+
     if ((rep=opendir(REPERTOIRE_PROC))==NULL) {
         printf("Not opened repository\n");
         exit(EXIT_FAILURE);
@@ -357,10 +387,10 @@ void ps(int options) {
                 printf("Not closed repository\n");
                 exit(EXIT_FAILURE);
             } else { //On a réussi à ouvrir le dossier correspondant au process
+                proc process = {0};
 
                 while ((fichierLuBis = readdir(processRep)) != NULL) {
 
-                    proc process = {0};
 
                     if (strcmp(fichierLuBis->d_name, "status") == 0) {
                         char path_to_status[
@@ -372,18 +402,6 @@ void ps(int options) {
 
                         infos_from_status(path_to_status, &process);
 
-                        printf(
-                            "%10s %5d %20d %7d %10s \n",
-                            process.user,
-                            process.pid,
-                            process.vsz,
-                            process.rss,
-                            process.command
-
-                        );
-
-                        freeProc(&process);
-
                     } else if (strcmp(fichierLuBis->d_name, "stat") == 0){
                         char path_to_stat[
                             1 + strlen(processDir)
@@ -393,8 +411,19 @@ void ps(int options) {
                         strcat(path_to_stat, "/stat");
 
                         getProcStat(path_to_stat, &process);
+                        printf(
+                            "%10s %5d %4d %7d %5s %2s \n",
+                            process.user,
+                            process.pid,
+                            process.vsz,
+                            process.rss,
+                            process.command,
+                            process.tty
+                        );
                     }
                 }
+                freeProc(&process);
+
             }
         }
     }
