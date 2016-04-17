@@ -11,6 +11,7 @@
 #include <pwd.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include "../../DEBUG.h"
 #include "../../LIB.h"
@@ -44,6 +45,7 @@ typedef struct proc{
     float cpu;
     char* tty;
     char* command;
+    struct tm timeOf;
 } proc;
 
 
@@ -251,6 +253,30 @@ is attached to.
 
     process->tty = tty_tmp;
 
+
+//--------------------FIN DE LA PARTIE POUR LES TTY---------
+//--------------------TROUVER LE TIME-----------------------
+
+    int utime = atoi(items[13]);
+    int stime = atoi(items[14]);
+
+    long hertz = sysconf(_SC_CLK_TCK);
+
+    int totalSeconds = (utime+stime)/hertz;
+    
+    int seconds = totalSeconds % 60; 
+    int minutes = (totalSeconds / 60) % 60; 
+    int hours = totalSeconds / 3600; 
+
+    struct tm timeOf;
+
+    timeOf.tm_hour=hours;
+    timeOf.tm_min=minutes;
+    timeOf.tm_sec=seconds;
+
+    process->timeOf = timeOf; 
+
+
     free(items);
     free(line);
 
@@ -367,8 +393,7 @@ void ps(int options) {
     /*systemStat sysStat = {0};*/
     /*getSystemStat(&sysStat);*/
 
-    printf("USER\tPID\t%%CPU\t%%MEM\tVSZ\tRSS");
-    printf("TTY\tSTAT\tSTART\tTIME\tCOMMAND\n");
+    printf("PID\tTTY\tTIME\tCMD\t\n");
 
     while ((fichierLu = readdir(rep)) != NULL){
         //Si c'est un dossier correspondant aux processus
@@ -412,13 +437,13 @@ void ps(int options) {
 
                         getProcStat(path_to_stat, &process);
                         printf(
-                            "%10s %5d %4d %7d %5s %2s \n",
-                            process.user,
+                            "%5d   %6s  %2d:%2d:%2d  %s ",
                             process.pid,
-                            process.vsz,
-                            process.rss,
-                            process.command,
-                            process.tty
+                            process.tty,
+                            process.timeOf.tm_hour, 
+                            process.timeOf.tm_min, 
+                            process.timeOf.tm_sec,
+                            process.command
                         );
                     }
                 }
