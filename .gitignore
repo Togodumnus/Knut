@@ -2,3 +2,4 @@ bin/
 obj/
 *.c~
 *.h~
+debug.txt
