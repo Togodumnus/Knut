@@ -22,6 +22,7 @@ LIBS=yes 	\
 	 cat    \
 	 chmod  \
 	 cp		\
+	 echo   \
 
 #Colors
 NO_C		=\033[0m
