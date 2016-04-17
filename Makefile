@@ -30,6 +30,8 @@ LIBS=yes 	\
 	 pwd    \
 	 du     \
 	 more   \
+	 chown  \
+	 chgrp  \
 
 #Colors
 NO_C		=\033[0m
