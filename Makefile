@@ -25,6 +25,7 @@ LIBS=yes 	\
 	 echo   \
 	 ls	    \
 	 mkdir  \
+	 rm		\
 
 #Colors
 NO_C		=\033[0m
