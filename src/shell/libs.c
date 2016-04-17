@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <dirent.h>
 #include <string.h>
 #include <dlfcn.h>
+#include <dirent.h>
 #include <sys/types.h>
 #ifdef __APPLE__
     #include <limits.h>
@@ -12,7 +12,6 @@
 
 #include "../DEBUG.h"
 #include "utils.h"
-
 
 #include "libs.h"
 
@@ -53,7 +52,7 @@ void enregisterCommande(char *name, CommandeFonction commandeFonction) {
 
     if (newCommande == NULL) {
         perror("Malloc error");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     newCommande->name = name;
     newCommande->commandeFonction = commandeFonction;
@@ -65,7 +64,7 @@ void enregisterCommande(char *name, CommandeFonction commandeFonction) {
 
     if (newList == NULL) {
         perror("Malloc error");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     commandes.liste = newList;
     commandes.liste[commandes.size] = newCommande;
@@ -109,12 +108,12 @@ void loadLib(const char *dir, const char *file) {
 
     if ((libFile = dlopen(path, RTLD_LAZY)) == NULL) {
         perror("lib introuvable");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     if ((pInit = (InitFonction) dlsym(libFile, "Init")) == NULL) {
         perror("fonction introuvable dans la lib");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     (pInit)(enregisterCommande); //on lance l'init de la lib
@@ -130,20 +129,18 @@ void loadLib(const char *dir, const char *file) {
  *
  * @param {char *}  libdir      Le dossier où il faut chercher les libs
  */
-void loadDynamicLibs(char *libdir) {
+void loadDynamicLibs(const char *libdir) {
 
     DEBUG("loading dynamic libs");
 
     DIR *directory;
-    struct dirent *file;
-
-    const char *EXTENSION = "so";
 
     directory = opendir(libdir); //on ouvre le dossier
     if (directory != NULL) {
+        struct dirent *file;
+        const char *EXTENSION = "so";
+
         while ((file = readdir(directory))) { //on parcours tous les fichiers
-
-
             //on charge les fichiers .so uniquement
             char *file_extension = fileExtension(file->d_name);
             if (file_extension != NULL
@@ -173,7 +170,6 @@ void loadDynamicLibs(char *libdir) {
 CommandeFonction findCommande(char *cmd) {
 
     for (int i = 0; i < commandes.size; i++) {
-        printf("%s\n", commandes.liste[i]->name);
         if (strcmp(commandes.liste[i]->name, cmd) == 0) {
             return commandes.liste[i]->commandeFonction;
         }
