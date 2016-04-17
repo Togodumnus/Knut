@@ -172,6 +172,7 @@ int chmodLib(int argc, char *argv[]) {
 
     int options = 0;
     int perms = 0;
+    optind = 1;
 
     char c;
     while((c = getopt(argc, argv, "Rvf")) != -1) {

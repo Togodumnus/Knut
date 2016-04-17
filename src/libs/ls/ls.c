@@ -232,6 +232,7 @@ int kls_full(char *path, int options) {
 int kls(int argc, char *argv[]) {
     char c;
 
+    optind = 1;
     int options = 0;
 
     while((c = getopt(argc, argv, "al")) != -1) {

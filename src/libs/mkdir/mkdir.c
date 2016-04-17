@@ -138,6 +138,7 @@ int kmkdir(int argc, char * argv[]) {
 
     int c;
     int flag = 0; //verbose and p flags
+    optind = 1;
 
     //on applique le mask des permissions
     mode_t permissions = 0777 & ~getumask();

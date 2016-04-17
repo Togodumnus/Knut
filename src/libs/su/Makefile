@@ -38,7 +38,8 @@ $(root)/$(binDir)/$(libsDir)/$(staticDir)/libsu.a: \
 
 #librairie dynamique
 $(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libsu.so: \
-	$(root)/$(objDir)/$(libsDir)/su/su.o
+	$(root)/$(objDir)/$(libsDir)/su/su.o \
+	$(root)/$(objDir)/$(libsDir)/su/lib.o
 	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
 	@$(CC) -shared -o $@ $^ $(PRIV_LD_FLAGS)
 	@echo "		$(CC) -shared -o $@ $^ $(PRIV_LD_FLAGS)"

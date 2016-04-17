@@ -62,7 +62,14 @@ void exec(Action *action, Command *cmd) {
                 DEBUG("execvp error");
                 exit(EXIT_FAILURE); //erreur de exec si ici
             } else {
-                exit((*libFunc)(cmd->argc, cmd->argv));
+
+                char **p;
+                for (p = cmd->argv; *p; p++) {
+                    DEBUG("arg %p : %s", p, *p);
+                }
+
+                int status = (*libFunc)(cmd->argc, cmd->argv);
+                exit(status);
             }
         }
 
@@ -313,8 +320,7 @@ int process(char *str, int fdInput, int fdOutput) {
             //Si l'action doit s'effectuer en background
             //on n'attend pas et on met le status à 0
             if (action->background) {
-                //TODO : le child peut rester en zoombie si le père meurt avant
-                //lui
+                //TODO : le child peut rester en zoombie
                 dprintf(fdOutput, "Process %d in background\n", pid_child);
                 status = 0;
             } else {

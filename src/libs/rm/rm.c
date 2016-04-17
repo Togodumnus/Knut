@@ -28,6 +28,7 @@ usage: rm [-frRv] file ...\n\
 int rmLib(int argc, char *argv[]) {
 
     int options = 0;
+    optind = 1;
 
     char c;
     while((c = getopt(argc, argv, "rRvf")) != -1) {

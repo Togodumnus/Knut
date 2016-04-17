@@ -46,6 +46,7 @@ usage: chown [-Rv] <owner> [:<group>] file ...\n\
 int chownLib(int argc, char *argv[]) {
     uid_t uid;
     int options = 0;
+    optind = 1;
 
     char c;
     while((c = getopt(argc, argv, "Rvf")) != -1) {

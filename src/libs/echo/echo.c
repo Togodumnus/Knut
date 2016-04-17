@@ -99,6 +99,7 @@ int kecho(int argc, char * argv[]) {
         return 0;
     }
 
+    optind = 1;
     char c;
     while((c = getopt(argc, argv, "ne")) != -1) {
         switch(c) {

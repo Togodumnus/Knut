@@ -48,6 +48,7 @@ int chgrpLib(int argc, char *argv[]) {
     gid_t gid;
     int options = 0;
     char *token;
+    optind = 1;
 
     char c;
     while((c = getopt(argc, argv, "Rvf")) != -1) {

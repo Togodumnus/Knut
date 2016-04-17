@@ -17,6 +17,7 @@ usage: pwd\n\
 
 int kpwd(int argc, char *argv[]) {
     int opt = 0;
+    optind = 1;
 
     while ((opt = getopt(argc, argv, "")) != -1) {
         switch (opt) {

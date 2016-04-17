@@ -19,6 +19,7 @@
  */
 int kcp(int argc, char *argv[]) {
     struct stat st;
+    optind = 1;
 
     char c;
     while((c = getopt(argc, argv, "r")) != -1) {

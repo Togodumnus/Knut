@@ -202,6 +202,7 @@ int duLib(int argc, char *argv[]) {
     int options = 0;
     bool grandTotal = false;
     long int total = 0;
+    optind = 1;
 
     while((c = getopt(argc, argv, "acLh")) != -1) {
         switch(c) {

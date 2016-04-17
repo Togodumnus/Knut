@@ -4,6 +4,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "../../DEBUG.h"
+
 const int N_FLAG    = 0x1;
 const int E_FLAG    = 0x2;
 const int B_FLAG    = 0x4;
@@ -70,6 +72,7 @@ Arguments: \n\
 int kCatLib(int argc,char *argv[]){
     int opt = 0;
     int option = 0;
+    optind = 1;
 
     while((opt = getopt(argc, argv, "enb")) != -1) {
         switch (opt) {
