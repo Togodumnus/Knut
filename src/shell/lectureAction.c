@@ -21,7 +21,6 @@ void removeCharFromString(char *str, char *ch) {
     char copy[strlen(str)];
     strcpy(copy, str);
     *ch = '\0';
-    DEBUG("Removing character %ld", (ch - str));
     strcat(str, copy + (ch - str) + 1);
 }
 

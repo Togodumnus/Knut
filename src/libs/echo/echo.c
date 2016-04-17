@@ -24,11 +24,10 @@ void kecho_e(int opt, int argc, char * argv[]) {
     for (i = opt; i < argc; i++) { //pour chaque argument
 
         //parcours caractère par caractère
-        char c;
         int j = 0;
         int l = strlen(argv[i]);
         while (j < l) {
-            c = argv[i][j];
+            char c = argv[i][j];
             if (c == '\\') {
                 j++;
                 c = argv[i][j];

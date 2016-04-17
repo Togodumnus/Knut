@@ -150,7 +150,7 @@ int kls_file(char *dir, char *filename, int options) {
         printf("%c", type(statls.st_mode));
         printf("%s", perms);
         printf(" ");
-        printf("%3d", (unsigned int) statls.st_nlink);
+        printf("%3u", (unsigned int) statls.st_nlink);
         printf(" ");
         printf("%s", getpwuid(statls.st_uid)->pw_name);
         printf(" ");

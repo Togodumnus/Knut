@@ -209,9 +209,6 @@ int process(char *str, int fdInput, int fdOutput) {
             //on lit l'input tant qu'on ne reçoit pas le stop
             do {
                 dprintf(fdOutput, YELLOW "➜ " END);
-                if (!isSocket(fdInput)) {
-                    fflush(stdin);
-                }
 
                 if (line != NULL) { //pas le 1er getline
                     write(tmpPipe[PIPE_WRITE], line, n);

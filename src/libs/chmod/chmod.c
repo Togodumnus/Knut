@@ -25,9 +25,9 @@ const int CHMOD_F_VERB  = 1<<2;   //-v
  * @param  {int}    n
  */
 int octalDecimal(int n) {
-    int decimal=0, i=0, rem;
+    int decimal=0, i=0;
     while (n!=0) {
-        rem = n%10;
+        int rem = n%10;
         n/=10;
         decimal += rem*pow(8,i);
         ++i;

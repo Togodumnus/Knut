@@ -150,7 +150,7 @@ void moreStrean(FILE *stream, int weight) {
 
             c = fgetc(stream);
 
-            if (c != EOF) {
+            if (!feof(stream)) {
                 printf("%c", c);
                 total++;
             }
@@ -162,9 +162,9 @@ void moreStrean(FILE *stream, int weight) {
 
             lineIndex++;
 
-        } while (c != EOF && (lineTmp < k));
+        } while (!feof(stream) && (lineTmp < k));
 
-        if (c == EOF) {
+        if (feof(stream)) {
             end = true;
         }
 
@@ -253,6 +253,8 @@ int moreLib(int argc, char *argv[]) {
 
     int result = 0;
     struct termios initialTermConfig = configTerm();
+
+    DEBUG("argc = %d", argc);
 
     if (argc < 2) { //pas de fichier en paramètre
         usageMore();

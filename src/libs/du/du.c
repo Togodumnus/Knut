@@ -39,15 +39,6 @@ const int DU_FLAG_h = 1<<2;    //-h
 int sizeDirContent(char *path, int options);
 
 /**
- * isParent
- *
- * @return  {bool}  True si file = . ou ..
- */
-bool isParent(char *file) {
-    return strcmp(file, ".") == 0 || strcmp(file, "..") == 0;
-}
-
-/**
  * readHuman
  *
  * Convertit une taille en un affichage pour humain

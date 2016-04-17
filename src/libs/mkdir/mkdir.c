@@ -35,27 +35,14 @@ mode_t getumask(void) {
  * @param  {int}  n    Le nombre à convertir
  */
 int octal_decimal(int n) {
-    int decimal=0, i=0, rem;
-    while (n!=0)
-    {
-        rem = n%10;
+    int decimal=0, i=0;
+    while (n!=0) {
+        int rem = n%10;
         n/=10;
         decimal += rem * pow(8,i);
         ++i;
     }
     return decimal;
-}
-
-/**
- * kmkdir_v
- *
- * Option 'v' de mkdir : affiche un message
- *
- * @param  {char *}  dirname    Le nom du répertoire créé
-*/
-int kmkdir_v(char * dirname) {
-    printf("mkdir: created directory %s\n", dirname);
-    return 0;
 }
 
 /**

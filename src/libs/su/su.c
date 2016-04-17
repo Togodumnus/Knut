@@ -47,7 +47,6 @@ struct passwd *pwd;
 int ksu(int argc, char *argv[]) {
     pam_handle_t *pamh = NULL;
     char ** pam_env_list; // liste des variable d'environnement
-    char ** pam_env;
     int retval;
 
     if(argc > 2) {
@@ -94,6 +93,7 @@ int ksu(int argc, char *argv[]) {
     // variable d'environnement
     pam_env_list = pam_getenvlist(pamh);
     if (pam_env_list != NULL) {
+        char ** pam_env;
         for (pam_env = pam_env_list; *pam_env != NULL; pam_env++) {
             putenv(*pam_env);
             free(*pam_env);

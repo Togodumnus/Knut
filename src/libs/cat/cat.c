@@ -12,11 +12,10 @@ const int B_FLAG    = 0x4;
 
 void catLib(FILE *file, int option) {
     int nbligne = 0;
+    char old = '\n';
 
-    char old = '\n',
-         c;
-
-    while ((c = fgetc(file)) != EOF) {
+    char c;
+    while ((c = fgetc(file)) && !feof(file)) {
 
         if (old == '\n') {
             if ((option & N_FLAG) == N_FLAG
@@ -44,7 +43,6 @@ void catLib(FILE *file, int option) {
             perror("Write error");
             exit(EXIT_FAILURE);
         }
-
 
         old = c;
     }
@@ -92,12 +90,13 @@ int kCatLib(int argc,char *argv[]){
         }
     }
 
-    FILE *file;
     for (int i = optind; i < argc; i++){
 
+        FILE *file;
         file = fopen(argv[i], "r");
         if (file != NULL) {
             catLib(file, option);
+            fclose(file);
         } else{
             printf("Erreur avec les fichiers\n");
             return 1;
