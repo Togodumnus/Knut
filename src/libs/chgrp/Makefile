@@ -31,7 +31,7 @@ $(root)/$(binDir)/$(libsDir)/$(staticDir)/libchgrp.a:\
 	@echo "		"$(DONE)
 
 #librairie dynamique
-$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libchgrp.so:/
+$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libchgrp.so: \
 	$(root)/$(objDir)/$(libsDir)/chgrp/chgrp.o \
 	$(root)/$(objDir)/$(libsDir)/chown/utils.o \
 	$(root)/$(objDir)/$(libsDir)/chown/lib.o

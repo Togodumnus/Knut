@@ -31,7 +31,7 @@ $(root)/$(binDir)/$(libsDir)/$(staticDir)/libchown.a:\
 	@echo "		"$(DONE)
 
 #librairie dynamique
-$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libchown.so:/
+$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libchown.so: \
 	$(root)/$(objDir)/$(libsDir)/chown/chown.o \
 	$(root)/$(objDir)/$(libsDir)/chown/utils.o \
 	$(root)/$(objDir)/$(libsDir)/chown/lib.o

@@ -17,7 +17,7 @@
 #include "../../DEBUG.h"
 #include "utils.h"
 
-struct  group *gr, *getgrnam(), *getgrgid();
+struct group *gr, *getgrnam(), *getgrgid();
 struct passwd *pwd;
 
 void chElem(char *path, int options, uid_t uid, gid_t gid, int f_rec, int f_verb);

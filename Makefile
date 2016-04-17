@@ -1,8 +1,9 @@
+UNAME = $(shell uname)
 
 CC = gcc
-CFLAGS = -c -Wall -std=c99 -Werror
+CFLAGS = -c -Wall -std=c99 -Werror -fPIC
 
-LDFLAGS = -ldl -rdynamic -lpam
+LDFLAGS = -ldl -rdynamic -lpam -lm
 ifeq ($(UNAME), Linux)
 LDFLAGS += -lpam_misc
 endif
