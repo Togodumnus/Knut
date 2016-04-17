@@ -141,7 +141,7 @@ void SIGINT_handler_nothing(int sig) {
 
 void SIGINT_handler_message(int sig) {
     DEBUG("SIGINT handler message pid=%d", getpid());
-    printf("\ntype ^D or exit to exit\n");
+    printf("\ntype ^D to exit\n");
     printPrompt(fileno(stdin));
 }
 
