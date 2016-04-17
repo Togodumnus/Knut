@@ -1,9 +1,11 @@
 
 CC = gcc
 CFLAGS = -c -Wall -std=c99 -Werror
-LDFLAGS= -ldl -rdynamic
 
-libCFLAGS = -fPIC
+LDFLAGS = -ldl -rdynamic -lpam
+ifeq ($(UNAME), Linux)
+LDFLAGS += -lpam_misc
+endif
 
 debug = -g -o1 #à enlever à la fin du debug
 

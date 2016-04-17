@@ -4,8 +4,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "../../LIB.h"
-
 const int N_FLAG    = 0x1;
 const int E_FLAG    = 0x2;
 const int B_FLAG    = 0x4;
@@ -52,7 +50,7 @@ void catLib(FILE *file, int option) {
     putchar('\n');
 }
 
-int usage() {
+int usageCat() {
 
     printf("\
 Knut cat \n\
@@ -86,7 +84,7 @@ int kCatLib(int argc,char *argv[]){
                 break;
 
             default:
-                return usage();
+                return usageCat();
                 break;
         }
     }
@@ -110,13 +108,3 @@ int kCatLib(int argc,char *argv[]){
     return 0;
 }
 
-
-/**
- * Init
- *
- * S'enregistre dans le shell dans le cas d'un chargement de la librairie
- * dynamique
- */
-void Init(EnregisterCommande enregisterCommande) {
-    enregisterCommande("cat", kCatLib);
-}

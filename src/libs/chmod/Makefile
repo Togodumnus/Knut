@@ -19,7 +19,8 @@ $(root)/$(binDir)/$(libsDir)/chmod: $(root)/$(objDir)/$(libsDir)/chmod/chmod.o \
 	@echo "		"$(DONE)
 
 #librairie statique
-$(root)/$(binDir)/$(libsDir)/$(staticDir)/libchmod.a: $(root)/$(objDir)/$(libsDir)/chmod/chmod.o
+$(root)/$(binDir)/$(libsDir)/$(staticDir)/libchmod.a:\
+	$(root)/$(objDir)/$(libsDir)/chmod/chmod.o
 	@echo "		$(BOLD_C)- Static$(NO_C)"
 	@ar -cr $@ $^
 	@echo "		ar -cr $@ $^"
@@ -28,7 +29,9 @@ $(root)/$(binDir)/$(libsDir)/$(staticDir)/libchmod.a: $(root)/$(objDir)/$(libsDi
 	@echo "		"$(DONE)
 
 #librairie dynamique
-$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libchmod.so: $(root)/$(objDir)/$(libsDir)/chmod/chmod.o
+$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libchmod.so:\
+	$(root)/$(objDir)/$(libsDir)/chmod/chmod.o \
+	$(root)/$(objDir)/$(libsDir)/chmod/lib.o
 	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
 	@$(CC) -shared -o $@ $^
 	@echo "		$(CC) -shared -o $@ $^"

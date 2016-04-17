@@ -13,7 +13,6 @@
 #include <grp.h>
 #include <pwd.h>
 
-#include "../../LIB.h"
 #include "../../DEBUG.h"
 #include "../chown/utils.h"
 
@@ -26,7 +25,7 @@ struct passwd *pwd;
 /**
  * usage
  */
-void usage() {
+void usageChgrp() {
     printf("\
 Knut chgrp\n\n\
 usage: chgrp [-Rv] <group> file ...\n\
@@ -63,12 +62,12 @@ int chgrpLib(int argc, char *argv[]) {
                 break;
             case '?': //option non reconnue
             default:
-                usage();
+                usageChgrp();
                 exit(EXIT_FAILURE);
         }
     }
     if (argc < 2) {
-        usage();
+        usageChgrp();
         exit(EXIT_FAILURE);
     }
     token = argv[optind];
@@ -96,12 +95,3 @@ int chgrpLib(int argc, char *argv[]) {
     return 0;
 }
 
-/**
- * Init
- *
- * S'enregistre dans le shell dans le cas d'un chargement de la librairie
- * dynamique
- */
-void Init(EnregisterCommande enregisterCommande) {
-    enregisterCommande("chgrp", chgrpLib);
-}

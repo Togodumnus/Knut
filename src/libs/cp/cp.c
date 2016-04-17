@@ -7,7 +7,6 @@
 #include <sys/stat.h>
 
 #include "utils.h"
-#include "../../LIB.h"
 
 /**
  * kcp
@@ -46,12 +45,3 @@ int kcp(int argc, char *argv[]) {
     }
 }
 
-/**
- * Init
- *
- * S'enregistre dans le shell dans le cas d'un chargement de la librairie
- * dynamique
- */
-void Init(EnregisterCommande enregisterCommande) {
-    enregisterCommande("cp", kcp);
-}

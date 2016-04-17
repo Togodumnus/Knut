@@ -10,7 +10,6 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include "../../LIB.h"
 #include "../../DEBUG.h"
 
 #include "more.h"
@@ -228,7 +227,7 @@ void moreStrean(FILE *stream, int weight) {
 /**
  * usage
  */
-void usage() {
+void usageMore() {
 
     printf("\
 Knut more \n\
@@ -256,7 +255,7 @@ int moreLib(int argc, char *argv[]) {
     struct termios initialTermConfig = configTerm();
 
     if (argc < 2) { //pas de fichier en paramètre
-        usage();
+        usageMore();
     }
 
     //on affiche chaque fichier passé en paramètre
@@ -290,12 +289,4 @@ int moreLib(int argc, char *argv[]) {
     return result;
 }
 
-/**
- * Init
- *
- * S'enregistre dans le shell dans le cas d'un chargement de la librairie
- * dynamique
- */
-void Init(EnregisterCommande enregisterCommande) {
-    enregisterCommande("more", moreLib);
-}
+

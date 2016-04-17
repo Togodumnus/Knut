@@ -20,8 +20,9 @@ $(root)/$(binDir)/$(libsDir)/chown: $(root)/$(objDir)/$(libsDir)/chown/chown.o \
 	@echo "		"$(DONE)
 
 #librairie statique
-$(root)/$(binDir)/$(libsDir)/$(staticDir)/libchown.a: $(root)/$(objDir)/$(libsDir)/chown/chown.o \
-						  $(root)/$(objDir)/$(libsDir)/chown/utils.o
+$(root)/$(binDir)/$(libsDir)/$(staticDir)/libchown.a:\
+	$(root)/$(objDir)/$(libsDir)/chown/chown.o \
+	$(root)/$(objDir)/$(libsDir)/chown/utils.o
 	@echo "		$(BOLD_C)- Static$(NO_C)"
 	@ar -cr $@ $^
 	@echo "		ar -cr $@ $^"
@@ -30,8 +31,10 @@ $(root)/$(binDir)/$(libsDir)/$(staticDir)/libchown.a: $(root)/$(objDir)/$(libsDi
 	@echo "		"$(DONE)
 
 #librairie dynamique
-$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libchown.so: $(root)/$(objDir)/$(libsDir)/chown/chown.o \
-						  $(root)/$(objDir)/$(libsDir)/chown/utils.o
+$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libchown.so:/
+	$(root)/$(objDir)/$(libsDir)/chown/chown.o \
+	$(root)/$(objDir)/$(libsDir)/chown/utils.o \
+	$(root)/$(objDir)/$(libsDir)/chown/lib.o
 	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
 	@$(CC) -shared -o $@ $^
 	@echo "		$(CC) -shared -o $@ $^"

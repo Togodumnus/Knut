@@ -18,7 +18,8 @@ $(root)/$(binDir)/$(libsDir)/echo: $(root)/$(objDir)/$(libsDir)/echo/echo.o \
 	@echo "		"$(DONE)
 
 #librairie statique
-$(root)/$(binDir)/$(libsDir)/$(staticDir)/libecho.a: $(root)/$(objDir)/$(libsDir)/echo/echo.o
+$(root)/$(binDir)/$(libsDir)/$(staticDir)/libecho.a:\
+	$(root)/$(objDir)/$(libsDir)/echo/echo.o
 	@echo "		$(BOLD_C)- Static$(NO_C)"
 	@ar -cr $@ $^
 	@echo "		ar -cr $@ $^"
@@ -27,7 +28,9 @@ $(root)/$(binDir)/$(libsDir)/$(staticDir)/libecho.a: $(root)/$(objDir)/$(libsDir
 	@echo "		"$(DONE)
 
 #librairie dynamique
-$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libecho.so: $(root)/$(objDir)/$(libsDir)/echo/echo.o
+$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libecho.so:\
+	$(root)/$(objDir)/$(libsDir)/echo/echo.o\
+	$(root)/$(objDir)/$(libsDir)/echo/lib.o
 	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
 	@$(CC) -shared -o $@ $^
 	@echo "		$(CC) -shared -o $@ $^"

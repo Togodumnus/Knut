@@ -51,13 +51,13 @@ void exec(Action *action, Command *cmd) {
             exit(EXIT_FAILURE); //erreur de exec si ici
         } else { //LIB_DYNAMIC_MODE ou LIB_STATIC_MODE
 
-            DEBUG("[child] LIB %s", action->cmd);
+            DEBUG("[child] LIB %s", cmd->cmd);
             CommandeFonction libFunc = findCommande(cmd->cmd);
 
             if (libFunc == NULL) { //cmd n'existe pas dans nos libs,
                                    //on tente un execvp
-                DEBUG("[child] NO LIB %s", action->cmd);
-                DEBUG("[child] EXECUTABLE %s", action->cmd);
+                DEBUG("[child] NO LIB %s", cmd->cmd);
+                DEBUG("[child] EXECUTABLE %s", cmd->cmd);
                 execvp(cmd->cmd, cmd->argv);
                 DEBUG("execvp error");
                 exit(EXIT_FAILURE); //erreur de exec si ici

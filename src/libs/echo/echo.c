@@ -6,7 +6,6 @@
 #include <stdbool.h>
 
 #include "../../DEBUG.h"
-#include "../../LIB.h"
 
 /**
  * kecho_e
@@ -137,12 +136,3 @@ int kecho(int argc, char * argv[]) {
     return 0;
 }
 
-/**
- * Init
- *
- * S'enregistre dans le shell dans le cas d'un chargement de la librairie
- * dynamique
- */
-void Init(EnregisterCommande enregisterCommande) {
-    enregisterCommande("echo", kecho);
-}

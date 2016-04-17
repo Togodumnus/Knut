@@ -12,20 +12,19 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-#include "../../LIB.h"
 #include "../../DEBUG.h"
 
 //flags
-const int F_FORCE = 1;      //-f
-const int F_REC   = 1<<1;   //-r, -R
-const int F_VERB  = 1<<2;   //-v
+const int CHMOD_F_FORCE = 1;      //-f
+const int CHMOD_F_REC   = 1<<1;   //-r, -R
+const int CHMOD_F_VERB  = 1<<2;   //-v
 
 /**
- * octal_decimal
+ * octalDecimal
  *
  * @param  {int}    n
  */
-int octal_decimal(int n) {
+int octalDecimal(int n) {
     int decimal=0, i=0, rem;
     while (n!=0) {
         rem = n%10;
@@ -39,7 +38,7 @@ int octal_decimal(int n) {
 /**
  * usage
  */
-void usage() {
+void usageChmod() {
     printf("\
 Knut chmod\n\n\
 usage: chmod [-Rfv] [0-7] file(s) ...\n\
@@ -115,7 +114,7 @@ void chmodElem(char *path, int options, int perms){
     //si pas de -f, on vérifie que l'élement est accessible en écriture avant
     //de modifier ses droits
     char ok = 'n';
-    if ((options & F_FORCE) != F_FORCE) {
+    if ((options & CHMOD_F_FORCE) != CHMOD_F_FORCE) {
         DEBUG("No force");
         if (access(path, W_OK) != 0) {
             //demande yes/no
@@ -133,7 +132,7 @@ void chmodElem(char *path, int options, int perms){
 
     if (ok == 'y') {
 
-        if ((options & F_VERB) == F_VERB) {
+        if ((options & CHMOD_F_VERB) == CHMOD_F_VERB) {
             printf("Changing file %s permissions\n", path);
         }
 
@@ -141,7 +140,7 @@ void chmodElem(char *path, int options, int perms){
         if (S_ISDIR(st.st_mode)) {
 
             //On regarde si on a l'option -r
-            if ((options & F_REC) == F_REC) {
+            if ((options & CHMOD_F_REC) == CHMOD_F_REC) {
                 DEBUG("Chmod %s content", path);
                 //modification des droits du contenu
                 chmodDirContent(path, options, perms);
@@ -179,28 +178,28 @@ int chmodLib(int argc, char *argv[]) {
         switch(c) {
             case 'R': //on veut modifier en récursif
                 DEBUG("-R option");
-                options |= F_REC;
+                options |= CHMOD_F_REC;
                 break;
             case 'f':
                 DEBUG("-f option");
-                options |= F_FORCE;
+                options |= CHMOD_F_FORCE;
                 break;
             case 'v':
                 DEBUG("-v option");
-                options |= F_VERB;
+                options |= CHMOD_F_VERB;
                 break;
             case '?': //option non reconnue
             default:
-                usage();
+                usageChmod();
                 exit(EXIT_FAILURE);
         }
     }
     if (argc < 2) {
-        usage();
+        usageChmod();
         exit(EXIT_FAILURE);
     }
     perms = atoi(argv[optind]); //on récupère les droits à la bonne place
-    perms = octal_decimal(perms);
+    perms = octalDecimal(perms);
     for (int i = optind+1; i < argc; i ++) {
         chmodElem(argv[i], options, perms);
     }
@@ -208,13 +207,3 @@ int chmodLib(int argc, char *argv[]) {
     return 0;
 }
 
-
-/**
- * Init
- *
- * S'enregistre dans le shell dans le cas d'un chargement de la librairie
- * dynamique
- */
-void Init(EnregisterCommande enregisterCommande) {
-    enregisterCommande("chmod", chmodLib);
-}

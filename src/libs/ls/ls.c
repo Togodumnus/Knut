@@ -21,14 +21,13 @@
 #endif
 
 #include "../../DEBUG.h"
-#include "../../LIB.h"
 
 #define PURPLE   "\033[1;35m"
 #define CYAN     "\033[1;36m"
 #define RED      "\033[38;5;124m"
 
-const int FLAG_a = 1;    //-a option
-const int FLAG_l = 1<<1; //-l option
+const int LS_FLAG_a = 1;    //-a option
+const int LS_FLAG_l = 1<<1; //-l option
 
 char *monthName[] = {"janv.", "févr.", " mars", "avril", "  mai", " juin",
                      "juil.", " août", "sept.", " oct.", " nov.", " déc."};
@@ -131,7 +130,7 @@ bool isLink(mode_t mode) {
 int kls_file(char *dir, char *filename, int options) {
 
     struct stat statls;
-    bool optL = (options & FLAG_l) == FLAG_l;
+    bool optL = (options & LS_FLAG_l) == LS_FLAG_l;
 
     char filepath[PATH_MAX];
     sprintf(filepath, "%s/%s", dir, filename);
@@ -210,7 +209,7 @@ int kls_full(char *path, int options) {
 
     while ((dptr = readdir(dirp))) {
         //prise en compte des fichiers caché si option
-        if (dptr->d_name[0] != '.' || (options & FLAG_a) == FLAG_a) {
+        if (dptr->d_name[0] != '.' || (options & LS_FLAG_a) == LS_FLAG_a) {
             kls_file(path, dptr->d_name, options);
         }
     }
@@ -238,10 +237,10 @@ int kls(int argc, char *argv[]) {
     while((c = getopt(argc, argv, "al")) != -1) {
         switch(c) {
             case 'a':
-                options |= FLAG_a;
+                options |= LS_FLAG_a;
                 break;
             case 'l':
-                options |= FLAG_l;
+                options |= LS_FLAG_l;
                 break;
             case '?':
                 printf("kls: invalid option -- '%c'\n",c);
@@ -266,12 +265,3 @@ int kls(int argc, char *argv[]) {
     return 0;
 }
 
-/**
- * Init
- *
- * S'enregistre dans le shell dans le cas d'un chargement de la librairie
- * dynamique
- */
-void Init(EnregisterCommande enregisterCommande) {
-    enregisterCommande("ls", kls);
-}

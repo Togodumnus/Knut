@@ -7,13 +7,12 @@
 #include "utils.h"
 #include "rm.h"
 
-#include "../../LIB.h"
 #include "../../DEBUG.h"
 
 /**
  * usage
  */
-void usage() {
+void usageRm() {
     printf("\
 Knut rm\n\n\
 usage: rm [-frRv] file ...\n\
@@ -36,25 +35,25 @@ int rmLib(int argc, char *argv[]) {
             case 'R':
             case 'r': //on veut supprimer en récursif
                 DEBUG("-r option");
-                options |= F_REC;
+                options |= RM_F_REC;
                 break;
             case 'f':
                 DEBUG("-f option");
-                options |= F_FORCE;
+                options |= RM_F_FORCE;
                 break;
             case 'v':
                 DEBUG("-v option");
-                options |= F_VERB;
+                options |= RM_F_VERB;
                 break;
             case '?': //option non reconnue
             default:
-                usage();
+                usageRm();
                 exit(EXIT_FAILURE);
         }
     }
 
     if (argc < 2) {
-        usage();
+        usageRm();
         exit(EXIT_FAILURE);
     }
 
@@ -65,13 +64,3 @@ int rmLib(int argc, char *argv[]) {
     return 0;
 }
 
-
-/**
- * Init
- *
- * S'enregistre dans le shell dans le cas d'un chargement de la librairie
- * dynamique
- */
-void Init(EnregisterCommande enregisterCommande) {
-    enregisterCommande("rm", rmLib);
-}

@@ -12,9 +12,9 @@
 #include "utils.h"
 #include "../../DEBUG.h"
 
-const int F_FORCE = 1;      //-f
-const int F_REC   = 1<<1;   //-r, -R
-const int F_VERB  = 1<<2;   //-v
+const int RM_F_FORCE = 1;      //-f
+const int RM_F_REC   = 1<<1;   //-r, -R
+const int RM_F_VERB  = 1<<2;   //-v
 
 /**
  * rmDirContent
@@ -79,7 +79,7 @@ void rmElement(char *path, int options) {
     //si pas de -f, on vérifie que l'élement est accessible en écriture avant
     //de le supprimer
     char ok = 'n';
-    if ((options & F_FORCE) != F_FORCE) {
+    if ((options & RM_F_FORCE) != RM_F_FORCE) {
         DEBUG("No force");
         if (access(path, W_OK) != 0) {
             printf("override permissions for %s ? [y/n] ", path);
@@ -96,13 +96,13 @@ void rmElement(char *path, int options) {
 
     if (ok == 'y') {
 
-        if ((options & F_VERB) == F_VERB) {
+        if ((options & RM_F_VERB) == RM_F_VERB) {
             printf("Deleting %s \n", path);
         }
 
         //si on est sur un dossier, on le supprime que si on a l'option -r
         if (S_ISDIR(st.st_mode)) {
-            if ((options & F_REC) == F_REC) {
+            if ((options & RM_F_REC) == RM_F_REC) {
                 DEBUG("Delete %s content", path);
                 rmDirContent(path, options); //suppression du contenu
 

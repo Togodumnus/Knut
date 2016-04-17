@@ -15,7 +15,6 @@
 #endif
 
 #include "../../DEBUG.h"
-#include "../../LIB.h"
 
 /*
  * macros des unités tirées du code source de du (Apple)
@@ -33,9 +32,9 @@
 #define TERA_SZ (TERA(1024ULL))
 #define PETA_SZ (PETA(1024ULL))
 
-const int FLAG_a = 1;       //-a
-const int FLAG_L = 1<<1;    //-L
-const int FLAG_h = 1<<2;    //-h
+const int DU_FLAG_a = 1;       //-a
+const int DU_FLAG_L = 1<<1;    //-L
+const int DU_FLAG_h = 1<<2;    //-h
 
 int sizeDirContent(char *path, int options);
 
@@ -90,7 +89,7 @@ long int sizeElement(char *path, int options) {
 
     DEBUG("sizeElement %s", path);
 
-    if ((options & FLAG_L) == FLAG_L) {
+    if ((options & DU_FLAG_L) == DU_FLAG_L) {
         statFunc = &stat; //on suit les lien
     } else {
         statFunc = &lstat; //on ne suit pas les liens
@@ -106,7 +105,7 @@ long int sizeElement(char *path, int options) {
             DEBUG("[file]");
             size = (int) Stat.st_blocks; //on ne veut pas la taille mais le
                                          //nombre de blocks occupés
-            if ((options & FLAG_h) & FLAG_h) {
+            if ((options & DU_FLAG_h) & DU_FLAG_h) {
                 size *= (int) Stat.st_blksize / 8;
                 DEBUG("blksize = %d", (int) Stat.st_blksize);
             }
@@ -120,9 +119,9 @@ long int sizeElement(char *path, int options) {
     }
 
     DEBUG("%s :\t%d", path, size);
-    if ((options & FLAG_a) == FLAG_a || S_ISDIR(Stat.st_mode)) {
+    if ((options & DU_FLAG_a) == DU_FLAG_a || S_ISDIR(Stat.st_mode)) {
 
-        if ((options & FLAG_h) & FLAG_h) { //on affiche l'info version humaine
+        if ((options & DU_FLAG_h) & DU_FLAG_h) { //on affiche l'info version humaine
             char msg[1024];
             readHuman(size, msg);
             printf("%s \t %s\n", msg, path);
@@ -177,7 +176,7 @@ int sizeDirContent(char *path, int options) {
 /**
  * usage
  */
-void usage() {
+void usageDu() {
     printf("\
 Knut du\n\n\
 usage: du [-Lach] file ...\n\
@@ -207,20 +206,20 @@ int duLib(int argc, char *argv[]) {
     while((c = getopt(argc, argv, "acLh")) != -1) {
         switch(c) {
             case 'a':
-                options |= FLAG_a;
+                options |= DU_FLAG_a;
                 break;
             case 'c':
                 grandTotal = true;
                 break;
             case 'L':
-                options |= FLAG_L;
+                options |= DU_FLAG_L;
                 break;
             case 'h':
-                options |= FLAG_h;
+                options |= DU_FLAG_h;
                 break;
             default:
             case '?': //option non reconnue
-                usage();
+                usageDu();
                 exit(EXIT_FAILURE);
                 break;
         }
@@ -238,7 +237,7 @@ int duLib(int argc, char *argv[]) {
     }
 
     if (grandTotal) {
-        if ((options & FLAG_h) == FLAG_h) {
+        if ((options & DU_FLAG_h) == DU_FLAG_h) {
             char msg[1024];
             readHuman(total, msg);
             printf("%s \t total\n", msg);
@@ -250,12 +249,3 @@ int duLib(int argc, char *argv[]) {
     return 0;
 }
 
-/**
- * Init
- *
- * S'enregistre dans le shell dans le cas d'un chargement de la librairie
- * dynamique
- */
-void Init(EnregisterCommande enregisterCommande) {
-    enregisterCommande("du", duLib);
-}

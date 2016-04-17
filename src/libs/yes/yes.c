@@ -1,7 +1,5 @@
 #include <stdio.h>
 
-#include "../../LIB.h"
-
 int yesLib(int argc, char *argv[]) {
     if (argc > 1) {
         while (42) {
@@ -15,12 +13,3 @@ int yesLib(int argc, char *argv[]) {
 
 }
 
-/**
- * Init
- *
- * S'enregistre dans le shell dans le cas d'un chargement de la librairie
- * dynamique
- */
-void Init(EnregisterCommande enregisterCommande) {
-    enregisterCommande("yes", yesLib);
-}

@@ -17,6 +17,8 @@
 #include <pwd.h>
 #include <string.h>
 
+#include "../../DEBUG.h"
+
 //utilisateur par défaut (si aucun argument n'est entré)
 const char DEFAULT_USER[] = "root";
 
@@ -115,3 +117,4 @@ int ksu(int argc, char *argv[]) {
 
     return retval;
 }
+

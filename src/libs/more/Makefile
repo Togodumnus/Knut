@@ -19,7 +19,8 @@ $(root)/$(binDir)/$(libsDir)/more: $(root)/$(objDir)/$(libsDir)/more/more.o \
 	@echo "		"$(DONE)
 
 #librairie statique
-$(root)/$(binDir)/$(libsDir)/$(staticDir)/libmore.a: $(root)/$(objDir)/$(libsDir)/more/more.o
+$(root)/$(binDir)/$(libsDir)/$(staticDir)/libmore.a:\
+	$(root)/$(objDir)/$(libsDir)/more/more.o
 	@echo "		$(BOLD_C)- Static$(NO_C)"
 	@ar -cr $@ $^
 	@echo "		ar -cr $@ $^"
@@ -28,7 +29,9 @@ $(root)/$(binDir)/$(libsDir)/$(staticDir)/libmore.a: $(root)/$(objDir)/$(libsDir
 	@echo "		"$(DONE)
 
 #librairie dynamique
-$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libmore.so: $(root)/$(objDir)/$(libsDir)/more/more.o
+$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libmore.so:\
+	$(root)/$(objDir)/$(libsDir)/more/more.o \
+	$(root)/$(objDir)/$(libsDir)/more/lib.o
 	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
 	@$(CC) -shared -o $@ $^
 	@echo "		$(CC) -shared -o $@ $^"

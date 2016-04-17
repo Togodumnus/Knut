@@ -27,7 +27,8 @@ $(root)/$(binDir)/$(libsDir)/su: $(root)/$(objDir)/$(libsDir)/su/su.o \
 	@echo "		"$(DONE)
 
 #librairie statique
-$(root)/$(binDir)/$(libsDir)/$(staticDir)/libsu.a: $(root)/$(objDir)/$(libsDir)/su/su.o
+$(root)/$(binDir)/$(libsDir)/$(staticDir)/libsu.a: \
+	$(root)/$(objDir)/$(libsDir)/su/su.o
 	@echo "		$(BOLD_C)- Static$(NO_C)"
 	@ar -cr $@ $^
 	@echo "		ar -cr $@ $^"
@@ -36,7 +37,8 @@ $(root)/$(binDir)/$(libsDir)/$(staticDir)/libsu.a: $(root)/$(objDir)/$(libsDir)/
 	@echo "		"$(DONE)
 
 #librairie dynamique
-$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libsu.so: $(root)/$(objDir)/$(libsDir)/su/su.o
+$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libsu.so: \
+	$(root)/$(objDir)/$(libsDir)/su/su.o
 	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
 	@$(CC) -shared -o $@ $^ $(PRIV_LD_FLAGS)
 	@echo "		$(CC) -shared -o $@ $^ $(PRIV_LD_FLAGS)"

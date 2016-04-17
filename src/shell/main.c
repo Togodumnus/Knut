@@ -14,6 +14,20 @@
 #include "../DEBUG.h"
 
 #include "../libs/yes/yes.h"
+#include "../libs/cat/cat.h"
+#include "../libs/chgrp/chgrp.h"
+#include "../libs/chmod/chmod.h"
+#include "../libs/chown/chown.h"
+#include "../libs/cp/cp.h"
+#include "../libs/du/du.h"
+#include "../libs/echo/echo.h"
+#include "../libs/ls/ls.h"
+#include "../libs/mkdir/mkdir.h"
+#include "../libs/more/more.h"
+#include "../libs/mv/mv.h"
+#include "../libs/pwd/pwd.h"
+#include "../libs/rm/rm.h"
+#include "../libs/su/su.h"
 
 /**
  * LIBS_DIR
@@ -67,7 +81,21 @@ int main(int argc, char* argv[]) {
             showCommandes();
         } else {                                    //enregistrement des librairies
                                                     //statiques
-            enregisterCommande("yes", yesLib);
+            enregisterCommande("yes",   yesLib);
+            enregisterCommande("cat",   kCatLib);
+            enregisterCommande("chgrp", chgrpLib);
+            enregisterCommande("chmod", chmodLib);
+            enregisterCommande("chown", chownLib);
+            enregisterCommande("cp",    kcp);
+            enregisterCommande("du",    duLib);
+            enregisterCommande("echo",  kecho);
+            enregisterCommande("ls",    kls);
+            enregisterCommande("mkdir", kmkdir);
+            enregisterCommande("mv",    kmv);
+            enregisterCommande("more",  moreLib);
+            enregisterCommande("pwd",   kpwd);
+            enregisterCommande("rm",    rmLib);
+            enregisterCommande("su",    ksu);
             printf(" (librairies statiques)\n");
             showCommandes();
         }

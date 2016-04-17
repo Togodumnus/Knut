@@ -21,9 +21,10 @@ $(root)/$(binDir)/$(libsDir)/mv: $(root)/$(objDir)/$(libsDir)/mv/mv.o \
 	@echo "		"$(DONE)
 
 #librairie statique
-$(root)/$(binDir)/$(libsDir)/$(staticDir)/libmv.a: $(root)/$(objDir)/$(libsDir)/mv/mv.o \
-							  $(root)/$(objDir)/$(libsDir)/cp/utils.o \
-							  $(root)/$(objDir)/$(libsDir)/rm/utils.o
+$(root)/$(binDir)/$(libsDir)/$(staticDir)/libmv.a:\
+	$(root)/$(objDir)/$(libsDir)/mv/mv.o \
+	$(root)/$(objDir)/$(libsDir)/cp/utils.o \
+	$(root)/$(objDir)/$(libsDir)/rm/utils.o
 	@echo "		$(BOLD_C)- Static$(NO_C)"
 	@ar -cr $@ $^
 	@echo "		ar -cr $@ $^"
@@ -32,9 +33,11 @@ $(root)/$(binDir)/$(libsDir)/$(staticDir)/libmv.a: $(root)/$(objDir)/$(libsDir)/
 	@echo "		"$(DONE)
 
 #librairie dynamique
-$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libmv.so: $(root)/$(objDir)/$(libsDir)/mv/mv.o \
-							  $(root)/$(objDir)/$(libsDir)/cp/utils.o \
-							  $(root)/$(objDir)/$(libsDir)/rm/utils.o
+$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libmv.so:\
+	$(root)/$(objDir)/$(libsDir)/mv/mv.o \
+	$(root)/$(objDir)/$(libsDir)/cp/utils.o \
+	$(root)/$(objDir)/$(libsDir)/rm/utils.o \
+	$(root)/$(objDir)/$(libsDir)/mv/lib.o
 	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
 	@$(CC) -shared -o $@ $^
 	@echo "		$(CC) -shared -o $@ $^"

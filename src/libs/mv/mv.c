@@ -12,7 +12,6 @@
 #include "../rm/utils.h"
 #include "../cp/utils.h"
 
-#include "../../LIB.h"
 #include "../../DEBUG.h"
 
 const int SRC_REG = 0x1;
@@ -33,7 +32,7 @@ const int TYPE_DIR  = 1;
  */
 void copy_file_and_delete(char * path_to_move, char * dir_path) {
     kcp_file_to_dir(path_to_move, dir_path);
-    rmElement(path_to_move, F_REC | F_FORCE);
+    rmElement(path_to_move, RM_F_REC | RM_F_FORCE);
 }
 
 /**
@@ -48,7 +47,7 @@ void copy_file_and_delete(char * path_to_move, char * dir_path) {
  */
 void copy_dir_and_delete(char * path_to_move, char * dir_path) {
     kcp_dir_to_dir(path_to_move, dir_path);
-    rmElement(path_to_move, F_REC | F_FORCE);
+    rmElement(path_to_move, RM_F_REC | RM_F_FORCE);
 }
 
 /**
@@ -118,7 +117,7 @@ void moveToDir(char *item, int type, char *target) {
 /**
  * usage
  */
-void usage() {
+void usageMv() {
     printf("\
 Knut mv \n\
 \n\
@@ -145,7 +144,7 @@ usage: mv source target\n\
 int kmv(int argc, char * argv[]) {
 
     if (argc < 3) {
-        usage();
+        usageMv();
         exit(EXIT_FAILURE);
     }
 
@@ -210,19 +209,9 @@ int kmv(int argc, char * argv[]) {
             }
         }
     } else {
-        usage();
+        usageMv();
         exit(EXIT_FAILURE);
     }
     return 0;
 }
 
-
-/**
- * Init
- *
- * S'enregistre dans le shell dans le cas d'un chargement de la librairie
- * dynamique
- */
-void Init(EnregisterCommande enregisterCommande) {
-    enregisterCommande("mv", kmv);
-}

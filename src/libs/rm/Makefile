@@ -31,7 +31,8 @@ $(root)/$(binDir)/$(libsDir)/$(staticDir)/librm.a: $(root)/$(objDir)/$(libsDir)/
 
 #librairie dynamique
 $(root)/$(binDir)/$(libsDir)/$(dynamicDir)/librm.so: $(root)/$(objDir)/$(libsDir)/rm/rm.o \
-						  $(root)/$(objDir)/$(libsDir)/rm/utils.o
+						  $(root)/$(objDir)/$(libsDir)/rm/utils.o \
+						  $(root)/$(objDir)/$(libsDir)/rm/lib.o
 	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
 	@$(CC) -shared -o $@ $^
 	@echo "		$(CC) -shared -o $@ $^"

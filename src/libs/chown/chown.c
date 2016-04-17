@@ -13,20 +13,19 @@
 #include <grp.h>
 #include <pwd.h>
 
-#include "../../LIB.h"
 #include "../../DEBUG.h"
 #include "utils.h"
 
 //flags
-const int F_REC   = 1<<1;   //-r, -R
-const int F_VERB  = 1<<2;   //-v
+const int CHOWNF_REC   = 1<<1;   //-r, -R
+const int CHOWNF_VERB  = 1<<2;   //-v
 struct group *gr, *getgrnam(), *getgrgid();
 struct passwd *pwd;
 
 /**
  * usage
  */
-void usage() {
+void usageChown() {
     printf("\
 Knut chown\n\n\
 usage: chown [-Rv] <owner> [:<group>] file ...\n\
@@ -53,20 +52,20 @@ int chownLib(int argc, char *argv[]) {
         switch(c) {
             case 'R': //on veut modifier en récursif
                 DEBUG("-R option");
-                options |= F_REC;
+                options |= CHOWNF_REC;
                 break;
             case 'v':
                 DEBUG("-v option");
-                options |= F_VERB;
+                options |= CHOWNF_VERB;
                 break;
             case '?': //option non reconnue
             default:
-                usage();
+                usageChown();
                 exit(EXIT_FAILURE);
         }
     }
     if (argc < 2) {
-        usage();
+        usageChown();
         exit(EXIT_FAILURE);
     }
     const char s[2] = ":";
@@ -109,18 +108,9 @@ int chownLib(int argc, char *argv[]) {
     }
 
     for (int i = optind+1; i < argc; i ++) {
-        chElem(argv[i], options, uid, gid,F_REC,F_VERB);
+        chElem(argv[i], options, uid, gid, CHOWNF_REC, CHOWNF_VERB);
     }
 
     return 0;
 }
 
-/**
- * Init
- *
- * S'enregistre dans le shell dans le cas d'un chargement de la librairie
- * dynamique
- */
-void Init(EnregisterCommande enregisterCommande) {
-    enregisterCommande("chown", chownLib);
-}

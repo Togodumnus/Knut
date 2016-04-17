@@ -20,8 +20,9 @@ $(root)/$(binDir)/$(libsDir)/cp: $(root)/$(objDir)/$(libsDir)/cp/cp.o \
 	@echo "		"$(DONE)
 
 #librairie statique
-$(root)/$(binDir)/$(libsDir)/$(staticDir)/libcp.a: $(root)/$(objDir)/$(libsDir)/cp/cp.o \
-						  $(root)/$(objDir)/$(libsDir)/cp/utils.o
+$(root)/$(binDir)/$(libsDir)/$(staticDir)/libcp.a:\
+	$(root)/$(objDir)/$(libsDir)/cp/cp.o \
+	$(root)/$(objDir)/$(libsDir)/cp/utils.o
 	@echo "		$(BOLD_C)- Static$(NO_C)"
 	@ar -cr $@ $^
 	@echo "		ar -cr $@ $^"
@@ -30,8 +31,10 @@ $(root)/$(binDir)/$(libsDir)/$(staticDir)/libcp.a: $(root)/$(objDir)/$(libsDir)/
 	@echo "		"$(DONE)
 
 #librairie dynamique
-$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libcp.so: $(root)/$(objDir)/$(libsDir)/cp/cp.o \
-						  $(root)/$(objDir)/$(libsDir)/cp/utils.o
+$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libcp.so:\
+	$(root)/$(objDir)/$(libsDir)/cp/cp.o \
+	$(root)/$(objDir)/$(libsDir)/cp/utils.o \
+	$(root)/$(objDir)/$(libsDir)/cp/lib.o
 	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
 	@$(CC) -shared -o $@ $^
 	@echo "		$(CC) -shared -o $@ $^"

@@ -8,7 +8,6 @@
 #include <stdbool.h>
 #include <errno.h>
 
-#include "../../LIB.h"
 #include "../../DEBUG.h"
 
 const int vFlag = 0x1;
@@ -111,7 +110,7 @@ int kmkdir_p(char *path, int permissions, bool verbose) {
     return 0;
 }
 
-void usage() {
+void usageMkdir() {
     printf("\
 Knut mkdir\n\
 \n\
@@ -158,7 +157,7 @@ int kmkdir(int argc, char * argv[]) {
                 flag |= pFlag;
                 break;
             default:
-                usage();
+                usageMkdir();
                 exit(EXIT_FAILURE);
         }
     }
@@ -181,16 +180,6 @@ int kmkdir(int argc, char * argv[]) {
         }
     }
 
-
     return 0;
 }
 
-/**
- * Init
- *
- * S'enregistre dans le shell dans le cas d'un chargement de la librairie
- * dynamique
- */
-void Init(EnregisterCommande enregisterCommande) {
-    enregisterCommande("mkdir", kmkdir);
-}

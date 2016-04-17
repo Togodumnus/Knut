@@ -13,7 +13,7 @@
 
 int indent = 0;
 
-const int BUFFER_SIZE = 1024;
+const int BUF_SIZE = 1024;
 
 const int FOLDER_RIGHT = 0775;
 
@@ -83,8 +83,8 @@ int kcp_file_to_file(char *path1, char *path2) {
 
     //la copie
     ssize_t n;
-    char buf[BUFFER_SIZE];
-    while ((n = read(fileno(f1), buf, BUFFER_SIZE)) > 0 ) {
+    char buf[BUF_SIZE];
+    while ((n = read(fileno(f1), buf, BUF_SIZE)) > 0 ) {
         ssize_t nw = 0;
         do {
             nw = write(fileno(f2), buf + nw, n - nw);
