@@ -9,11 +9,40 @@ se référer au rapport fourni avec le projet.*
 # Installation
 
 ```bash
-make #make dev pour l'affichage de tous les messages de débug
+make #make dev pour l'affichage des messages de debug
 make clean
 ```
 
 # Utilisation de KnutShell
+
+Architecture du projet :
+
+```
+.
+├── Makefile
+├── README.md       #vous êtes ici
+├── bin/            #les binaires compilés par le Makefile
+├── obj/            #les fichiers objet
+└── src/            #les sources
+    ├── libs/
+    └── shell/
+```
+
+## Compiler
+```
+make            #compilation du shell et des commandes
+make dev        #idem, avec messages de debug
+make clean      #nettoyage du répertoire obj/
+make distclean  #nettoyage du répertoire bin/
+```
+
+Pour utiliser `su` :
+
+```
+sudo chown root ./bin/libs/su
+sudo chgrp root ./bin/libs/su
+sudo chmod 4711 ./bin/libs/su   #setuid bit
+```
 
 ## Lancer le shell
 
@@ -28,7 +57,7 @@ l'utilisation des librairies statiques et dynamiques. Voir l'option `mode`.
 **Options :**
 
 - `-m <mode>` : Sous quelle forme utiliser nos commandes.
-    - `exec` : utilisation des versions exécutables
+    - `exec` : utilisation des versions exécutables (défaut)
     - `static` : utilisation des libraries statiques
     - `dynamic` : utilisation des libraries dynamiques
 
@@ -58,6 +87,7 @@ vim
 cat < monFichier.txt && echo fin cat
 echo start; (sleep 4 && echo Coucou) &
 cat <<stop
+exit
 ```
 
 ## Le shell distant
@@ -75,7 +105,8 @@ Pour se connecter à un KnutShell distant via TCP :
 ./bin/knutShell connect 192.168.0.1 XXXX #l'ip est par défaut 127.0.0.1
 ```
 
-# Commandes disponibles
-
-//TODO
-
+# Équipe
+* Quentin Billaud
+* Guillaume Clochard
+* Jimmy Doré
+* Tom Marrucci
