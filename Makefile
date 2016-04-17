@@ -21,6 +21,7 @@ EXEC=knutShell#le shell à compiler
 LIBS=yes 	\
 	 cat    \
 	 chmod  \
+	 cp		\
 
 #Colors
 NO_C		=\033[0m
