@@ -1,3 +1,3 @@
 #pragma once
 
-void shellCommand(char *cmd, char *arg);
+int shellCommand(Command *cmd);
