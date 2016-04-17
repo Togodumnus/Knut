@@ -11,6 +11,7 @@
 #endif
 #include <signal.h>
 
+#include "server.h"
 #include "utils.h"
 #include "../DEBUG.h"
 
@@ -120,10 +121,12 @@ void printPrompt(int fd) {
     dprintf(fd, GREEN "Toto" WHITE " @ " YELLOW "KnutShell\n" END);
     dprintf(fd, YELLOW "> " END);
 
-    char eot = 4; //EOT : end of transmission
-    if (write(fd, &eot, sizeof(char)) == -1) {
-        perror("Can't end transmission with file descriptor");
-        exit(EXIT_FAILURE);
+    if (isSocket(fd)) {
+        char eot = 4; //EOT : end of transmission
+        if (write(fd, &eot, sizeof(char)) == -1) {
+            perror("Can't end transmission with file descriptor");
+            exit(EXIT_FAILURE);
+        }
     }
 }
 
