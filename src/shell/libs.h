@@ -17,7 +17,7 @@ typedef int (*CommandeFonction)(int argc, char *argv[]);
 typedef void (*InitFonction)(EnregisterCommande);
 
 void loadLib(const char *dir, const char *file);
-void loadDynamicLibs(char *libdir);
+void loadDynamicLibs(const char *libdir);
 void enregisterCommande(char *name, CommandeFonction commandeFonction);
 void showCommandes();
 
