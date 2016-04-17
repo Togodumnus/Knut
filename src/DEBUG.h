@@ -13,7 +13,7 @@
 
 #define WHITE_BK  "\033[48;5;255m"
 
-#define END      "\033[m"
+#define END      "\033[1;00m"
 
 #ifdef DEBUG_FLAG
     #define debug 1
