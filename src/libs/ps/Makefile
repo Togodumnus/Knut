@@ -19,7 +19,8 @@ $(root)/$(binDir)/$(libsDir)/ps: $(root)/$(objDir)/$(libsDir)/ps/ps.o \
 	@echo "		"$(DONE)
 
 #librairie statique
-$(root)/$(binDir)/$(libsDir)/$(staticDir)/libps.a: $(root)/$(objDir)/$(libsDir)/ps/ps.o
+$(root)/$(binDir)/$(libsDir)/$(staticDir)/libps.a:\
+	$(root)/$(objDir)/$(libsDir)/ps/ps.o
 	@echo "		$(BOLD_C)- Static$(NO_C)"
 	@ar -cr $@ $^
 	@echo "		ar -cr $@ $^"
@@ -28,7 +29,9 @@ $(root)/$(binDir)/$(libsDir)/$(staticDir)/libps.a: $(root)/$(objDir)/$(libsDir)/
 	@echo "		"$(DONE)
 
 #librairie dynamique
-$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libps.so: $(root)/$(objDir)/$(libsDir)/ps/ps.o
+$(root)/$(binDir)/$(libsDir)/$(dynamicDir)/libps.so:\
+	$(root)/$(objDir)/$(libsDir)/ps/ps.o \
+	$(root)/$(objDir)/$(libsDir)/ps/lib.o
 	@echo "		$(BOLD_C)- Dynamic$(NO_C)"
 	@$(CC) -shared -o $@ $^
 	@echo "		$(CC) -shared -o $@ $^"

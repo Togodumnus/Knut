@@ -29,6 +29,7 @@
 #include "../libs/pwd/pwd.h"
 #include "../libs/rm/rm.h"
 #include "../libs/su/su.h"
+#include "../libs/ps/ps.h"
 
 /**
  * LIBS_DIR
@@ -102,6 +103,7 @@ int main(int argc, char* argv[]) {
             enregisterCommande("pwd",   kpwd);
             enregisterCommande("rm",    rmLib);
             enregisterCommande("su",    ksu);
+            enregisterCommande("ps",    kPs);
             printf(" (librairies statiques)\n");
             showCommandes();
         }
