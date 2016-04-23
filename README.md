@@ -1,10 +1,7 @@
-Knut.sh ![build](https://gitlab.univ-nantes.fr/E132397K/Knut.sh/badges/master/build.svg)
+Knut.sh
 =======
 
 A bash-like shell.
-
-*Pour tous les détails d'implémentation et les possibles améliorations,
-se référer au rapport fourni avec le projet.*
 
 # Installation
 
@@ -115,9 +112,3 @@ Pour se connecter à un KnutShell distant via TCP :
 ./bin/knutShell connect XXXX
 ./bin/knutShell connect 192.168.0.1 XXXX #l'ip est par défaut 127.0.0.1
 ```
-
-# Équipe
-* Quentin Billaud
-* Guillaume Clochard
-* Jimmy Doré
-* Tom Marrucci
