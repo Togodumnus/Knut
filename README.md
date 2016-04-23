@@ -3,6 +3,8 @@ Knut.sh
 
 A bash-like shell.
 
+![gif demo](http://i.imgur.com/ol1r4Ze.gif)
+
 # Installation
 
 ```bash
